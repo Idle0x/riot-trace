@@ -1,9 +1,8 @@
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import DailyReview from "@/components/DailyReview";
 
-// We use Next.js Server Components to fetch data securely on the backend
 export default async function Hub() {
-  // Fetch tiers and automatically join their associated lessons
   const { data: tiers, error } = await supabase
     .from("tiers")
     .select("*, lessons(id, title, xp_reward)")
@@ -32,6 +31,9 @@ export default async function Hub() {
           </p>
         </div>
 
+        {/* The Spaced Repetition Engine intercepts here */}
+        <DailyReview />
+
         {/* Tiers Grid */}
         <div className="text-[10px] text-muted tracking-[3px] font-mono mb-4">
           CURRICULUM ARCHITECTURE
@@ -39,7 +41,7 @@ export default async function Hub() {
         
         <div className="grid gap-4">
           {tiers?.map((tier, index) => {
-            const isUnlocked = index === 0; // Temporary logic: only Tier 1 unlocked for now
+            const isUnlocked = index === 0; // Currently only Tier 1 is visually unlocked
             const lessonCount = tier.lessons?.length || 0;
 
             return (
