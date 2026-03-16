@@ -1,9 +1,10 @@
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 
-export default async function TierPage({ params }: { params: { tierId: string } }) {
-  const tierId = parseInt(params.tierId);
+export default async function TierPage({ params }: { params: Promise<{ tierId: string }> }) {
+  // 1. Next.js 15+ strict requirement: await the params
+  const resolvedParams = await params;
+  const tierId = parseInt(resolvedParams.tierId);
 
   // Fetch the tier and all its associated lessons
   const { data: tier, error } = await supabase
@@ -12,8 +13,20 @@ export default async function TierPage({ params }: { params: { tierId: string } 
     .eq("id", tierId)
     .single();
 
+  // THE DEBUG TRAP: Print the exact error instead of a generic 404
   if (error || !tier) {
-    notFound();
+    return (
+      <main className="min-h-screen dot-bg p-8 pt-24">
+        <div className="max-w-2xl mx-auto border border-riotRed bg-riotRed/10 p-6 rounded-xl font-mono">
+          <h2 className="text-riotRed font-bold mb-4 text-xl">DATABASE FETCH FAILED</h2>
+          <p className="text-white mb-2">Attempted to fetch Tier ID: {tierId}</p>
+          <p className="text-muted mb-4">Error Details:</p>
+          <pre className="text-riotYellow text-xs overflow-auto">
+            {JSON.stringify(error || "Tier not found in database", null, 2)}
+          </pre>
+        </div>
+      </main>
+    );
   }
 
   // Sort lessons sequentially by ID (TypeScript strict mode fix applied)
