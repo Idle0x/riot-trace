@@ -1,23 +1,28 @@
 "use client";
 
 import { useState } from "react";
+import { saveTaskProgress } from "@/app/actions";
 
 interface LiveCodeRunnerProps {
+  taskId?: number;
+  xpReward?: number;
   scenario?: string;
   initialCode?: string;
   validationLogic?: string;
 }
 
 export default function LiveCodeRunner({ 
+  taskId,
+  xpReward = 0,
   scenario = "Write your code below.", 
   initialCode = "// Type your JavaScript here...",
   validationLogic = ""
 }: LiveCodeRunnerProps) {
   const [code, setCode] = useState(initialCode);
   const [output, setOutput] = useState<string[]>([]);
-  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "success" | "error" | "saving">("idle");
 
-  const runCode = () => {
+  const runCode = async () => {
     setOutput([]);
     setStatus("idle");
     const logs: string[] = [];
@@ -32,15 +37,27 @@ export default function LiveCodeRunner({
     };
 
     try {
-      // We append the hidden validation logic directly to the user's code
-      // If the user's code is wrong, the validation logic throws an error
       const executionString = code + "\n\n// --- HIDDEN VALIDATION ---\n" + validationLogic;
       const execute = new Function(executionString);
       execute();
       
-      // If we made it here without throwing, the task is complete!
       if (validationLogic) {
         logs.push("✅ TASK PASSED: All validation checks cleared.");
+        setStatus("saving"); // Change status to show we are communicating with the DB
+        
+        // Handle anonymous user tracking
+        let userId = localStorage.getItem("riot_trace_user_id");
+        if (!userId) {
+          userId = crypto.randomUUID(); // Generate a secure random ID
+          localStorage.setItem("riot_trace_user_id", userId);
+        }
+
+        // Trigger the server action if we have a task ID
+        if (taskId) {
+          await saveTaskProgress(userId, taskId, xpReward);
+          logs.push(`🏆 PROGRESS SAVED: +${xpReward} XP earned.`);
+        }
+        
         setStatus("success");
       }
     } catch (error: any) {
@@ -49,14 +66,13 @@ export default function LiveCodeRunner({
     } finally {
       console.log = originalLog;
       if (logs.length === 0) logs.push("Execution complete (no output).");
-      setOutput(logs);
+      // Use the functional state update to ensure we don't overwrite the async logs
+      setOutput((prev) => [...prev, ...logs]);
     }
   };
 
   return (
     <div className="border border-border2 rounded-xl overflow-hidden bg-bg shadow-2xl">
-      
-      {/* Scenario Block */}
       {scenario && (
         <div className="bg-surf p-4 border-b border-border2">
           <div className="text-[10px] text-riotYellow tracking-widest font-mono mb-2">
@@ -66,7 +82,6 @@ export default function LiveCodeRunner({
         </div>
       )}
 
-      {/* Editor Header */}
       <div className="bg-[#0A0A0F] flex items-center justify-between px-4 py-2 border-b border-border2">
         <div className="flex gap-2">
           <div className="w-3 h-3 rounded-full bg-[#FF5F56]"></div>
@@ -75,13 +90,14 @@ export default function LiveCodeRunner({
         </div>
         <button 
           onClick={runCode}
+          disabled={status === "saving"}
           className={`text-[10px] font-mono tracking-widest border px-4 py-1.5 rounded-md transition-colors ${
-            status === "success" 
-              ? "bg-riotGreen/20 text-riotGreen border-riotGreen/50"
-              : "bg-riotBlue/10 text-riotBlue border-riotBlue/30 hover:bg-riotBlue hover:text-bg"
+            status === "success" ? "bg-riotGreen/20 text-riotGreen border-riotGreen/50" : 
+            status === "saving" ? "bg-border text-muted border-border2" :
+            "bg-riotBlue/10 text-riotBlue border-riotBlue/30 hover:bg-riotBlue hover:text-bg"
           }`}
         >
-          {status === "success" ? "PASSED" : "RUN & VALIDATE"}
+          {status === "success" ? "PASSED" : status === "saving" ? "SAVING..." : "RUN & VALIDATE"}
         </button>
       </div>
 
@@ -105,7 +121,7 @@ export default function LiveCodeRunner({
                 key={i} 
                 className={`mb-1 ${
                   line.includes('⚠️') ? 'text-riotRed' : 
-                  line.includes('✅') ? 'text-riotGreen' : 
+                  line.includes('✅') || line.includes('🏆') ? 'text-riotGreen' : 
                   'text-riotBlue'
                 }`}
               >
