@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import LiveCodeRunner from "@/components/LiveCodeRunner";
 
 export default async function LessonPage({ params }: { params: { tierId: string, lessonId: string } }) {
   const tierId = parseInt(params.tierId);
@@ -63,28 +64,23 @@ export default async function LessonPage({ params }: { params: { tierId: string,
                 </p>
               );
             }
-            // We will handle 'code' blocks here later
             return null;
           })}
         </div>
 
-        {/* The Crucible Workbench Placeholder */}
+        {/* The Crucible Workbench */}
         <div className="mt-16">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-2 h-2 rounded-full bg-riotRed animate-pulse"></div>
-            <div className="text-[10px] text-riotRed tracking-[3px] font-mono">
+            <div className="w-2 h-2 rounded-full bg-riotGreen animate-pulse"></div>
+            <div className="text-[10px] text-riotGreen tracking-[3px] font-mono">
               CRUCIBLE WORKBENCH_
             </div>
           </div>
           
-          <div className="bg-[#0A0A0F] border border-border2 rounded-xl p-8 text-center border-dashed">
-            <div className="text-muted font-mono text-xs mb-3">
-              Initializing live execution environment...
-            </div>
-            <p className="text-sm text-text font-sans max-w-md mx-auto">
-              This is where you will write, run, and debug real code to prove your understanding before advancing.
-            </p>
-          </div>
+          {/* This is the new interactive component */}
+          <LiveCodeRunner 
+            initialCode={`// Tier 0${tierId} | Module 0${lessonId}\n// Prove your understanding.\n\nconst user = { name: "riot" };\n// TODO: Try mutating the object and logging it\n\nconsole.log(user);`} 
+          />
         </div>
 
       </div>
