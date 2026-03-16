@@ -3,86 +3,84 @@ import Link from "next/link";
 import LiveCodeRunner from "@/components/LiveCodeRunner";
 
 export default async function LessonPage({ params }: { params: Promise<{ tierId: string, lessonId: string }> }) {
-  // 1. Await the params promise (The Next.js 15+ Fix)
   const resolvedParams = await params;
   const tierId = parseInt(resolvedParams.tierId);
   const lessonId = parseInt(resolvedParams.lessonId);
 
-  // 2. Fetch the lesson and its associated crucible task
   const { data: lesson, error } = await supabase
     .from("lessons")
     .select("*, crucible_tasks(*)")
     .eq("id", lessonId)
     .single();
 
-  // THE DEBUG TRAP: Print the exact error instead of a generic 404
   if (error || !lesson) {
     return (
-      <main className="min-h-screen dot-bg p-8 pt-24">
-        <div className="max-w-2xl mx-auto border border-riotRed bg-riotRed/10 p-6 rounded-xl font-mono">
-          <h2 className="text-riotRed font-bold mb-4 text-xl">LESSON FETCH FAILED</h2>
-          <p className="text-white mb-2">Attempted to fetch Lesson ID: {lessonId}</p>
-          <p className="text-muted mb-4">Error Details:</p>
-          <pre className="text-riotYellow text-xs overflow-auto">
-            {JSON.stringify(error || "Lesson not found in database", null, 2)}
+      <main className="min-h-screen bg-dots p-8 pt-24">
+        <div className="max-w-2xl mx-auto border border-accent-red bg-[rgba(255,68,102,0.08)] p-6 rounded-xl font-mono">
+          <h2 className="text-accent-red font-bold mb-4 text-xl">LESSON FETCH FAILED</h2>
+          <pre className="text-text-primary text-xs overflow-auto">
+            {JSON.stringify(error || "Lesson not found", null, 2)}
           </pre>
         </div>
       </main>
     );
   }
 
-  // Safely extract the task if it exists
   const task = lesson.crucible_tasks?.[0];
 
   return (
-    <main className="min-h-screen dot-bg p-8 pb-32">
-      <div className="max-w-5xl mx-auto animate-fadeUp">
+    <main className="min-h-screen bg-dots p-8 pb-32 relative overflow-hidden">
+      {/* Background Glows */}
+      <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-glow-blue opacity-20 pointer-events-none -z-10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+      <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-glow-green opacity-10 pointer-events-none -z-10 rounded-full blur-3xl translate-x-1/3 translate-y-1/3"></div>
+
+      <div className="max-w-6xl mx-auto animate-fadeUp z-10 relative">
         
         {/* HEADER */}
-        <header className="mb-8 border-b border-border pb-6">
-          <Link href={`/tier/${tierId}`} className="text-[10px] font-mono text-muted hover:text-white transition-colors uppercase tracking-[2px] mb-4 block">
-            ← RETURN TO TIER 0{tierId}
+        <header className="mb-12 border-b border-border-base pb-8">
+          <Link href={`/tier/${tierId}`} className="label text-text-muted hover:text-text-primary transition-colors mb-6 block w-max hover-arrow">
+            <span className="arrow">←</span> RETURN TO TIER 0{tierId}
           </Link>
-          <div className="flex items-center gap-3 mb-2">
-            <span className="text-[10px] text-riotBlue tracking-[3px] font-mono">
+          <div className="flex items-center gap-4 mb-4">
+            <span className="label text-accent-blue">
               MODULE 0{lesson.id}
             </span>
-            <span className="text-[10px] text-riotYellow tracking-[3px] font-mono border border-riotYellow/30 px-2 rounded-sm bg-riotYellow/10">
+            <span className="label text-accent-yellow border border-[rgba(255,209,102,0.2)] bg-[rgba(255,209,102,0.05)] px-2 py-1 rounded-sm">
               {lesson.xp_reward} XP
             </span>
           </div>
-          <h1 className="text-3xl font-bold text-white font-sans leading-tight">
+          <h1 className="heading-xl">
             {lesson.title}
           </h1>
         </header>
 
-        {/* TWO COLUMN LAYOUT: THEORY vs EXECUTION */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* TWO COLUMN LAYOUT */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           
-          {/* LEFT COLUMN: THEORY */}
-          <div className="space-y-6">
-            <div className="text-[10px] text-muted tracking-[3px] font-mono border-b border-border2 pb-2">
+          {/* LEFT COLUMN: THEORY (Takes up 5 columns) */}
+          <div className="lg:col-span-5 space-y-8">
+            <div className="label text-text-muted border-b border-border-base pb-3">
               THEORY / MENTAL MODEL
             </div>
             
-            <div className="text-sm text-gray-300 leading-relaxed font-sans space-y-4">
+            <div className="body text-text-secondary space-y-5">
               {lesson.content_blocks?.map((block: any, i: number) => (
                 <p key={i}>{block.body}</p>
               ))}
             </div>
 
             {task?.scenario && (
-              <div className="mt-8 bg-surf border border-border2 p-5 rounded-xl border-l-2 border-l-riotRed">
-                <div className="text-[10px] text-riotRed tracking-[3px] font-mono mb-2">
+              <div className="card-interactive mt-10 border-l-2 border-l-accent-red">
+                <div className="label text-accent-red mb-3">
                   CRUCIBLE OBJECTIVE
                 </div>
-                <p className="text-sm text-white">{task.scenario}</p>
+                <p className="body text-text-primary">{task.scenario}</p>
               </div>
             )}
           </div>
 
-          {/* RIGHT COLUMN: THE LIVE EXECUTOR */}
-          <div className="h-full min-h-[500px]">
+          {/* RIGHT COLUMN: THE LIVE EXECUTOR (Takes up 7 columns) */}
+          <div className="lg:col-span-7 h-full min-h-[600px]">
             {task ? (
               <LiveCodeRunner 
                 initialCode={task.starting_code || ""}
@@ -91,7 +89,7 @@ export default async function LessonPage({ params }: { params: Promise<{ tierId:
                 xpReward={lesson.xp_reward}
               />
             ) : (
-              <div className="h-full flex items-center justify-center border border-dashed border-border2 rounded-xl text-muted text-sm font-mono p-8 text-center bg-surf/50">
+              <div className="h-full flex items-center justify-center border border-dashed border-border-base rounded-xl text-text-muted text-sm font-mono p-8 text-center bg-bg-surface glass">
                 No execution task forged for this module yet. Read the theory and return to Hub.
               </div>
             )}
