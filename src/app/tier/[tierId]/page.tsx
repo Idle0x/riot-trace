@@ -16,8 +16,8 @@ export default async function TierPage({ params }: { params: { tierId: string } 
     notFound();
   }
 
-  // Sort lessons sequentially by ID
-  const lessons = tier.lessons?.sort((a, b) => a.id - b.id) || [];
+  // Sort lessons sequentially by ID (TypeScript strict mode fix applied)
+  const lessons = tier.lessons?.sort((a: { id: number }, b: { id: number }) => a.id - b.id) || [];
 
   return (
     <main className="min-h-screen dot-bg p-8 pb-32">
