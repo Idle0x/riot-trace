@@ -80,6 +80,8 @@ export default async function LessonPage({ params }: { params: { tierId: string,
           {/* Dynamically render the code runner if a task exists in the DB */}
           {lesson.crucible_tasks && lesson.crucible_tasks.length > 0 ? (
             <LiveCodeRunner 
+              taskId={lesson.crucible_tasks[0].id}
+              xpReward={lesson.xp_reward}
               scenario={lesson.crucible_tasks[0].scenario}
               initialCode={lesson.crucible_tasks[0].starting_code}
               validationLogic={lesson.crucible_tasks[0].validation_logic?.test || ""}
