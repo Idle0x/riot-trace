@@ -1,6 +1,34 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function Navbar() {
+  const [xp, setXp] = useState(0);
+
+  const fetchXP = async () => {
+    const userId = localStorage.getItem("riot_trace_user_id");
+    if (!userId) return;
+
+    const { data, error } = await supabase
+      .from("user_progress")
+      .select("score")
+      .eq("user_id", userId);
+
+    if (!error && data) {
+      const total = data.reduce((sum, row) => sum + (row.score || 0), 0);
+      setXp(total);
+    }
+  };
+
+  useEffect(() => {
+    fetchXP();
+    // Listen for custom event from the code runner
+    window.addEventListener("xp_updated", fetchXP);
+    return () => window.removeEventListener("xp_updated", fetchXP);
+  }, []);
+
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-bg/95 backdrop-blur-md px-5 py-4 flex items-center justify-between">
       <div className="flex items-center gap-3">
@@ -17,9 +45,8 @@ export default function Navbar() {
         </Link>
       </div>
       
-      {/* Placeholder for future authentication and XP tracking */}
-      <div className="bg-surf border border-border2 rounded-full px-4 py-1.5 text-xs font-mono text-riotBlue tracking-wider">
-        0 XP
+      <div className="bg-surf border border-border2 rounded-full px-4 py-1.5 text-xs font-mono text-riotBlue tracking-wider transition-all duration-300">
+        {xp} XP
       </div>
     </header>
   );
