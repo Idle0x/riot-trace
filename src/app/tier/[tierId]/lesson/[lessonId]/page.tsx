@@ -77,10 +77,18 @@ export default async function LessonPage({ params }: { params: { tierId: string,
             </div>
           </div>
           
-          {/* This is the new interactive component */}
-          <LiveCodeRunner 
-            initialCode={`// Tier 0${tierId} | Module 0${lessonId}\n// Prove your understanding.\n\nconst user = { name: "riot" };\n// TODO: Try mutating the object and logging it\n\nconsole.log(user);`} 
-          />
+          {/* Dynamically render the code runner if a task exists in the DB */}
+          {lesson.crucible_tasks && lesson.crucible_tasks.length > 0 ? (
+            <LiveCodeRunner 
+              scenario={lesson.crucible_tasks[0].scenario}
+              initialCode={lesson.crucible_tasks[0].starting_code}
+              validationLogic={lesson.crucible_tasks[0].validation_logic?.test || ""}
+            />
+          ) : (
+            <div className="text-sm text-muted italic text-center p-8 border border-border2 rounded-xl border-dashed">
+              No crucible task assigned for this module yet.
+            </div>
+          )}
         </div>
 
       </div>
