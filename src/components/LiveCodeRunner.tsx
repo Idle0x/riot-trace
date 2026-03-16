@@ -3,39 +3,51 @@
 import { useState } from "react";
 
 interface LiveCodeRunnerProps {
+  scenario?: string;
   initialCode?: string;
+  validationLogic?: string;
 }
 
-export default function LiveCodeRunner({ initialCode = "// Type your JavaScript here...\nconsole.log('Hello, Crucible');" }: LiveCodeRunnerProps) {
+export default function LiveCodeRunner({ 
+  scenario = "Write your code below.", 
+  initialCode = "// Type your JavaScript here...",
+  validationLogic = ""
+}: LiveCodeRunnerProps) {
   const [code, setCode] = useState(initialCode);
   const [output, setOutput] = useState<string[]>([]);
+  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
 
   const runCode = () => {
-    // Clear previous output
     setOutput([]);
+    setStatus("idle");
     const logs: string[] = [];
 
-    // 1. Intercept console.log so we can print it to our UI
     const originalLog = console.log;
     console.log = (...args) => {
       const formattedArgs = args.map(arg => 
         typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
       ).join(' ');
       logs.push(formattedArgs);
-      originalLog(...args); // Still log to real browser console just in case
+      originalLog(...args);
     };
 
-    // 2. Safely execute the code and catch errors
     try {
-      // new Function() is a fast, lightweight way to execute a string of JS
-      const execute = new Function(code);
+      // We append the hidden validation logic directly to the user's code
+      // If the user's code is wrong, the validation logic throws an error
+      const executionString = code + "\n\n// --- HIDDEN VALIDATION ---\n" + validationLogic;
+      const execute = new Function(executionString);
       execute();
+      
+      // If we made it here without throwing, the task is complete!
+      if (validationLogic) {
+        logs.push("✅ TASK PASSED: All validation checks cleared.");
+        setStatus("success");
+      }
     } catch (error: any) {
-      logs.push(`⚠️ Error: ${error.message}`);
+      logs.push(`⚠️ ${error.message}`);
+      setStatus("error");
     } finally {
-      // 3. Restore the original console.log and update UI
       console.log = originalLog;
-      // If nothing was logged but it ran successfully
       if (logs.length === 0) logs.push("Execution complete (no output).");
       setOutput(logs);
     }
@@ -43,8 +55,19 @@ export default function LiveCodeRunner({ initialCode = "// Type your JavaScript 
 
   return (
     <div className="border border-border2 rounded-xl overflow-hidden bg-bg shadow-2xl">
+      
+      {/* Scenario Block */}
+      {scenario && (
+        <div className="bg-surf p-4 border-b border-border2">
+          <div className="text-[10px] text-riotYellow tracking-widest font-mono mb-2">
+            // OBJECTIVE
+          </div>
+          <p className="text-sm text-text font-sans">{scenario}</p>
+        </div>
+      )}
+
       {/* Editor Header */}
-      <div className="bg-surf flex items-center justify-between px-4 py-2 border-b border-border2">
+      <div className="bg-[#0A0A0F] flex items-center justify-between px-4 py-2 border-b border-border2">
         <div className="flex gap-2">
           <div className="w-3 h-3 rounded-full bg-[#FF5F56]"></div>
           <div className="w-3 h-3 rounded-full bg-[#FFBD2E]"></div>
@@ -52,24 +75,25 @@ export default function LiveCodeRunner({ initialCode = "// Type your JavaScript 
         </div>
         <button 
           onClick={runCode}
-          className="text-[10px] font-mono tracking-widest bg-riotGreen/10 text-riotGreen border border-riotGreen/30 hover:bg-riotGreen hover:text-bg transition-colors px-4 py-1.5 rounded-md"
+          className={`text-[10px] font-mono tracking-widest border px-4 py-1.5 rounded-md transition-colors ${
+            status === "success" 
+              ? "bg-riotGreen/20 text-riotGreen border-riotGreen/50"
+              : "bg-riotBlue/10 text-riotBlue border-riotBlue/30 hover:bg-riotBlue hover:text-bg"
+          }`}
         >
-          EXECUTE
+          {status === "success" ? "PASSED" : "RUN & VALIDATE"}
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-border2">
-        {/* Code Input Area */}
         <textarea
           value={code}
           onChange={(e) => setCode(e.target.value)}
           spellCheck={false}
-          className="w-full h-64 bg-bg text-text font-mono text-sm p-4 focus:outline-none resize-none"
-          placeholder="// Write JavaScript..."
+          className="w-full h-72 bg-bg text-text font-mono text-sm p-4 focus:outline-none resize-none"
         />
 
-        {/* Console Output Area */}
-        <div className="h-64 bg-[#020205] p-4 overflow-y-auto font-mono text-sm">
+        <div className="h-72 bg-[#020205] p-4 overflow-y-auto font-mono text-sm">
           <div className="text-muted text-[10px] tracking-widest mb-3 border-b border-border2 pb-2">
             OUTPUT_
           </div>
@@ -79,7 +103,11 @@ export default function LiveCodeRunner({ initialCode = "// Type your JavaScript 
             output.map((line, i) => (
               <div 
                 key={i} 
-                className={`mb-1 ${line.startsWith('⚠️') ? 'text-riotRed' : 'text-riotBlue'}`}
+                className={`mb-1 ${
+                  line.includes('⚠️') ? 'text-riotRed' : 
+                  line.includes('✅') ? 'text-riotGreen' : 
+                  'text-riotBlue'
+                }`}
               >
                 {line}
               </div>
