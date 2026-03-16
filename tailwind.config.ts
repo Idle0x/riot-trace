@@ -8,35 +8,25 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      fontFamily: {
-        mono: ["IBM Plex Mono", "Fira Code", "monospace"],
-        sans: ["IBM Plex Sans", "system-ui", "sans-serif"],
-      },
       colors: {
-        bg: "#05050A",
-        surf: "#0A0A12",
-        surf2: "#12121D",
-        border: "#1A1A2A",
-        border2: "#2A2A3A",
-        text: "#E0E0E0",
-        muted: "#6B6B80",
+        bg: "#020205",
+        surf: "#0A0A0F",
+        surf2: "#12121A",
+        border: "#1A1A24",
+        border2: "#2A2A35",
+        text: "#EAEAEA",
+        muted: "#8A8A9E",
         riotGreen: "#00FF66",
         riotBlue: "#00E5FF",
         riotRed: "#FF3366",
-        riotYellow: "#FFCC00",
+        riotYellow: "#FFD600"
       },
-      animation: {
-        fadeUp: "fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards",
-      },
-      keyframes: {
-        fadeUp: {
-          "0%": { opacity: "0", transform: "translateY(10px)" },
-          "100%": { opacity: "1", transform: "translateY(0)" },
-        },
-      },
+      fontFamily: {
+        sans: ['ui-sans-serif', 'system-ui', 'sans-serif'],
+        mono: ['ui-monospace', 'SFMono-Regular', 'monospace'],
+      }
     },
   },
   plugins: [],
 };
-
 export default config;
