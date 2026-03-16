@@ -43,19 +43,18 @@ export default function LiveCodeRunner({
       
       if (validationLogic) {
         logs.push("✅ TASK PASSED: All validation checks cleared.");
-        setStatus("saving"); // Change status to show we are communicating with the DB
+        setStatus("saving"); 
         
-        // Handle anonymous user tracking
         let userId = localStorage.getItem("riot_trace_user_id");
         if (!userId) {
-          userId = crypto.randomUUID(); // Generate a secure random ID
+          userId = crypto.randomUUID(); 
           localStorage.setItem("riot_trace_user_id", userId);
         }
 
-        // Trigger the server action if we have a task ID
         if (taskId) {
           await saveTaskProgress(userId, taskId, xpReward);
           logs.push(`🏆 PROGRESS SAVED: +${xpReward} XP earned.`);
+          window.dispatchEvent(new Event("xp_updated")); // This triggers the Navbar to update
         }
         
         setStatus("success");
@@ -66,7 +65,6 @@ export default function LiveCodeRunner({
     } finally {
       console.log = originalLog;
       if (logs.length === 0) logs.push("Execution complete (no output).");
-      // Use the functional state update to ensure we don't overwrite the async logs
       setOutput((prev) => [...prev, ...logs]);
     }
   };
