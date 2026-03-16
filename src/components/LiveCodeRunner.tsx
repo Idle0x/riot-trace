@@ -1,134 +1,114 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { saveTaskProgress } from "@/app/actions";
+import { MagneticButton } from "@/components/ui/MagneticButton";
 
-interface LiveCodeRunnerProps {
-  taskId?: number;
-  xpReward?: number;
-  scenario?: string;
-  initialCode?: string;
-  validationLogic?: string;
-}
-
-export default function LiveCodeRunner({ 
-  taskId,
-  xpReward = 0,
-  scenario = "Write your code below.", 
-  initialCode = "// Type your JavaScript here...",
-  validationLogic = ""
-}: LiveCodeRunnerProps) {
+export default function LiveCodeRunner({ initialCode, validationLogic, taskId, xpReward }: any) {
   const [code, setCode] = useState(initialCode);
   const [output, setOutput] = useState<string[]>([]);
-  const [status, setStatus] = useState<"idle" | "success" | "error" | "saving">("idle");
+  const [status, setStatus] = useState<"idle" | "running" | "success" | "error">("idle");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const runCode = async () => {
+  useEffect(() => {
+    setCode(initialCode);
     setOutput([]);
     setStatus("idle");
+  }, [initialCode]);
+
+  const executeCode = async () => {
+    setStatus("running");
+    setOutput([]);
     const logs: string[] = [];
 
-    const originalLog = console.log;
+    const originalConsoleLog = console.log;
     console.log = (...args) => {
-      const formattedArgs = args.map(arg => 
-        typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
-      ).join(' ');
-      logs.push(formattedArgs);
-      originalLog(...args);
+      logs.push(args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(" "));
+      originalConsoleLog(...args);
     };
 
     try {
-      const executionString = code + "\n\n// --- HIDDEN VALIDATION ---\n" + validationLogic;
-      const execute = new Function(executionString);
-      execute();
-      
-      if (validationLogic) {
-        logs.push("✅ TASK PASSED: All validation checks cleared.");
-        setStatus("saving"); 
+      const fullCode = `
+        ${code}
         
-        let userId = localStorage.getItem("riot_trace_user_id");
-        if (!userId) {
-          userId = crypto.randomUUID(); 
-          localStorage.setItem("riot_trace_user_id", userId);
-        }
+        // --- HIDDEN VALIDATION ---
+        ${validationLogic}
+      `;
 
-        if (taskId) {
-          await saveTaskProgress(userId, taskId, xpReward);
-          logs.push(`🏆 PROGRESS SAVED: +${xpReward} XP earned.`);
-          window.dispatchEvent(new Event("xp_updated")); // This triggers the Navbar to update
-        }
-        
-        setStatus("success");
-      }
-    } catch (error: any) {
-      logs.push(`⚠️ ${error.message}`);
+      const sandbox = new Function(fullCode);
+      sandbox();
+
+      logs.push("✅ TASK PASSED: Validation successful.");
+      setOutput(logs);
+      setStatus("success");
+
+      const userId = localStorage.getItem("riot_trace_user_id") || "anon_" + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem("riot_trace_user_id", userId);
+
+      await saveTaskProgress(userId, taskId, xpReward);
+
+    } catch (err: any) {
+      logs.push(`❌ ERROR: ${err.message}`);
+      setOutput(logs);
       setStatus("error");
     } finally {
-      console.log = originalLog;
-      if (logs.length === 0) logs.push("Execution complete (no output).");
-      setOutput((prev) => [...prev, ...logs]);
+      console.log = originalConsoleLog;
     }
   };
 
   return (
-    <div className="border border-border2 rounded-xl overflow-hidden bg-bg shadow-2xl">
-      {scenario && (
-        <div className="bg-surf p-4 border-b border-border2">
-          <div className="text-[10px] text-riotYellow tracking-widest font-mono mb-2">
-            // OBJECTIVE
-          </div>
-          <p className="text-sm text-text font-sans">{scenario}</p>
-        </div>
-      )}
-
-      <div className="bg-[#0A0A0F] flex items-center justify-between px-4 py-2 border-b border-border2">
+    <div className="flex flex-col h-full bg-bg-surface border border-border-base rounded-xl overflow-hidden shadow-card">
+      
+      {/* Editor Header */}
+      <div className="bg-bg-surface-2 border-b border-border-base p-3 flex justify-between items-center">
         <div className="flex gap-2">
-          <div className="w-3 h-3 rounded-full bg-[#FF5F56]"></div>
-          <div className="w-3 h-3 rounded-full bg-[#FFBD2E]"></div>
-          <div className="w-3 h-3 rounded-full bg-[#27C93F]"></div>
+          <div className="w-3 h-3 rounded-full bg-border-strong"></div>
+          <div className="w-3 h-3 rounded-full bg-border-strong"></div>
+          <div className="w-3 h-3 rounded-full bg-border-strong"></div>
         </div>
-        <button 
-          onClick={runCode}
-          disabled={status === "saving"}
-          className={`text-[10px] font-mono tracking-widest border px-4 py-1.5 rounded-md transition-colors ${
-            status === "success" ? "bg-riotGreen/20 text-riotGreen border-riotGreen/50" : 
-            status === "saving" ? "bg-border text-muted border-border2" :
-            "bg-riotBlue/10 text-riotBlue border-riotBlue/30 hover:bg-riotBlue hover:text-bg"
-          }`}
-        >
-          {status === "success" ? "PASSED" : status === "saving" ? "SAVING..." : "RUN & VALIDATE"}
-        </button>
+        <div className="label text-text-muted tracking-widest">
+          CRUCIBLE_TERMINAL //
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-border2">
+      {/* Code Input */}
+      <div className="flex-1 relative border-b border-border-base">
         <textarea
+          ref={textareaRef}
           value={code}
           onChange={(e) => setCode(e.target.value)}
           spellCheck={false}
-          className="w-full h-72 bg-bg text-text font-mono text-sm p-4 focus:outline-none resize-none"
+          className="absolute inset-0 w-full h-full bg-transparent text-accent-green p-5 font-mono text-sm leading-relaxed resize-none focus:outline-none focus:bg-[rgba(0,255,170,0.02)] transition-colors"
         />
-
-        <div className="h-72 bg-[#020205] p-4 overflow-y-auto font-mono text-sm">
-          <div className="text-muted text-[10px] tracking-widest mb-3 border-b border-border2 pb-2">
-            OUTPUT_
-          </div>
-          {output.length === 0 ? (
-            <div className="text-muted/50 italic">Awaiting execution...</div>
-          ) : (
-            output.map((line, i) => (
-              <div 
-                key={i} 
-                className={`mb-1 ${
-                  line.includes('⚠️') ? 'text-riotRed' : 
-                  line.includes('✅') || line.includes('🏆') ? 'text-riotGreen' : 
-                  'text-riotBlue'
-                }`}
-              >
-                {line}
-              </div>
-            ))
-          )}
-        </div>
       </div>
+
+      {/* Console Output */}
+      <div className="h-48 bg-bg-base p-5 font-mono text-xs overflow-y-auto">
+        <div className="text-text-dim mb-2">] Console Output...</div>
+        {output.map((line, i) => (
+          <div key={i} className={`mb-1 ${line.startsWith("❌") ? "text-accent-red" : line.startsWith("✅") ? "text-accent-green glow" : "text-text-primary"}`}>
+            {line}
+          </div>
+        ))}
+      </div>
+
+      {/* Action Bar */}
+      <div className="p-4 bg-bg-surface-2 flex justify-between items-center">
+        <div className="label text-text-muted">
+          {status === "success" ? "XP REWARDED" : "AWAITING EXECUTION"}
+        </div>
+        <MagneticButton
+          onClick={executeCode}
+          className={`px-6 py-2 rounded-md font-mono text-xs font-bold tracking-widest transition-all ${
+            status === "success" 
+              ? "bg-[rgba(0,255,170,0.1)] border border-accent-green text-accent-green" 
+              : "bg-text-primary text-bg-base hover:bg-accent-green hover:shadow-glow-green"
+          }`}
+        >
+          {status === "running" ? "EXECUTING..." : status === "success" ? "EXECUTED ✅" : "EXECUTE CODE"}
+        </MagneticButton>
+      </div>
+
     </div>
   );
 }
