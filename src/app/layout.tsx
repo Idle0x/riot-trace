@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
+import AppShell from "@/components/layout/AppShell";
 
 export const metadata: Metadata = {
-  title: "riot' Trace",
-  description: "The interactive developer crucible.",
+  title: "riot' Trace | Executive Laboratory",
+  description: "Advanced execution tracing and mental models.",
 };
 
 export default function RootLayout({
@@ -13,10 +13,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="bg-bg text-text font-mono min-h-screen antialiased">
-        <Navbar />
-        {children}
+    <html lang="en" className="dark scroll-hidden">
+      <body className="antialiased bg-[#090A0F]">
+        <AppShell>
+          {children}
+        </AppShell>
       </body>
     </html>
   );
