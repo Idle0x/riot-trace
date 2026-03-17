@@ -2,110 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
 
-:root {
-  /* Backgrounds */
-  --bg-base: #07070f;
-  --bg-surface: #0c0c18;
-  --bg-surface-2: #111120;
-  --bg-surface-3: #161628;
+@layer base {
+  body {
+    @apply bg-base text-text-primary antialiased selection:bg-accent-green/30 selection:text-white;
+    /* Prevents horizontal bounce */
+    overflow-x: hidden; 
+  }
 
-  /* Borders */
-  --border-dim: #0d0d1a;
-  --border-base: #111120;
-  --border-mid: #1a1a30;
-  --border-strong: #252540;
-
-  /* Text */
-  --text-primary: #e4e4f0;
-  --text-secondary: #888898;
-  --text-muted: #555568;
-  --text-dim: #333348;
-
-  /* Accents */
-  --accent-green: #00ffaa;
-  --accent-blue: #4da6ff;
-  --accent-yellow: #ffd166;
-  --accent-red: #ff4466;
-
-  /* Transitions */
-  --transition-fast: 120ms ease;
-  --transition-base: 200ms ease;
-  --transition-spring: 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* Kill all default browser link behavior globally */
+  a {
+    @apply no-underline text-inherit;
+  }
 }
 
-body {
-  background-color: var(--bg-base);
-  color: var(--text-primary);
+@layer utilities {
+  /* The Physical Material Texture */
+  .bg-noise {
+    position: relative;
+  }
+  .bg-noise::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    /* High-frequency SVG fractal noise */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 100;
+    mix-blend-mode: overlay;
+  }
+
+  /* Typographic Physics */
+  .text-engraved {
+    color: #090A0F; /* Matches base background */
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+  
+  .text-phosphor {
+    color: #00FF66;
+    text-shadow: 0 0 12px rgba(0, 255, 102, 0.6), 0 0 24px rgba(0, 255, 102, 0.2);
+  }
+
+  /* Structural UI Panels */
+  .panel-flush {
+    @apply bg-surface border border-border-base shadow-plate;
+  }
+  .panel-sunken {
+    @apply bg-surface-sunken border border-border-dim shadow-sunken;
+  }
 }
 
-/* Typography Classes */
-.heading-xl {
-  font-family: 'Syne', sans-serif;
-  font-size: clamp(32px, 6vw, 56px);
-  font-weight: 800;
-  letter-spacing: -1.5px;
-  line-height: 1.05;
-  color: var(--text-primary);
-}
-
-.heading-lg {
-  font-family: 'Syne', sans-serif;
-  font-size: clamp(24px, 4vw, 36px);
-  font-weight: 700;
-  letter-spacing: -0.8px;
-  line-height: 1.15;
-}
-
-.label {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-/* Glassmorphism Classes */
-.glass {
-  background: rgba(12, 12, 24, 0.7);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.nav-glass {
-  background: rgba(7, 7, 15, 0.8);
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-}
-
-/* Base Card from Blueprint */
-.card-interactive {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-base);
-  border-radius: 14px;
-  padding: 20px;
-  cursor: pointer;
-  transition: all var(--transition-base);
-}
-
-.card-interactive:hover {
-  border-color: var(--border-strong);
-  transform: translateY(-2px);
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.04);
-}
-
-/* Scrollbars */
+/* Custom Tactical Scrollbars */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #1a1a2e transparent;
+  scrollbar-color: #252830 transparent;
 }
-
 ::-webkit-scrollbar {
   width: 4px;
   height: 4px;
@@ -114,16 +66,9 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1a1a2e;
+  background: #252830;
   border-radius: 2px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #252548;
+  background: #3A3F4C;
 }
-
-/* Stagger Animations */
-.stagger > *:nth-child(1) { animation-delay: 0ms; }
-.stagger > *:nth-child(2) { animation-delay: 60ms; }
-.stagger > *:nth-child(3) { animation-delay: 120ms; }
-.stagger > *:nth-child(4) { animation-delay: 180ms; }
-.stagger > *:nth-child(5) { animation-delay: 240ms; }
