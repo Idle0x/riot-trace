@@ -15,7 +15,8 @@ export function MagneticButton({ children, className = "", onClick }: {
     const rect = el.getBoundingClientRect();
     const x = e.clientX - (rect.left + rect.width / 2);
     const y = e.clientY - (rect.top + rect.height / 2);
-    el.style.transform = `translate(${x * 0.25}px, ${y * 0.25}px)`;
+    // Reduced from 0.25 to 0.15 for a heavier, less "floaty" feel
+    el.style.transform = `translate(${x * 0.15}px, ${y * 0.15}px)`;
   }
 
   function handleLeave() {
@@ -31,7 +32,8 @@ export function MagneticButton({ children, className = "", onClick }: {
       onClick={onClick}
       onMouseMove={handleMove}
       onMouseLeave={handleLeave}
-      style={{ transition: 'transform 300ms cubic-bezier(0.23, 1, 0.32, 1)' }}
+      // Stiffer mechanical spring bezier
+      style={{ transition: 'transform 200ms cubic-bezier(0.175, 0.885, 0.32, 1.275)' }}
     >
       {children}
     </button>
