@@ -2,10 +2,24 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { useCountUp } from "@/hooks/useCountUp"; // Ensure you have this hook saved
 
 export default function Navbar() {
+  const pathname = usePathname();
   const [xp, setXp] = useState(0);
+  const displayXp = useCountUp(xp, 1500); // 1.5s spring animation for XP
+
+  const isLesson = pathname?.includes('/lesson');
+  const isForge = pathname?.includes('/forge');
+
+  // Dynamic Context Breadcrumbs
+  const contextName = isLesson 
+    ? "CRUCIBLE_ENVIRONMENT" 
+    : isForge 
+      ? "FORGE_TERMINAL" 
+      : "GLOBAL_MATRIX";
 
   const fetchXP = async () => {
     const userId = localStorage.getItem("riot_trace_user_id");
@@ -24,29 +38,54 @@ export default function Navbar() {
 
   useEffect(() => {
     fetchXP();
-    // Listen for custom event from the code runner
     window.addEventListener("xp_updated", fetchXP);
     return () => window.removeEventListener("xp_updated", fetchXP);
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-bg/95 backdrop-blur-md px-5 py-4 flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-[rgba(0,255,102,0.1)] border border-[rgba(0,255,102,0.25)] flex items-center justify-center text-riotGreen text-sm">
-          ◉
-        </div>
-        <Link href="/" className="flex flex-col">
-          <div className="text-sm font-bold text-white font-sans leading-none tracking-tight">
-            riot' Trace
-          </div>
-          <div className="text-[9px] text-muted tracking-[3px] font-mono mt-0.5">
-            LABORATORY
-          </div>
-        </Link>
-      </div>
+    <header className="fixed top-0 left-0 right-0 z-50 h-14 bg-base border-b border-border-base flex items-center justify-between px-4 lg:px-6 shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
       
-      <div className="bg-surf border border-border2 rounded-full px-4 py-1.5 text-xs font-mono text-riotBlue tracking-wider transition-all duration-300">
-        {xp} XP
+      {/* Left: Branding & Context Breadcrumbs */}
+      <div className="flex items-center gap-4 lg:gap-6">
+        <Link href="/" className="flex items-center gap-3 group">
+          {/* Tactical Hardware Node Indicator */}
+          <div className="w-4 h-4 rounded-sm bg-surface border border-border-strong flex items-center justify-center shadow-plate transition-all group-hover:border-accent-green">
+            <div className="w-1.5 h-1.5 bg-accent-green rounded-sm shadow-glow-green animate-pulse-slow"></div>
+          </div>
+          <span className="font-bold tracking-tight text-sm group-hover:text-white transition-colors">
+            riot' Trace
+          </span>
+        </Link>
+
+        {/* Separator */}
+        <div className="h-4 w-px bg-border-dim hidden sm:block"></div>
+
+        {/* Breadcrumb Context */}
+        <div className="hidden sm:flex font-mono text-[9px] uppercase tracking-widest text-text-muted items-center gap-2">
+          {contextName}
+        </div>
+      </div>
+
+      {/* Right: Telemetry & XP Vault */}
+      <div className="flex items-center gap-4 lg:gap-6">
+        
+        {/* System Diagnostics */}
+        <div className="hidden md:flex items-center gap-2 font-mono text-[9px] tracking-widest text-text-muted">
+          <span>LATENCY: 12ms</span>
+          <span className="text-border-strong">|</span>
+          <span className="text-accent-green flex items-center gap-1">
+            <div className="w-1 h-1 bg-accent-green rounded-full"></div> SYS.OK
+          </span>
+        </div>
+
+        {/* XP Vault - Sunk into the header */}
+        <div className="h-8 flex items-center bg-surface-sunken border border-border-dim rounded shadow-sunken px-3 select-none">
+          <span className="font-mono text-[9px] tracking-widest text-text-muted mr-3">TOTAL_XP</span>
+          <span className="font-mono text-[11px] font-bold text-phosphor w-10 text-right">
+            {displayXp}
+          </span>
+        </div>
+
       </div>
     </header>
   );
