@@ -1,19 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import { MagneticButton } from "@/components/ui/MagneticButton";
 
 export default function ForgePage() {
   const [status, setStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [progress, setProgress] = useState(0);
 
   // Form State
   const [tierId, setTierId] = useState("1");
   const [title, setTitle] = useState("");
   const [theory, setTheory] = useState("");
   const [xpReward, setXpReward] = useState("100");
-  
+
   // Task State
   const [scenario, setScenario] = useState("");
   const [startingCode, setStartingCode] = useState("");
@@ -23,6 +25,12 @@ export default function ForgePage() {
     e.preventDefault();
     setStatus("saving");
     setErrorMessage("");
+    setProgress(0);
+
+    // Terminal progress simulation
+    const progressInterval = setInterval(() => {
+      setProgress((p) => (p < 90 ? p + Math.floor(Math.random() * 15) : 95));
+    }, 150);
 
     try {
       // 1. Insert the Lesson
@@ -32,7 +40,6 @@ export default function ForgePage() {
           tier_id: parseInt(tierId),
           title: title,
           xp_reward: parseInt(xpReward),
-          // We structure the theory text into the JSON block format our app expects
           content_blocks: [{ type: "markdown", body: theory }]
         })
         .select()
@@ -48,16 +55,17 @@ export default function ForgePage() {
             lesson_id: lessonData.id,
             scenario: scenario,
             starting_code: startingCode,
-            // Wrap the validation logic in the JSON structure expected by the runner
             validation_logic: { test: validationLogic }
           });
 
         if (taskError) throw taskError;
       }
 
+      clearInterval(progressInterval);
+      setProgress(100);
       setStatus("success");
-      
-      // Reset form after 2 seconds
+
+      // Reset form after delay
       setTimeout(() => {
         setTitle("");
         setTheory("");
@@ -65,9 +73,11 @@ export default function ForgePage() {
         setStartingCode("");
         setValidationLogic("");
         setStatus("idle");
-      }, 2000);
+        setProgress(0);
+      }, 2500);
 
     } catch (error: any) {
+      clearInterval(progressInterval);
       console.error(error);
       setErrorMessage(error.message);
       setStatus("error");
@@ -75,150 +85,154 @@ export default function ForgePage() {
   };
 
   return (
-    <main className="min-h-screen dot-bg p-8 pb-32">
-      <div className="max-w-3xl mx-auto animate-fadeUp">
-        
-        <header className="mb-10 border-b border-border pb-6">
-          <Link href="/" className="text-[10px] font-mono text-muted hover:text-white transition-colors uppercase tracking-[2px] mb-4 block">
-            ← RETURN TO HUB
+    <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 animate-fade-up">
+      <div className="w-full max-w-3xl relative z-10">
+
+        <header className="mb-12 border-b border-border-base pb-6">
+          <Link href="/" className="font-mono text-[9px] text-text-muted hover:text-white transition-colors flex items-center gap-2 mb-6 group w-max tracking-widest uppercase">
+            <span className="text-accent-blue group-hover:-translate-x-1 transition-transform">←</span> 
+            TERMINATE CONNECTION
           </Link>
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-2 h-2 rounded-full bg-riotYellow animate-pulse"></div>
-            <div className="text-[10px] text-riotYellow tracking-[3px] font-mono">
-              RESTRICTED AREA
+            <div className="w-1.5 h-1.5 rounded-full bg-accent-red shadow-glow-red animate-pulse-slow"></div>
+            <div className="text-[9px] text-accent-red tracking-[0.3em] font-mono font-bold uppercase">
+              RESTRICTED_ACCESS // ROOT_REQUIRED
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-white font-sans leading-tight">
-            The Forge.
+          <h1 className="heading-xl text-text-primary">
+            The <span className="text-engraved text-white/50">Forge.</span>
           </h1>
-          <p className="text-sm text-muted mt-2">
-            Convert real-world knowledge into permanent execution tasks.
+          <p className="font-mono text-[11px] text-text-secondary mt-2 tracking-wide uppercase">
+            Initialize new execution parameters into the matrix.
           </p>
         </header>
 
-        <form onSubmit={handleForge} className="space-y-8">
-          
-          {/* LESSON CONFIGURATION */}
-          <div className="bg-surf border border-border2 p-6 rounded-xl space-y-4">
-            <div className="text-[10px] text-riotBlue tracking-widest font-mono border-b border-border2 pb-2 mb-4">
-              1. LESSON METADATA
+        <form onSubmit={handleForge} className="space-y-10">
+
+          {/* 1. LESSON METADATA */}
+          <div className="space-y-6">
+            <div className="font-mono text-[9px] text-accent-blue tracking-[0.2em] border-b border-border-base pb-2 flex items-center justify-between">
+              <span>01 // METADATA_INJECTION</span>
+              <span className="text-text-dim">SYS.DB_WRITE</span>
             </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-mono text-muted mb-2">Target Tier</label>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="group">
+                <label className="block text-[9px] font-mono text-text-muted uppercase tracking-widest mb-1 transition-colors group-focus-within:text-accent-blue">Target Architecture Tier</label>
                 <select 
                   value={tierId} 
                   onChange={(e) => setTierId(e.target.value)}
-                  className="w-full bg-bg border border-border2 rounded-md p-2 text-sm text-white font-mono focus:outline-none focus:border-riotBlue"
+                  className="w-full bg-transparent border-b border-border-strong py-2 text-[13px] text-text-primary font-mono focus:outline-none focus:border-accent-blue transition-colors cursor-pointer appearance-none rounded-none"
                 >
-                  <option value="1">Tier 1: Code Literacy</option>
-                  <option value="2">Tier 2: JavaScript Deeply</option>
-                  <option value="3">Tier 3: React Mental Model</option>
-                  <option value="4">Tier 4: The Web Platform</option>
-                  <option value="5">Tier 5: Databases & Backend</option>
-                  <option value="6">Tier 6: CS Essentials</option>
-                  <option value="7">Tier 7: System Design</option>
+                  <option value="1" className="bg-base">Tier 1: Code Literacy</option>
+                  <option value="2" className="bg-base">Tier 2: JavaScript Deeply</option>
+                  <option value="3" className="bg-base">Tier 3: React Mental Model</option>
+                  <option value="4" className="bg-base">Tier 4: The Web Platform</option>
+                  <option value="5" className="bg-base">Tier 5: Databases & Backend</option>
+                  <option value="6" className="bg-base">Tier 6: CS Essentials</option>
+                  <option value="7" className="bg-base">Tier 7: System Design</option>
                 </select>
               </div>
-              <div>
-                <label className="block text-xs font-mono text-muted mb-2">XP Reward</label>
+
+              <div className="group">
+                <label className="block text-[9px] font-mono text-text-muted uppercase tracking-widest mb-1 transition-colors group-focus-within:text-accent-blue">XP Bounty</label>
                 <input 
                   type="number" 
                   value={xpReward} 
                   onChange={(e) => setXpReward(e.target.value)}
-                  className="w-full bg-bg border border-border2 rounded-md p-2 text-sm text-white font-mono focus:outline-none focus:border-riotBlue"
+                  className="w-full bg-transparent border-b border-border-strong py-2 text-[13px] text-accent-yellow font-mono focus:outline-none focus:border-accent-yellow transition-colors placeholder:text-border-strong rounded-none"
                 />
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-mono text-muted mb-2">Module Title</label>
+            <div className="group">
+              <label className="block text-[9px] font-mono text-text-muted uppercase tracking-widest mb-1 transition-colors group-focus-within:text-accent-blue">Module Designation (Title)</label>
               <input 
                 type="text" 
                 required
                 placeholder="e.g., The Event Loop: Why JS Doesn't Freeze"
                 value={title} 
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full bg-bg border border-border2 rounded-md p-2 text-sm text-white font-sans focus:outline-none focus:border-riotBlue"
+                className="w-full bg-transparent border-b border-border-strong py-2 text-[15px] font-bold text-text-primary font-sans focus:outline-none focus:border-accent-blue transition-colors placeholder:text-text-dim rounded-none"
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-mono text-muted mb-2">Theory / Context (Markdown)</label>
+            <div className="group">
+              <label className="block text-[9px] font-mono text-text-muted uppercase tracking-widest mb-1 transition-colors group-focus-within:text-accent-blue">Mental Model Payload (Markdown)</label>
               <textarea 
                 required
                 rows={4}
-                placeholder="Explain the concept clearly before the user faces the crucible..."
+                placeholder="Inject theoretical context here..."
                 value={theory} 
                 onChange={(e) => setTheory(e.target.value)}
-                className="w-full bg-bg border border-border2 rounded-md p-3 text-sm text-white font-sans focus:outline-none focus:border-riotBlue resize-y"
+                className="w-full bg-transparent border-b border-border-strong py-2 text-[13px] text-text-primary font-mono focus:outline-none focus:border-accent-blue transition-colors placeholder:text-text-dim resize-y custom-scrollbar rounded-none"
               />
             </div>
           </div>
 
-          {/* CRUCIBLE CONFIGURATION */}
-          <div className="bg-[#0A0A0F] border border-border2 p-6 rounded-xl space-y-4 shadow-2xl">
-            <div className="text-[10px] text-riotRed tracking-widest font-mono border-b border-border2 pb-2 mb-4">
-              2. CRUCIBLE TASK (OPTIONAL)
+          {/* 2. CRUCIBLE TASK CONFIGURATION */}
+          <div className="space-y-6 pt-4">
+            <div className="font-mono text-[9px] text-accent-red tracking-[0.2em] border-b border-border-base pb-2 flex items-center justify-between">
+              <span>02 // CRUCIBLE_PARAMETERS (OPTIONAL)</span>
+              <span className="text-text-dim">SYS.EXEC_ENV</span>
             </div>
 
-            <div>
-              <label className="block text-xs font-mono text-muted mb-2">Objective Scenario</label>
+            <div className="group">
+              <label className="block text-[9px] font-mono text-text-muted uppercase tracking-widest mb-1 transition-colors group-focus-within:text-accent-red">Objective Scenario</label>
               <textarea 
                 rows={2}
-                placeholder="What exactly must the user do to pass?"
+                placeholder="Define execution requirements..."
                 value={scenario} 
                 onChange={(e) => setScenario(e.target.value)}
-                className="w-full bg-bg border border-border2 rounded-md p-3 text-sm text-white font-sans focus:outline-none focus:border-riotRed resize-y"
+                className="w-full bg-transparent border-b border-border-strong py-2 text-[13px] text-text-primary font-mono focus:outline-none focus:border-accent-red transition-colors placeholder:text-text-dim resize-y custom-scrollbar rounded-none"
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-mono text-muted mb-2">Starting Code</label>
+            <div className="group">
+              <label className="block text-[9px] font-mono text-text-muted uppercase tracking-widest mb-1 transition-colors group-focus-within:text-accent-green">Initial State (Code)</label>
               <textarea 
-                rows={5}
-                placeholder="// Define variables, set up the broken state, etc."
+                rows={4}
+                placeholder="// Define environment state..."
                 value={startingCode} 
                 onChange={(e) => setStartingCode(e.target.value)}
                 spellCheck={false}
-                className="w-full bg-bg border border-border2 rounded-md p-3 text-sm text-riotGreen font-mono focus:outline-none focus:border-riotRed resize-y"
+                className="w-full bg-transparent border-b border-border-strong py-2 text-[13px] text-accent-green font-mono focus:outline-none focus:border-accent-green transition-colors placeholder:text-text-dim resize-y custom-scrollbar rounded-none"
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-mono text-muted mb-2">Hidden Validation Logic (Throws Error on Fail)</label>
+            <div className="group">
+              <label className="block text-[9px] font-mono text-text-muted uppercase tracking-widest mb-1 transition-colors group-focus-within:text-accent-red">Hidden Validation Logic (Throw Error on Fail)</label>
               <textarea 
-                rows={4}
-                placeholder={`if (myVariable !== true) throw new Error("Task Failed: You didn't set myVariable to true");`}
+                rows={3}
+                placeholder={`if (!success) throw new Error("Task Failed");`}
                 value={validationLogic} 
                 onChange={(e) => setValidationLogic(e.target.value)}
                 spellCheck={false}
-                className="w-full bg-bg border border-border2 rounded-md p-3 text-sm text-riotRed font-mono focus:outline-none focus:border-riotRed resize-y"
+                className="w-full bg-transparent border-b border-border-strong py-2 text-[13px] text-accent-red font-mono focus:outline-none focus:border-accent-red transition-colors placeholder:text-text-dim resize-y custom-scrollbar rounded-none"
               />
             </div>
           </div>
 
-          {/* SUBMIT */}
-          <button 
-            type="submit"
-            disabled={status === "saving" || status === "success"}
-            className={`w-full py-4 rounded-xl font-mono text-xs tracking-widest transition-all ${
-              status === "saving" ? "bg-border text-muted" :
-              status === "success" ? "bg-riotGreen text-bg" :
-              "bg-white text-bg hover:bg-muted"
-            }`}
-          >
-            {status === "saving" ? "FORGING MODULE..." : 
-             status === "success" ? "MODULE ADDED TO DATABASE ✅" : 
-             "FORGE NEW CRUCIBLE MODULE"}
-          </button>
+          {/* SUBMIT / TERMINAL OUTPUT */}
+          <div className="pt-8">
+            <MagneticButton
+              className={`w-full py-4 rounded-sm font-mono text-[11px] tracking-[0.2em] font-bold uppercase transition-all border shadow-plate
+                ${status === "saving" ? "bg-surface border-border-strong text-text-muted cursor-wait" :
+                  status === "success" ? "bg-accent-green/10 border-accent-green text-phosphor cursor-default" :
+                  "bg-text-primary border-transparent text-base hover:bg-accent-blue hover:shadow-glow-blue hover:text-base"}
+              `}
+            >
+              {status === "saving" ? `[ FORGING_MODULE... ${progress}% ]` : 
+               status === "success" ? "[ MODULE_FORGED // SYS.VERIFIED ]" : 
+               "[ INITIATE WRITE SEQUENCE ]"}
+            </MagneticButton>
 
-          {status === "error" && (
-            <div className="text-riotRed text-sm font-mono text-center p-4 border border-riotRed/30 rounded-lg bg-riotRed/10">
-              ⚠️ {errorMessage}
-            </div>
-          )}
+            {status === "error" && (
+              <div className="mt-4 text-accent-red text-[11px] font-mono font-bold tracking-widest text-center animate-[shake_0.4s_cubic-bezier(.36,.07,.19,.97)_both]">
+                [FATAL_ERROR] // {errorMessage.toUpperCase()}
+              </div>
+            )}
+          </div>
 
         </form>
       </div>
