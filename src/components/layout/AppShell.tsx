@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { usePathname } from 'next/navigation';
-import Navbar from './Navbar';
+import Navbar from "@/components/Navbar";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
