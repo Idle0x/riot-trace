@@ -1,34 +1,84 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+/* 1. TAILWIND V4 THEME ENGINE */
+@theme {
+  --color-base: #090A0F;
+  
+  --color-surface: #12141A;
+  --color-surface-hover: #181A22;
+  --color-surface-active: #1E212B;
+  --color-surface-sunken: #050508;
 
+  --color-border-dim: #1A1C23;
+  --color-border-base: #252830;
+  --color-border-strong: #3A3F4C;
+
+  --color-text-primary: #E4E4F0;
+  --color-text-secondary: #888898;
+  --color-text-muted: #555568;
+
+  --color-accent-green: #00FF66;
+  --color-accent-blue: #4DA6FF;
+  --color-accent-yellow: #FFD166;
+  --color-accent-red: #FF4466;
+  --color-accent-purple: #C77DFF;
+
+  --shadow-glow-green: 0 0 20px rgba(0, 255, 102, 0.15), 0 0 40px rgba(0, 255, 102, 0.05);
+  --shadow-glow-blue: 0 0 20px rgba(77, 166, 255, 0.15), 0 0 40px rgba(77, 166, 255, 0.05);
+  --shadow-sunken: inset 0 2px 10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(0, 0, 0, 0.8);
+  --shadow-plate: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 4px 12px rgba(0, 0, 0, 0.4);
+
+  --font-sans: "Syne", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+
+  --animate-fade-up: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-scan-line: scan 2s linear infinite;
+  --animate-typewriter: typewriter 2s steps(40) forwards;
+  --animate-blink: blink 1s step-end infinite;
+
+  @keyframes fadeUp {
+    0% { opacity: 0; transform: translateY(12px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes scan {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(1000%); }
+  }
+  @keyframes typewriter {
+    0% { width: 0%; }
+    100% { width: 100%; }
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+}
+
+/* 2. BASE PHYSICS */
 @layer base {
   body {
-    background-color: #090A0F;
-    color: #E4E4F0;
+    background-color: var(--color-base);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* Prevents horizontal bounce */
     overflow-x: hidden; 
   }
 
-  /* Custom Selection Color */
   ::selection {
     background-color: rgba(0, 255, 102, 0.3);
     color: white;
   }
 
-  /* Kill all default browser link behavior globally */
   a {
     text-decoration: none;
     color: inherit;
   }
 }
 
+/* 3. MATERIAL TEXTURES & TYPOGRAPHY */
 @layer utilities {
-  /* The Physical Material Texture */
   .bg-noise {
     position: relative;
   }
@@ -36,14 +86,12 @@
     content: '';
     position: absolute;
     inset: 0;
-    /* High-frequency SVG fractal noise */
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
     pointer-events: none;
     z-index: 100;
     mix-blend-mode: overlay;
   }
 
-  /* Typographic Physics */
   .text-engraved {
     color: #090A0F;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.08);
@@ -53,22 +101,9 @@
     color: #00FF66;
     text-shadow: 0 0 12px rgba(0, 255, 102, 0.6), 0 0 24px rgba(0, 255, 102, 0.2);
   }
-
-  /* Structural UI Panels (Hardcoded hex to bypass Tailwind v4 @apply strictness) */
-  .panel-flush {
-    background-color: #12141A;
-    border: 1px solid #252830;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 4px 12px rgba(0,0,0,0.4);
-  }
-  
-  .panel-sunken {
-    background-color: #050508;
-    border: 1px solid #1A1C23;
-    box-shadow: inset 0 2px 10px rgba(0,0,0,0.6), inset 0 1px 0 rgba(0,0,0,0.8);
-  }
 }
 
-/* Custom Tactical Scrollbars */
+/* 4. HARDWARE SCROLLBARS */
 * {
   scrollbar-width: thin;
   scrollbar-color: #252830 transparent;
