@@ -4,16 +4,16 @@ moduleId: 1
 lessonId: 3
 title: "The Logic Gates"
 xpReward: 40
-scenario: "Log the evaluation of 5 > 10. On the next line, fix this comparison so it evaluates to true: console.log('true' === true). On the final line, log the typeof the boolean false."
-startingCode: "// Task 1: Evaluate 5 > 10\n\n// Task 2: Fix this statement\nconsole.log('true' === true);\n\n// Task 3: Log typeof false\n"
+scenario: "Log the evaluation of 5 > 10. On the next line, fix the provided comparison so it evaluates to true. On the final line, log the typeof the boolean false."
+startingCode: "// 1. Evaluate 5 > 10\n\n// 2. Fix this strict equality check\nconsole.log('true' === true);\n\n// 3. Log typeof false\n"
 syntaxHint: "5 > 3; // true\n10 === 10; // true (strict equality)\ntypeof true; // 'boolean'"
-validationLogic: "if (logs[0] !== 'false') throw new Error('Task 1 Failed: 5 is not greater than 10.'); if (logs[1] !== 'true') throw new Error('Task 2 Failed: You must fix the types so they strictly equal each other.'); if (logs[2] !== 'boolean') throw new Error('Task 3 Failed: Third log must be the typeof false.');"
+validationLogic: "if (logs[0] !== 'false') throw new Error('Task 1 Failed: 5 is not greater than 10. It should log false.'); if (logs[1] !== 'true') throw new Error('Task 2 Failed: You must fix the types in the starting code so they strictly equal each other.'); if (logs[2] !== 'boolean') throw new Error('Task 3 Failed: Third log must be the typeof false.');"
 ---
 
 Is the user logged in? Is this node healthy? Is the XP above zero? Every conditional, every filter, every auth check — all of it reduces to `true` or `false`. This is the foundation of all decision-making in code.
 
 ### The Boolean
-A boolean has exactly two possible values. They are not strings; do not wrap them in quotes.
+A boolean has exactly two possible values. They are not strings; do not wrap them in quotes. If you wrap them in quotes, they become dumb text.
 ```javascript
 true    
 false   
@@ -29,7 +29,10 @@ These operators compare two values and **always** produce a boolean result.
 ```
 
 ### The Golden Rule: `===` vs `==`
-This is critical.
+This is one of the most critical concepts in JavaScript.
+
+
+
 * `==` (Loose Equality): Converts types before comparing. This is dangerous and causes unpredictable bugs. Example: `0 == false` returns `true`.
 * `===` (Strict Equality): Never converts types. It checks both VALUE and TYPE. Example: `0 === false` returns `false`.
 
@@ -41,3 +44,6 @@ This is critical.
 true === true   // true
 "true" === true // false (String vs Boolean)
 ```
+
+### Your Assignment
+In the Crucible, I have given you one broken line of code. Fix it, and write the other two requirements from scratch.
