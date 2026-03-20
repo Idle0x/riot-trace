@@ -1,0 +1,19 @@
+---
+tierId: 1
+moduleId: 1
+lessonId: 4
+title: "MODULE 01 BOSS FIGHT"
+xpReward: 150
+scenario: "Blank terminal. No theory pane. Follow the exact execution requirements."
+startingCode: "// 1. Log: [INITIALIZING_NODE...]\n// 2. Calculate and log total bandwidth: 1024 * 8\n// 3. Log a strict equality check: does 'MAINNET' equal 'DEVNET'\n// 4. Log the typeof the result from step 3\n"
+validationLogic: "if (logs[0] !== '[INITIALIZING_NODE...]') throw new Error('Task 1 Failed: Exact string match required.'); if (logs[1] !== '8192') throw new Error('Task 2 Failed: Math calculation incorrect.'); if (logs[2] !== 'false') throw new Error('Task 3 Failed: Strict equality check incorrect.'); if (logs[3] !== 'boolean') throw new Error('Task 4 Failed: Typeof check incorrect.');"
+---
+
+### EXECUTION REQUIREMENTS
+This is a Boss Fight. The terminal is yours. 
+
+Your output must match exactly:
+1. Log the exact string: `[INITIALIZING_NODE...]`
+2. Calculate and log total bandwidth: multiply `1024` by `8`
+3. Log a strict equality check: is the string `"MAINNET"` equal to `"DEVNET"`?
+4. Log the `typeof` of the result from step 3.
