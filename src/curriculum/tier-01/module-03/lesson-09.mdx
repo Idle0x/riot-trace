@@ -17,7 +17,7 @@ Is the node healthy or offline? Should we show the warning banner? Do we have pe
 ### The Syntax
 
 **1. Basic `if`**
-Executes the block of code inside the `{}` only if the condition inside the `()` evaluates to `true`.
+Executes the block of code inside the `{}` *only* if the condition inside the `()` evaluates to `true`.
 ```javascript
 const health = 95;
 
@@ -48,7 +48,7 @@ if (health >= 90) {
 }
 ```
 
-### Micro-Drill
-*Mentally verify before moving to the Crucible.*
-1. Write an `if` that logs "online" when a variable `status` equals `"active"`.
-2. Extend it with an `else` that logs "offline".
+### Your Assignment
+You have a variable `health` set to `65`. Write an `if/else` block that checks if `health` is strictly greater than `80`. 
+* If it is, print `'Node is healthy'`. 
+* If it is not, print `'Node needs attention'`.
