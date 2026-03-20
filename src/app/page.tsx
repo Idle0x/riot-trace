@@ -1,25 +1,12 @@
-import { supabase } from "@/lib/supabase";
 import DailyReview from "@/components/DailyReview";
 import { TierCard } from "@/components/ui/TierCard";
+import { getAllTiers } from "@/lib/curriculum";
 
 export default async function Hub() {
-  const { data: tiers, error } = await supabase
-    .from("tiers")
-    .select("*, lessons(id, title, xp_reward)")
-    .order("id");
-
-  if (error) {
-    return (
-      <div className="max-w-3xl mx-auto mt-20 border border-accent-red/30 bg-accent-red/5 p-6 rounded-sm font-mono text-accent-red text-xs">
-        [FATAL_ERROR] // FAILED TO LOAD CURRICULUM ARCHITECTURE.
-      </div>
-    );
-  }
+  const tiers = getAllTiers();
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 md:px-8 pb-32 pt-10 animate-fade-up">
-
-      {/* Terminal Header */}
       <div className="mb-12 border-b border-border-base pb-8">
         <div className="font-mono text-[10px] text-text-muted tracking-[0.3em] uppercase mb-4 flex items-center gap-2">
           <div className="w-1 h-4 bg-accent-blue"></div>
@@ -34,10 +21,8 @@ export default async function Hub() {
         </p>
       </div>
 
-      {/* The Urgent Action Queue (Spaced Repetition) */}
       <DailyReview />
 
-      {/* Sector Matrix Header */}
       <div className="flex items-center gap-4 mb-4">
         <div className="font-mono text-[9px] tracking-[0.3em] text-text-muted uppercase">
           CURRICULUM_MATRIX
@@ -45,19 +30,21 @@ export default async function Hub() {
         <div className="h-[1px] flex-grow bg-border-base"></div>
       </div>
 
-      {/* The Interlocking Data Plates */}
-      {/* We use a rounded container with hidden overflow so the snapped borders stay neat */}
       <div className="bg-base border border-border-base shadow-plate rounded-lg overflow-hidden">
-        {tiers?.map((tier) => (
+        {tiers.map((tier) => (
           <TierCard 
             key={tier.id} 
             tier={tier} 
-            lessonCount={tier.lessons?.length || 0} 
-            isUnlocked={true} // Add logic here later if you want to gate tiers
+            lessonCount={tier.lessonCount} 
+            isUnlocked={tier.id === 1} // Currently locking tiers > 1 for progression rules
           />
         ))}
+        {tiers.length === 0 && (
+           <div className="p-8 text-center font-mono text-[10px] text-accent-red tracking-widest uppercase bg-surface-sunken">
+             [ FATAL_ERROR: LOCAL CURRICULUM DIRECTORY NOT FOUND ]
+           </div>
+        )}
       </div>
-
     </div>
   );
 }
