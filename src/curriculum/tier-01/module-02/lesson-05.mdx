@@ -2,38 +2,42 @@
 tierId: 1
 moduleId: 2
 lessonId: 5
-title: "Declaring Variables: The Three Keywords"
+title: "Declaring Variables: The Keywords"
 xpReward: 40
-scenario: "Declare a const called TIER with the value 'Code Literacy'. Declare a let called xp with the value 0. On the next line, reassign xp to 100. Log both TIER and xp to the console."
-startingCode: "// 1. Declare a const for TIER\n\n// 2. Declare a let for xp\n\n// 3. Reassign xp\n\n// 4. Log both variables\n"
+scenario: "Declare a const called TIER with the value 'Code Literacy'. Declare a let called xp with the value 0. Reassign xp to 100. Log both TIER and xp to the console."
+startingCode: "// 1. Declare a const for TIER\n\n// 2. Declare a let for xp\n\n// 3. Reassign xp to 100\n\n// 4. Log both variables\n"
 syntaxHint: "const myVar = 'value';\nlet myNumber = 0;\nmyNumber = 10;\nconsole.log(myVar, myNumber);"
-validationLogic: "if (typeof TIER === 'undefined' || TIER !== 'Code Literacy') throw new Error('Task 1 Failed: const TIER is missing or incorrect.'); if (typeof xp === 'undefined' || xp !== 100) throw new Error('Task 2/3 Failed: xp is not declared or not reassigned to 100.'); if (!logs.some(l => l.includes('Code Literacy') && l.includes('100'))) throw new Error('Task 4 Failed: Variables not logged correctly.');"
+validationLogic: "if (!code.includes('const TIER')) throw new Error('Task 1 Failed: You must declare a const named TIER.'); if (!code.includes('let xp')) throw new Error('Task 2 Failed: You must declare a let named xp.'); if (typeof TIER === 'undefined' || TIER !== 'Code Literacy') throw new Error('Task 1 Failed: TIER is incorrect.'); if (typeof xp === 'undefined' || xp !== 100) throw new Error('Task 3 Failed: xp is not reassigned to 100.'); if (!logs.some(l => l.includes('Code Literacy') && l.includes('100'))) throw new Error('Task 4 Failed: Both variables were not logged together.');"
 ---
 
-You've used `const`, `let`, and `var` without fully knowing why you chose each. After this lesson, you'll never guess again.
+You've used `const`, `let`, and `var` before without fully knowing why you chose each. After this lesson, you will never guess again.
 
-Variables are not "boxes" that hold things. They are **labels** that point to a location in memory.
+Variables are not "boxes" that hold things. They are **labels** that point to a location in your computer's memory.
 
-### The Keywords
+[attachment_0](attachment)
+
+### The Three Keywords
 
 **1. `const` (Constant)**
-The label cannot be reassigned to point to something else. Use this by default for almost everything.
+The label cannot be reassigned to point to something else. Use this by default for almost everything. It makes your code predictable.
 ```javascript
 const NETWORK = "mainnet";
 // NETWORK = "devnet";  ← TypeError: Assignment to constant variable
 ```
 
 **2. `let` (Mutable)**
-The label CAN be reassigned. Use this for counters or values you expect to change over time.
+The label CAN be reassigned. Use this for counters or values you expect to change over time (like a user's XP).
 ```javascript
 let score = 0;
-score = 100;  // ✓ This is perfectly fine
+score = 100;  // ✓ This is perfectly fine. We reassigned the label.
 ```
 
 **3. `var` (Legacy)**
-Function-scoped, hoisted weirdly, and largely obsolete. **Do not use it.** It causes scope bugs that `const` and `let` were specifically invented to fix.
+This is the old way. It is function-scoped, hoists weirdly, and is largely obsolete. **Do not use it.** It causes bugs that `const` and `let` were specifically invented to fix.
 
-### Micro-Drill
-*Mentally verify before moving to the Crucible.*
-1. Declare a `const` called `NODE_ID` with value `"12A"`.
-2. Declare a `let` called `health` with value `100`, then reassign it to `95`.
+### Your Assignment
+You are setting up the initial state for a user. In the Crucible:
+1. Use `const` to declare a variable named `TIER` and assign it the string `"Code Literacy"`.
+2. Use `let` to declare `xp` and assign it the number `0`.
+3. The user completed a task. Reassign `xp` to `100`. (Do not use `let` again, just reassign it).
+4. `console.log()` both variables.
