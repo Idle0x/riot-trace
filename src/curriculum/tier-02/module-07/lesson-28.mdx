@@ -1,0 +1,47 @@
+---
+tierId: 2
+moduleId: 7
+lessonId: 28
+title: "The sort Method"
+xpReward: 40
+scenario: "Sort the provided array of health scores in descending order (highest to lowest). Log the sorted array."
+startingCode: "const scores = [45, 91, 78, 55, 95];\n\n// Sort the scores descending\n\n// Log the array\n"
+syntaxHint: "array.sort((a, b) => b - a); // Descending\narray.sort((a, b) => a - b); // Ascending"
+validationLogic: "if (!code.includes('.sort(')) throw new Error('Task Failed: You must use the .sort() method.'); if (!logs.some(l => l.includes('95') && l.includes('91') && l.includes('78') && l.includes('55') && l.includes('45'))) throw new Error('Task Failed: The array is not sorted in descending order.');"
+---
+
+Leaderboards, ranked node lists, transaction history sorted by date — sorting is everywhere. However, JavaScript's `.sort()` method has one behavior that surprises every beginner.
+
+### The Lexicographical Trap
+If you just call `.sort()` without any instructions, JavaScript converts everything to a string and sorts it alphabetically. 
+
+```javascript
+const numbers = [10, 1, 20, 2];
+numbers.sort(); 
+console.log(numbers); // Logs: [1, 10, 2, 20] 
+```
+Wait, 10 comes before 2? Yes, because alphabetically, "1" comes before "2".
+
+### The Comparator Function
+To sort numbers correctly, you must pass an Arrow Function into `.sort()`. This function takes two parameters representing two items being compared (usually named `a` and `b`).
+
+
+
+```javascript
+// Ascending (Lowest to Highest)
+numbers.sort((a, b) => {
+  return a - b; 
+});
+
+// Descending (Highest to Lowest)
+numbers.sort((a, b) => {
+  return b - a; 
+});
+```
+**How it works:** If `a - b` results in a negative number, JavaScript knows `a` is smaller and puts it first. If `b - a` is negative, it puts `b` first.
+
+### Mutation Warning
+Unlike `.map()` and `.filter()`, `.sort()` **mutates (changes) the original array**. It does not create a new one. 
+
+### Your Assignment
+You have an array of health scores. Use `.sort()` and a comparator function to sort them in descending order (highest score first). Log the resulting array.
