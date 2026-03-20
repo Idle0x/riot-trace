@@ -1,0 +1,53 @@
+---
+tierId: 1
+moduleId: 3
+lessonId: 10
+title: "Logical Operators"
+xpReward: 40
+scenario: "Using a single 'if' statement and the && operator, log 'Access granted' ONLY if loggedIn is true AND admin is true."
+startingCode: "const loggedIn = true;\nconst admin = true;\n\n// Write your condition below\n"
+syntaxHint: "if (conditionA && conditionB) {\n  // runs if BOTH are true\n}"
+validationLogic: "if (!code.includes('&&')) throw new Error('Task Failed: You must use the && operator.'); if (!logs.includes('Access granted')) throw new Error('Task Failed: Logic did not grant access when both are true.');"
+---
+
+A node is "at risk" if health is low AND it's on mainnet. A user can access a dashboard if they're logged in OR they're an owner. Real conditions are rarely single checks. 
+
+
+
+### The Combiners
+
+**1. AND (`&&`)**
+BOTH conditions must be true for the block to execute.
+```javascript
+const health = 65;
+const network = "mainnet";
+
+if (health < 70 && network === "mainnet") {
+  console.log("Mainnet node at risk");  // logs — both conditions are true
+}
+```
+
+**2. OR (`||`)**
+AT LEAST ONE condition must be true.
+```javascript
+const isAdmin = false;
+const isOwner = true;
+
+if (isAdmin || isOwner) {
+  console.log("Access granted");  // logs — isOwner is true
+}
+```
+
+**3. NOT (`!`)**
+Inverts a boolean value. `!true` becomes `false`.
+```javascript
+const isOffline = false;
+if (!isOffline) {
+  console.log("Node is reachable");  // logs — !false = true
+}
+```
+
+### Short-Circuit Evaluation
+JavaScript is lazy (in a good way). It stops reading the moment it knows the answer:
+* `A && B` — if A is false, JS doesn't even bother looking at B. It already knows the whole statement can't be true.
+* `A || B` — if A is true, JS stops. It already knows the statement is true.
