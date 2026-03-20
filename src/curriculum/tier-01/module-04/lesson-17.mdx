@@ -6,6 +6,7 @@ title: "TIER 01 CAPSTONE: The Syntax Audit"
 xpReward: 500
 scenario: "You are given a broken Node.js script with deliberate errors covering primitives, scopes, comparisons, objects, and arrays. Fix all errors so the script outputs the exact required text."
 startingCode: "const SYSTEM_NAME = 'riot-trace v1.0.0';\nlet isOnline == true;\n\nvar stats = {\n  nodes: 201,\n  network = 'mainnet'\n};\n\nif (stats.nodes === '201') {\n  console.log('Nodes online: ' + stats.nodes);\n}\n\n// FIX THE SCRIPT TO OUTPUT EXACTLY:\n// [SYS.BOOT] riot-trace v1.0.0\n// Network: mainnet\n// Nodes online: 201\n// Status: OPERATIONAL\n"
+syntaxHint: ""
 validationLogic: "if (code.includes('== true')) throw new Error('Capstone Failed: Invalid variable assignment syntax remaining.'); if (code.includes('network =')) throw new Error('Capstone Failed: Invalid object property assignment remaining.'); if (!logs.includes('[SYS.BOOT] riot-trace v1.0.0')) throw new Error('Capstone Failed: Missing or incorrect boot log.'); if (!logs.includes('Network: mainnet')) throw new Error('Capstone Failed: Missing or incorrect network log.'); if (!logs.includes('Nodes online: 201')) throw new Error('Capstone Failed: Strict equality type mismatch not fixed.'); if (!logs.includes('Status: OPERATIONAL')) throw new Error('Capstone Failed: Missing status log.');"
 ---
 
@@ -20,4 +21,6 @@ The starting code contains deliberate syntax and logic errors preventing executi
 1. Find and fix the assignment error on `isOnline`.
 2. Find and fix the object syntax error inside `stats`.
 3. Find and fix the strict equality type-mismatch in the `if` statement preventing the nodes from logging.
-4. Ensure your final `console.log` outputs match the required 4 lines exactly (shown in comments). Use variables where applicable.
+4. Write the remaining `console.log()` statements to ensure your final output matches the required 4 lines exactly (shown in the comments). Use your variables where applicable.
+
+Clear this audit, and Tier 02 unlocks.
