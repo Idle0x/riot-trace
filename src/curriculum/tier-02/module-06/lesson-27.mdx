@@ -1,0 +1,26 @@
+---
+tierId: 2
+moduleId: 6
+lessonId: 27
+title: "MODULE 06 BOSS FIGHT"
+xpReward: 150
+scenario: "Build a closure-based ID generator using arrow functions. Generate three IDs."
+startingCode: "// EXECUTE OBJECTIVE\n"
+syntaxHint: ""
+validationLogic: "if (!code.includes('=>')) throw new Error('Task Failed: Must use arrow syntax.'); if (!logs.some(l => l === 'node_1') || !logs.some(l => l === 'node_3')) throw new Error('Task Failed: Did not log the correct sequential IDs.');"
+---
+
+### EXECUTION REQUIREMENTS
+This is a Boss Fight. You are combining everything from this module.
+
+1. Write a function called `createIdGenerator`. It must take a parameter `prefix`.
+2. Inside it, declare a `let` variable called `count` and set it to `0`.
+3. It must return an **Arrow Function**.
+4. The returned arrow function must increment `count` by 1, and return a string combining the `prefix`, an underscore `_`, and the `count`.
+5. Create a generator: `const generateNodeId = createIdGenerator('node');`
+6. Call `generateNodeId()` three separate times and `console.log` the result of each call.
+
+*Expected Output in Terminal:*
+`node_1`
+`node_2`
+`node_3`
