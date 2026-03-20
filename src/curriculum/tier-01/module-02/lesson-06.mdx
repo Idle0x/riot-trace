@@ -5,33 +5,36 @@ lessonId: 6
 title: "Scope: Where Variables Live"
 xpReward: 40
 scenario: "Create a function called getStatus(). Inside it, declare a const called status with the value 'online'. Log status inside the function. Finally, call the function."
-startingCode: "// 1. Create the function\nfunction getStatus() {\n  \n}\n\n// 2. Call the function\n"
+startingCode: "// 1. Create the function\nfunction getStatus() {\n  \n}\n\n// 2. Call the function so it runs\n"
 syntaxHint: "function myFunc() {\n  const inside = 'hidden';\n  console.log(inside);\n}\nmyFunc();"
-validationLogic: "if (typeof getStatus !== 'function') throw new Error('Task Failed: getStatus function not found.'); if (!logs.some(l => l === 'online')) throw new Error('Task Failed: The function did not log online.');"
+validationLogic: "if (typeof getStatus !== 'function') throw new Error('Task Failed: getStatus function not found.'); if (!code.includes('const status')) throw new Error('Task Failed: You must declare status using const inside the function.'); if (!logs.some(l => l === 'online')) throw new Error('Task Failed: The function did not log online.');"
 ---
 
-The mysterious `ReferenceError: x is not defined` that appears in your console? Scope explains exactly why certain variables are visible in some places and invisible in others.
+Ever seen the mysterious `ReferenceError: x is not defined` in your console? Scope explains exactly why certain variables are visible in some places and invisible in others.
+
+
 
 ### The Three Scopes
 
 **1. GLOBAL SCOPE**
-Accessible everywhere. Defined at the top of the file, outside of any functions or blocks.
+Accessible everywhere. Defined at the absolute top of your file, outside of any functions or blocks.
 ```javascript
 const globalConfig = "mainnet";
 ```
 
 **2. FUNCTION SCOPE**
-Variables declared inside a function only exist inside that function. They die when the function finishes running.
+Variables declared inside a function *only exist inside that function*. They die the exact millisecond the function finishes running.
 ```javascript
 function processNode() {
   const localHealth = 95;  // lives here, dies here
-  console.log(localHealth);  // ✓ Works
+  console.log(localHealth);  // ✓ Works perfectly
 }
+
 // console.log(localHealth);  // ✗ ReferenceError: localHealth is not defined
 ```
 
 **3. BLOCK SCOPE**
-Variables declared inside `{ curly braces }` (like an `if` statement or `for` loop) using `let` or `const` only exist inside those braces.
+Variables declared inside `{ curly braces }` (like an `if` statement or a loop) using `let` or `const` only exist inside those braces.
 ```javascript
 if (true) {
   const blockVar = "only here";
@@ -42,3 +45,6 @@ if (true) {
 ### The Rule of Visibility
 Looking **outward** (up the chain) always works. Code inside a function can see global variables.
 Looking **inward** (down the chain) never works. Global code cannot see inside a function.
+
+### Your Assignment
+You are building a status checker. Define the function, create the scoped variable inside it, log it, and then execute the function.
