@@ -1,0 +1,49 @@
+---
+tierId: 2
+moduleId: 7
+lessonId: 30
+title: "The Spread Operator (...)"
+xpReward: 40
+scenario: "Use the spread operator to create an 'updatedNode'. Copy all properties from the base node, but overwrite 'health' to 100. Log updatedNode."
+startingCode: "const baseNode = { id: '7A5r', health: 45, network: 'mainnet' };\n\n// Create updatedNode using spread syntax\n\n// Log updatedNode\n"
+syntaxHint: "const newObj = { ...oldObj, keyToChange: 'newValue' };"
+validationLogic: "if (!code.includes('...baseNode')) throw new Error('Task Failed: You must use the spread operator (...) on baseNode.'); if (!logs.some(l => l.includes('100') && l.includes('mainnet') && l.includes('7A5r'))) throw new Error('Task Failed: The updatedNode does not contain the correct copied and overwritten data.');"
+---
+
+`const newState = { ...state, count: 1 }`. You've seen this exact syntax in React. The three dots `...` are called the **Spread Operator**.
+
+### Expanding Collections
+The spread operator takes an object (or an array) and unpacks all of its contents into a new object (or array). 
+
+This is crucial because, as you learned in Lesson 28, some methods mutate data. In React, **you are never allowed to mutate original state directly.** You must make a copy first.
+
+```javascript
+// Spreading Arrays
+const listA = [1, 2];
+const listB = [3, 4];
+const combined = [...listA, ...listB]; // [1, 2, 3, 4]
+
+// Spreading Objects
+const node = { id: "abc", health: 95 };
+
+// This creates a BRAND NEW object in memory. 
+// It copies everything from 'node' into it.
+const copy = { ...node }; 
+```
+
+### Overwriting Properties
+The true power of spread is copying an object and updating one specific piece of it at the same time.
+
+```javascript
+const user = { name: "Alice", role: "user", status: "active" };
+
+// Read as: "Unpack user, then overwrite role"
+const upgradedUser = { ...user, role: "admin" };
+
+console.log(upgradedUser); 
+// { name: "Alice", status: "active", role: "admin" }
+```
+*Note: The order matters! If you put `role: "admin"` BEFORE `...user`, the old role inside `user` will overwrite your new one.*
+
+### Your Assignment
+You need to heal a node without mutating the original database record. Create `updatedNode`. Spread the `baseNode` into it, and overwrite the `health` property to `100`. Log the new object.
