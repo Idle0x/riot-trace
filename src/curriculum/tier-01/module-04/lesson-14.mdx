@@ -12,10 +12,10 @@ validationLogic: "if (!code.includes('health')) throw new Error('Task Failed: Mi
 
 Every node in xandeum-pulse is an object. Every transaction in riot-sop is an object. Objects are the single most important data structure in JavaScript.
 
-
+[attachment_1](attachment)
 
 ### Key-Value Pairs
-An object holds data not by order (like an array), but by **labels (keys)**.
+An object holds data not by strict numerical order (like an array), but by named **labels (keys)**.
 ```javascript
 const node = {
   id: "7A5rRdb",
@@ -25,7 +25,7 @@ const node = {
 };
 ```
 * **Keys** (left of colon) — think of them as property names.
-* **Values** (right of colon) — can be any data type (string, number, boolean, array, or even another object).
+* **Values** (right of colon) — can be any data type (string, number, boolean, array, or even another nested object).
 
 ### Accessing & Modifying Data
 There are two ways to read or change data in an object.
@@ -44,3 +44,6 @@ Used when the key is dynamic (stored inside a variable) or contains invalid char
 const targetKey = "health";
 console.log(node[targetKey]); // Evaluates to node["health"] -> 95
 ```
+
+### Your Assignment
+Construct a node object, mutate one of its properties after creation, and log the specific mutated property.
