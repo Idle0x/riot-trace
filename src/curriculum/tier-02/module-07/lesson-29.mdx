@@ -1,0 +1,38 @@
+---
+tierId: 2
+moduleId: 7
+lessonId: 29
+title: "Method Chaining: The Pipeline"
+xpReward: 40
+scenario: "Filter the nodes array to only keep nodes with health > 80. Then, chain a .map() to extract just their IDs. Log the final array of IDs."
+startingCode: "const nodes = [\n  { id: '1A', health: 45 },\n  { id: '2B', health: 95 },\n  { id: '3C', health: 88 }\n];\n\n// Chain .filter() and .map()\nconst eliteIds = nodes\n\n// Log eliteIds\n"
+syntaxHint: "const result = array\n  .filter(item => item.value > 10)\n  .map(item => item.name);"
+validationLogic: "if (!code.includes('.filter(') || !code.includes('.map(')) throw new Error('Task Failed: You must use both filter and map.'); if (!logs.some(l => l.includes('2B') && l.includes('3C') && !l.includes('1A'))) throw new Error('Task Failed: Did not log the correct filtered and mapped IDs.');"
+---
+
+You have learned `.filter()` and `.map()`. Until now, you've used them one at a time. But in professional architecture, we string them together into a **Pipeline**.
+
+### The Flow of Data
+Because `.filter()` returns an array, and `.map()` returns an array, you can immediately call the next method without saving intermediate variables.
+
+```javascript
+const transactions = [
+  { type: "inflow", amount: 500 },
+  { type: "outflow", amount: 200 },
+  { type: "inflow", amount: 1000 }
+];
+
+// Read top-to-bottom:
+const formattedInflows = transactions
+  .filter((tx) => tx.type === "inflow")      // 1. Keep only inflows
+  .map((tx) => `Received: $${tx.amount}`);   // 2. Format them into strings
+
+console.log(formattedInflows); 
+// Logs: ["Received: $500", "Received: $1000"]
+```
+
+### Why Do This?
+It makes your code read like a sentence. "Take the transactions, filter for inflows, map them to strings." It removes the need for clunky temporary variables.
+
+### Your Assignment
+You need a list of IDs for healthy nodes. Take the `nodes` array. Chain `.filter()` to keep only nodes with `health` strictly greater than 80. Immediately chain `.map()` onto that to extract just the `id`. Store the final result in `eliteIds` and log it.
