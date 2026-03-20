@@ -1,0 +1,46 @@
+---
+tierId: 1
+moduleId: 4
+lessonId: 13
+title: "Arrays: Ordered Collections"
+xpReward: 40
+scenario: "Create an array called networks with 'mainnet' and 'devnet'. Use .push() to add 'testnet' to the end. Log the entire array, then log the length of the array."
+startingCode: "// 1. Create the array\n\n// 2. Push a new item\n\n// 3. Log the array and its length\n"
+syntaxHint: "const list = ['a', 'b'];\nlist.push('c');\nconsole.log(list.length);"
+validationLogic: "if (!code.includes('push')) throw new Error('Task Failed: You must use the .push() method.'); if (!logs.some(l => l.includes('testnet') && l.includes('mainnet'))) throw new Error('Task Failed: The array does not contain the required networks.'); if (!logs.some(l => l === '3' || l === 3)) throw new Error('Task Failed: Did not log the correct array length (3).');"
+---
+
+Your xandeum-pulse app has a `nodes` array — a list of every node on the network. Understanding arrays means you can work with any list of data.
+
+[attachment_0](attachment)
+
+### Ordered Lists
+An array is a list of values held in a specific order. 
+* **ZERO-INDEXED:** The first item in an array is at index `0`, not `1`.
+
+```javascript
+const nodes = ["nodeA", "nodeB", "nodeC"];
+//             index 0   index 1   index 2
+
+// Accessing elements via Bracket Notation
+nodes[0]           // "nodeA"
+nodes[1]           // "nodeB"
+nodes[nodes.length - 1]  // "nodeC" (This is how you always get the last item)
+```
+
+### Mutating the Array
+You can change the contents of an array even if it was declared with `const`. (Remember: `const` locks the *label*, not the internal data).
+
+```javascript
+nodes.push("nodeD");      // Adds to the END
+nodes.unshift("nodeZ");   // Adds to the BEGINNING
+
+nodes.pop();              // Removes the LAST item
+nodes.shift();            // Removes the FIRST item
+```
+
+### Checking Contents
+```javascript
+nodes.indexOf("nodeB")    // Returns 1 (the index)
+nodes.includes("nodeB")   // Returns true (boolean)
+```
