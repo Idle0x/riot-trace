@@ -1,0 +1,38 @@
+---
+tierId: 1
+moduleId: 4
+lessonId: 15
+title: "Destructuring: Unpacking Collections"
+xpReward: 40
+scenario: "Given the target object, use object destructuring to extract 'network' and 'latency' into distinct variables in a single line. Log them both."
+startingCode: "const target = { network: 'mainnet', latency: 12, status: 'OK' };\n\n// Destructure network and latency here\n\n// Log them\n"
+syntaxHint: "const { key1, key2 } = myObject;\nconsole.log(key1);"
+validationLogic: "if (!code.includes('const {') && !code.includes('let {') && !code.includes('var {')) throw new Error('Task Failed: You must use the object destructuring syntax { } on the left side of the equals sign.'); if (!logs.some(l => l.includes('mainnet') && l.includes('12'))) throw new Error('Task Failed: Did not log both variables correctly.');"
+---
+
+You've seen `const { data, error } = await supabase.query()`. You've seen `const [count, setCount] = useState(0)`. This syntax appears everywhere in modern JavaScript. 
+
+### Object Destructuring
+Instead of accessing properties one by one, you can "unpack" them directly into variables.
+
+```javascript
+const node = { id: "abc", health: 95, network: "mainnet" };
+
+// Old way (Verbose):
+const id = node.id;
+const health = node.health;
+
+// Destructuring (Clean):
+const { id, health } = node;
+```
+*Rule: The variable names inside the `{}` MUST match the keys in the object.*
+
+### Array Destructuring
+Arrays don't have keys, so they are unpacked by **position**.
+```javascript
+const coordinates = [45.12, -12.89, 100];
+
+// Unpack by position
+const [lat, lng] = coordinates; 
+// lat = 45.12, lng = -12.89
+```
