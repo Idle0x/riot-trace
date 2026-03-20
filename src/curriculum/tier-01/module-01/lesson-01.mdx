@@ -1,0 +1,45 @@
+---
+tierId: 1
+moduleId: 1
+lessonId: 1
+title: "Making the Machine Speak"
+xpReward: 40
+scenario: "Log the exact phrase 'System Online' to the terminal."
+startingCode: "// Use the console object to output the string\n"
+validationLogic: "if (!logs.some(l => l.includes('System Online'))) throw new Error('Task Failed: Did not detect exact string output.');"
+---
+
+Every monitoring dashboard, every transaction log, every error message in xandeum-pulse — all of it starts as a string. Before you build anything, you must be able to talk to the machine and have it talk back.
+
+### The String
+A string is text data. It must be wrapped in quotes. Three types of quotes exist in JavaScript and they are not interchangeable by accident — each has a purpose:
+
+\`\`\`javascript
+// Single quotes — basic string
+'Hello Matrix'
+
+// Double quotes — use when string contains an apostrophe
+"riot's dashboard"
+
+// Backticks (template literals) — use when embedding variables
+\`Node count: \${nodeCount}\`
+\`\`\`
+
+### Anatomy Breakdown — Character by Character
+Look at this exact command:
+\`console.log("System Online");\`
+
+* \`console\` = The object. Built into every JS environment.
+* \`.\` = Dot notation. Accessing a method on the object.
+* \`log\` = The method name. "log" means print to output.
+* \`(\` = Opening parenthesis. Starts the argument you are passing in.
+* \`"\` = Opening double quote. Begins the string.
+* \`System Online\` = The string content.
+* \`"\` = Closing double quote. Ends the string.
+* \`)\` = Closing parenthesis.
+* \`;\` = Semicolon. Ends the statement.
+
+### Micro-Drill
+*Mentally verify before moving to the Crucible.*
+1. Wrap the word `riot-trace` in correct backtick syntax.
+2. Fix this broken string: `console.log('Node's health is 95');` (Hint: Use double quotes to wrap the outside).
