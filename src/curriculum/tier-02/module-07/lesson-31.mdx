@@ -1,0 +1,26 @@
+---
+tierId: 2
+moduleId: 7
+lessonId: 31
+title: "MODULE 07 BOSS FIGHT"
+xpReward: 150
+scenario: "Combine Spread, Sort, Filter, and Map to process the node data."
+startingCode: "const nodes = [\n  { id: '1A', health: 45 },\n  { id: '2B', health: 95 },\n  { id: '3C', health: 12 },\n  { id: '4D', health: 88 }\n];\n\n// EXECUTE OBJECTIVE\n"
+syntaxHint: ""
+validationLogic: "if (!code.includes('...') || !code.includes('.sort') || !code.includes('.filter') || !code.includes('.map')) throw new Error('Task Failed: You must use spread, sort, filter, and map.'); if (!logs.some(l => l.includes('2B') && l.includes('4D'))) throw new Error('Task Failed: Did not log the correct IDs.'); if (logs.some(l => l.includes('1A') || l.includes('3C'))) throw new Error('Task Failed: Array contains nodes with health below 50.');"
+---
+
+### EXECUTION REQUIREMENTS
+This is a Boss Fight. The terminal is yours. 
+
+You need to produce a leaderboard of IDs for healthy nodes. 
+**CRITICAL:** You are not allowed to mutate the original `nodes` array. Remember that `.sort()` mutates.
+
+1. Create a variable called `leaderboard`.
+2. Use the spread operator `[...nodes]` to create a safe copy of the array.
+3. Chain `.sort()` onto that copy to sort the nodes by health in **descending** order (highest first).
+4. Chain `.filter()` to keep only nodes with `health` greater than 50.
+5. Chain `.map()` to extract just the `id` strings.
+6. `console.log()` the final `leaderboard` array.
+
+If you chain this correctly, you will process complex data in a single, highly readable block of professional code.
