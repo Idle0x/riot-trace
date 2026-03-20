@@ -84,6 +84,7 @@ export default async function LessonPage({ params }: { params: Promise<{ tierId:
           validationLogic={lesson.validationLogic || ""}
           taskId={lesson.lessonId}
           xpReward={lesson.xpReward}
+          syntaxHint={lesson.syntaxHint}
         />
       </div>
 
