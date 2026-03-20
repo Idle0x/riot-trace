@@ -1,0 +1,51 @@
+---
+tierId: 2
+moduleId: 8
+lessonId: 34
+title: "Async & Await: Synchronous Illusion"
+xpReward: 40
+scenario: "Create an async function called 'init'. Inside it, use 'await' to pause execution until fetchNodeData() resolves, store it in a variable, and log it. Then call init()."
+startingCode: "function fetchNodeData() {\n  return new Promise(r => setTimeout(() => r('Node_Online'), 500));\n}\n\n// 1. Create async function 'init'\n\n// 2. Call init()\n"
+syntaxHint: "async function init() {\n  const data = await fetchNodeData();\n  console.log(data);\n}\ninit();"
+validationLogic: "if (!code.includes('async function') && !code.includes('async ()')) throw new Error('Task Failed: Must create an async function.'); if (!code.includes('await')) throw new Error('Task Failed: Must use the await keyword.'); if (!logs.some(l => l.includes('Node_Online'))) throw new Error('Task Failed: Did not await and log the correct data.');"
+---
+
+Chaining `.then()` works, but if you have to make three or four database requests in a row, you end up with "Callback Hell" — deeply nested code that is incredibly hard to read.
+
+Modern JavaScript introduced `async` and `await` to fix this.
+
+### The Synchronous Illusion
+`async/await` is just syntactic sugar over Promises. It allows you to write asynchronous code that *looks* like normal, top-to-bottom synchronous code.
+
+```javascript
+// You MUST put 'async' in front of the function definition
+async function loadDashboard() {
+  
+  // The 'await' keyword pauses this specific function 
+  // until the Promise resolves, then assigns the value!
+  const user = await fetchUser();
+  const nodes = await fetchNodes(user.id);
+  
+  console.log("Dashboard Loaded");
+}
+```
+
+### The Rule of Await
+You can **only** use the `await` keyword inside a function that has been labeled `async`. If you try to use `await` in the global scope or a normal function, the machine will crash.
+
+### Try / Catch
+Because we aren't using `.catch()` anymore, how do we handle errors? We wrap the code in a standard `try...catch` block.
+
+```javascript
+async function safeLoad() {
+  try {
+    const data = await riskyDatabaseCall();
+    console.log(data);
+  } catch (error) {
+    console.log("Caught an error:", error);
+  }
+}
+```
+
+### Your Assignment
+We are retiring `.then()`. Create an `async` function. Inside it, `await` the result of `fetchNodeData()`, save it to a variable, and log it. Don't forget to execute your function at the bottom!
