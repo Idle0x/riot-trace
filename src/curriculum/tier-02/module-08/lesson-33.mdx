@@ -1,0 +1,48 @@
+---
+tierId: 2
+moduleId: 8
+lessonId: 33
+title: "Promises: The Data IOU"
+xpReward: 40
+scenario: "Call the provided fetchNodeData() function. Chain a .then() to log the result, and a .catch() to log any error."
+startingCode: "function fetchNodeData() {\n  return new Promise((resolve) => {\n    setTimeout(() => resolve('Node_Online'), 500);\n  });\n}\n\n// Call fetchNodeData, then log the result, catch any errors\n"
+syntaxHint: "myFunction()\n  .then(data => console.log(data))\n  .catch(error => console.log(error));"
+validationLogic: "if (!code.includes('.then(')) throw new Error('Task Failed: You must use .then() to handle the Promise.'); if (!logs.some(l => l.includes('Node_Online'))) throw new Error('Task Failed: Did not successfully resolve and log the Promise data.');"
+---
+
+When you ask a database for information, it cannot give it to you instantly. Instead, it gives you a **Promise**. 
+
+A Promise is exactly what it sounds like: an IOU. It is an object that says, *"I don't have the data right now, but I promise to let you know when I do."*
+
+
+
+### The Three States of a Promise
+1. **Pending:** The request is in flight. (Waiting for the database).
+2. **Fulfilled (Resolved):** The data arrived successfully.
+3. **Rejected:** Something went wrong (Network down, bad password).
+
+### Handling the Promise (`.then` and `.catch`)
+Because a Promise takes time, we cannot just assign it to a variable normally. 
+```javascript
+// WRONG: This just prints "Pending Promise", not the data!
+const data = fetchNodeData(); 
+console.log(data); 
+```
+
+To get the actual data, we chain `.then()` onto it. To handle errors, we chain `.catch()`.
+
+```javascript
+// RIGHT: 
+fetchNodeData()
+  .then((data) => {
+    // This runs ONLY when the data arrives
+    console.log("Success:", data); 
+  })
+  .catch((error) => {
+    // This runs ONLY if it fails
+    console.log("Failed:", error);
+  });
+```
+
+### Your Assignment
+I have provided a mock function `fetchNodeData()` that returns a Promise. Call the function. Chain a `.then()` to catch the resolved data and log it. Chain a `.catch()` just in case it fails. 
