@@ -23,13 +23,13 @@ const nodes = ["nodeA", "nodeB", "nodeC"];
 //             index 0   index 1   index 2
 
 // Accessing elements via Bracket Notation
-nodes[0]           // "nodeA"
-nodes[1]           // "nodeB"
+nodes[0]                 // "nodeA"
+nodes[1]                 // "nodeB"
 nodes[nodes.length - 1]  // "nodeC" (This is how you always get the last item)
 ```
 
 ### Mutating the Array
-You can change the contents of an array even if it was declared with `const`. (Remember: `const` locks the *label*, not the internal data).
+You can change the contents of an array even if it was declared with `const`. (Remember: `const` locks the *label*, not the internal data inside the collection).
 
 ```javascript
 nodes.push("nodeD");      // Adds to the END
@@ -44,3 +44,6 @@ nodes.shift();            // Removes the FIRST item
 nodes.indexOf("nodeB")    // Returns 1 (the index)
 nodes.includes("nodeB")   // Returns true (boolean)
 ```
+
+### Your Assignment
+You need to build a list of active networks. Create the array, add an item to it dynamically using a built-in method, and log the results.
