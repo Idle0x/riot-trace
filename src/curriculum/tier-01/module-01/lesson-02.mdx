@@ -1,0 +1,26 @@
+---
+tierId: 1
+moduleId: 1
+lessonId: 2
+title: "The Mathematics of the Machine"
+xpReward: 40
+scenario: "Log the result of 100 * 5. On the next line, log the remainder of 10 divided by 3. On the final line, log the exact string 'Type of 100 is: ' followed by the typeof evaluation of 100."
+startingCode: "// Perform the required mathematical operations\n"
+syntaxHint: "10 * 5; // Multiplication\n10 % 3; // Modulo (Remainder)\ntypeof 42; // Returns 'number'"
+validationLogic: "if (logs[0] !== '500') throw new Error('Task 1 Failed: First log must be the result of 100 * 5.'); if (logs[1] !== '1') throw new Error('Task 2 Failed: Second log must be the remainder of 10 / 3.'); if (!logs[2]?.includes('Type of 100 is: number')) throw new Error('Task 3 Failed: Third log must evaluate the type correctly.');"
+---
+
+XP counts, node health scores, storage in terabytes, credit balances — your apps are full of numbers. This lesson makes you fluent in how JavaScript handles numerical data.
+
+### Number Types
+JavaScript has one `number` type for both integers and floats (decimals). 
+
+```javascript
+// Integers
+42
+1944        // your xandeum-pulse commit count
+201         // nodes on the network
+
+// Floats
+429.47      // TB of network capacity
+78.3        // average health score
