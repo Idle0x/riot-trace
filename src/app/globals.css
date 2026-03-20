@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 /* 1. TAILWIND V4 THEME ENGINE */
 @theme {
