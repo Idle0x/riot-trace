@@ -1,0 +1,49 @@
+---
+tierId: 2
+moduleId: 6
+lessonId: 24
+title: "Functions: The Unit of Reuse"
+xpReward: 40
+scenario: "Write a function named calculateScore that takes two parameters: 'base' and 'bonus'. It should return the sum of the two. Call the function with 100 and 50, and log the result."
+startingCode: "// 1. Define the function\n\n\n// 2. Call the function and log the result\n"
+syntaxHint: "function add(a, b) {\n  return a + b;\n}\nconsole.log(add(5, 5));"
+validationLogic: "if (!code.includes('function calculateScore')) throw new Error('Task Failed: You must name the function calculateScore.'); if (!code.includes('return')) throw new Error('Task Failed: Your function must explicitly return a value.'); if (!logs.some(l => l.includes('150'))) throw new Error('Task Failed: Did not log the correct result (150).');"
+---
+
+A function is a reusable block of code that performs a specific task. Instead of writing the same calculation 50 times for 50 different nodes, you write it once and **call** it 50 times.
+
+
+
+### Parameters vs Arguments
+These two terms confuse every beginner. Let's lock them in:
+* **Parameters:** The placeholders you define *inside* the function declaration.
+* **Arguments:** The actual data you pass in when you *call* the function.
+
+```javascript
+// 'uptime' and 'storage' are PARAMETERS
+function calculateHealth(uptime, storage) {
+  const score = uptime + storage;
+  return score;
+}
+
+// 8.5 and 250 are ARGUMENTS
+const nodeHealth = calculateHealth(8.5, 250); 
+```
+
+### The Return Keyword
+A function is like a factory machine. You feed raw materials in (Arguments), it processes them, and it spits a finished product out. 
+
+If you do not use the `return` keyword, the machine finishes its work but drops the product on the floor. The function will silently evaluate to `undefined`. 
+
+```javascript
+function brokenAdd(a, b) {
+  const sum = a + b;
+  // Missing return!
+}
+
+const result = brokenAdd(5, 5); 
+console.log(result); // Logs: undefined
+```
+
+### Your Assignment
+You need to calculate a user's total XP. Define a function called `calculateScore` that accepts two parameters. Add them together and `return` the result. Then, call the function with the arguments `100` and `50` and log what it returns.
