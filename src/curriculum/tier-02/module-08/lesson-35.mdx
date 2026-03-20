@@ -1,0 +1,29 @@
+---
+tierId: 2
+moduleId: 8
+lessonId: 35
+title: "TIER 02 CAPSTONE: The Logic Engine"
+xpReward: 500
+scenario: "Fetch raw network data, filter for active nodes, sort them by health, and log the ID of the healthiest node."
+startingCode: "// Mock Database Call\nfunction getNetworkData() {\n  return new Promise(resolve => {\n    setTimeout(() => {\n      resolve([\n        { id: '1A', health: 45, status: 'offline' },\n        { id: '2B', health: 95, status: 'active' },\n        { id: '3C', health: 88, status: 'active' },\n        { id: '4D', health: 99, status: 'offline' }\n      ]);\n    }, 500);\n  });\n}\n\n// EXECUTE CAPSTONE OBJECTIVE BELOW\n"
+syntaxHint: ""
+validationLogic: "if (!code.includes('async') || !code.includes('await')) throw new Error('Capstone Failed: Must use async/await architecture.'); if (!code.includes('.filter(') || !code.includes('.sort(')) throw new Error('Capstone Failed: Must filter and sort the data.'); if (!logs.some(l => l.includes('2B'))) throw new Error('Capstone Failed: Did not log the correct ID of the healthiest active node.'); if (logs.some(l => l.includes('4D'))) throw new Error('Capstone Failed: You included an offline node in your ranking.');"
+---
+
+### THE FINAL GATES
+You have completed the Logic Engine architecture segment. You now understand how to iterate, map, filter, sort, and await external data. You possess the required logic to control a frontend application.
+
+This is the Capstone. There are no hints.
+
+### EXECUTION REQUIREMENTS
+You are building the core pipeline for a monitoring dashboard. I have provided a mock database function `getNetworkData()` that returns a Promise resolving to an array of nodes.
+
+1. Create an `async` function named `analyzeNetwork`.
+2. Inside it, `await` the data from `getNetworkData()`.
+3. Process the returned array: 
+   * **Filter** it to keep *only* nodes where `status` is `'active'`.
+   * **Sort** the active nodes by `health` in descending order (highest first).
+4. `console.log()` the `id` of the node at index `0` (the healthiest active node).
+5. Call your `analyzeNetwork()` function to execute the pipeline.
+
+Clear this audit, and Tier 03 (React: The Mental Model) unlocks.
