@@ -1,0 +1,39 @@
+---
+tierId: 1
+moduleId: 2
+lessonId: 5
+title: "Declaring Variables: The Three Keywords"
+xpReward: 40
+scenario: "Declare a const called TIER with the value 'Code Literacy'. Declare a let called xp with the value 0. On the next line, reassign xp to 100. Log both TIER and xp to the console."
+startingCode: "// 1. Declare a const for TIER\n\n// 2. Declare a let for xp\n\n// 3. Reassign xp\n\n// 4. Log both variables\n"
+syntaxHint: "const myVar = 'value';\nlet myNumber = 0;\nmyNumber = 10;\nconsole.log(myVar, myNumber);"
+validationLogic: "if (typeof TIER === 'undefined' || TIER !== 'Code Literacy') throw new Error('Task 1 Failed: const TIER is missing or incorrect.'); if (typeof xp === 'undefined' || xp !== 100) throw new Error('Task 2/3 Failed: xp is not declared or not reassigned to 100.'); if (!logs.some(l => l.includes('Code Literacy') && l.includes('100'))) throw new Error('Task 4 Failed: Variables not logged correctly.');"
+---
+
+You've used `const`, `let`, and `var` without fully knowing why you chose each. After this lesson, you'll never guess again.
+
+Variables are not "boxes" that hold things. They are **labels** that point to a location in memory.
+
+### The Keywords
+
+**1. `const` (Constant)**
+The label cannot be reassigned to point to something else. Use this by default for almost everything.
+```javascript
+const NETWORK = "mainnet";
+// NETWORK = "devnet";  ← TypeError: Assignment to constant variable
+```
+
+**2. `let` (Mutable)**
+The label CAN be reassigned. Use this for counters or values you expect to change over time.
+```javascript
+let score = 0;
+score = 100;  // ✓ This is perfectly fine
+```
+
+**3. `var` (Legacy)**
+Function-scoped, hoisted weirdly, and largely obsolete. **Do not use it.** It causes scope bugs that `const` and `let` were specifically invented to fix.
+
+### Micro-Drill
+*Mentally verify before moving to the Crucible.*
+1. Declare a `const` called `NODE_ID` with value `"12A"`.
+2. Declare a `let` called `health` with value `100`, then reassign it to `95`.
