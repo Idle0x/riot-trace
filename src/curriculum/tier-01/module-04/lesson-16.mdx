@@ -6,6 +6,7 @@ title: "MODULE 04 BOSS FIGHT"
 xpReward: 150
 scenario: "Blank terminal. Arrays, Objects, and Destructuring in play."
 startingCode: "// 1. Create an array of two node objects.\n\n// 2. Push a third node object into the array.\n\n// 3. Destructure the 'health' property from the second node in the array.\n\n// 4. Log the destructured health value.\n"
+syntaxHint: ""
 validationLogic: "if (!code.includes('.push(')) throw new Error('Task Failed: Must use push to add the third node.'); if (!code.includes('const {') && !code.includes('let {')) throw new Error('Task Failed: Must use destructuring to extract the health property.'); if (logs.length === 0) throw new Error('Task Failed: You did not log the health value.');"
 ---
 
@@ -15,5 +16,5 @@ This is a Boss Fight. The terminal is yours.
 Your output and logic must match exactly:
 1. Create a `nodes` array containing exactly 2 node objects. Each object must have an `id` and `health` property.
 2. Use `.push()` to add a third node object to the array.
-3. Access the **second node** in the array (remember zero-indexing) and use **destructuring** to extract its `health` property into a standalone variable.
+3. Access the **second node** in the array (remember zero-indexing!) and use **destructuring** to extract its `health` property into a standalone variable.
 4. Log that destructured `health` variable.
