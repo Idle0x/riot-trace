@@ -1,0 +1,44 @@
+---
+tierId: 2
+moduleId: 8
+lessonId: 32
+title: "The Event Loop: Time & Order"
+xpReward: 40
+scenario: "Log 'A'. Then use setTimeout to log 'B' with a 0ms delay. Finally, log 'C'. Watch the terminal closely."
+startingCode: "// 1. Log 'A'\n\n// 2. setTimeout for 'B' (0ms)\n\n// 3. Log 'C'\n"
+syntaxHint: "console.log('A');\nsetTimeout(() => console.log('B'), 0);\nconsole.log('C');"
+validationLogic: "if (!code.includes('setTimeout')) throw new Error('Task Failed: You must use setTimeout.'); if (logs[0] !== 'A' || logs[1] !== 'C' || logs[2] !== 'B') throw new Error('Task Failed: The execution order is incorrect. It should log A, C, B.');"
+---
+
+JavaScript is **single-threaded**. It has only one lane of traffic. It can only do one thing at a time. So, what happens if it asks a database for 10,000 records? Does the entire app freeze while it waits? 
+
+No. Because of the **Event Loop**.
+
+
+
+### The Call Stack & The Queue
+When JavaScript sees a command that takes time (like a network request or a timer), it hands that task off to the browser (or Node.js) and immediately moves on to the next line of code.
+
+When the time-consuming task finishes, its result is placed in a **Queue**. The Event Loop constantly checks: *"Is the main lane empty? Yes? Okay, bring in the next item from the queue."*
+
+### The 0ms Illusion
+Look at this code:
+```javascript
+console.log("Start");
+
+setTimeout(() => {
+  console.log("Timer Finished");
+}, 0); // 0 millisecond delay!
+
+console.log("End");
+```
+
+Even though the delay is `0` milliseconds, the output will always be:
+1. `Start`
+2. `End`
+3. `Timer Finished`
+
+Why? Because `setTimeout` forces its code into the Queue. JavaScript *must* finish reading the entire main file (`Start`, then `End`) before it is allowed to look at the Queue. 
+
+### Your Assignment
+Prove the Event Loop exists. In the Crucible, log `'A'`, set a `0` millisecond timeout to log `'B'`, and then log `'C'`. If you understand the Event Loop, you know what order they will actually print in.
