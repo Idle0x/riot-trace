@@ -34,11 +34,17 @@ export default function LiveCodeRunner({ initialCode, validationLogic, taskId, x
     };
 
     try {
-      const fullCode = `${code}\n// --- HIDDEN VALIDATION ---\n${validationLogic}`;
+      const fullCode = `
+        ${code}
+        // --- HIDDEN VALIDATION ---
+        ${validationLogic}
+      `;
+
       await new Promise(resolve => setTimeout(resolve, 600));
 
-      const sandbox = new Function(fullCode);
-      sandbox();
+      // Inject 'logs' and 'code' directly into the sandbox scope
+      const sandbox = new Function("logs", "code", fullCode);
+      sandbox(logs, code);
 
       logs.push(">> SYS.VERIFIED");
       logs.push(">> TASK PASSED: VALIDATION SUCCESSFUL.");
