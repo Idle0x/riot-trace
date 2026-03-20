@@ -1,0 +1,54 @@
+---
+tierId: 1
+moduleId: 3
+lessonId: 9
+title: "The If Statement"
+xpReward: 40
+scenario: "Write an if/else block. If health is strictly greater than 80, log 'Node is healthy'. Otherwise, log 'Node needs attention'."
+startingCode: "const health = 65;\n\n// Write your if/else statement below\n"
+syntaxHint: "if (condition) {\n  // runs if true\n} else {\n  // runs if false\n}"
+validationLogic: "if (!code.includes('if') || !code.includes('else')) throw new Error('Task Failed: You must use an if/else block.'); if (health > 80 && !logs.includes('Node is healthy')) throw new Error('Task Failed: Incorrect logic for healthy node.'); if (health <= 80 && !logs.includes('Node needs attention')) throw new Error('Task Failed: Incorrect logic for unhealthy node.');"
+---
+
+Is the node healthy or offline? Should we show the warning banner? Do we have permission? Every piece of dynamic behavior in your apps runs through an `if` statement at some level. 
+
+[attachment_0](attachment)
+
+### The Syntax
+
+**1. Basic `if`**
+Executes the block of code inside the `{}` only if the condition inside the `()` evaluates to `true`.
+```javascript
+const health = 95;
+
+if (health > 80) {
+  console.log("Node is healthy");
+}
+```
+
+**2. `if-else`**
+Provides a fallback path. One of the two blocks will *always* execute.
+```javascript
+if (health > 80) {
+  console.log("Node is healthy");
+} else {
+  console.log("Node needs attention");
+}
+```
+
+**3. `if-else if-else`**
+Handles multiple conditions. **Important:** Conditions are evaluated top-to-bottom. The *first* true condition wins, and the rest are entirely skipped.
+```javascript
+if (health >= 90) {
+  console.log("Excellent");
+} else if (health >= 70) {
+  console.log("Good");
+} else {
+  console.log("Critical");
+}
+```
+
+### Micro-Drill
+*Mentally verify before moving to the Crucible.*
+1. Write an `if` that logs "online" when a variable `status` equals `"active"`.
+2. Extend it with an `else` that logs "offline".
