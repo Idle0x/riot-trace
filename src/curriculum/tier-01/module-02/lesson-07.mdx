@@ -1,0 +1,39 @@
+---
+tierId: 1
+moduleId: 2
+lessonId: 7
+title: "Hoisting: Code From the Future"
+xpReward: 40
+scenario: "Call initialize() before defining it. Then define the function initialize() { console.log('System initialized'); }"
+startingCode: "// 1. Call the function BEFORE defining it\n\n\n// 2. Define the function\n"
+syntaxHint: "sayHello(); // Calling it first\n\nfunction sayHello() {\n  console.log('Hello');\n}"
+validationLogic: "if (code.indexOf('initialize()') > code.indexOf('function initialize')) throw new Error('Task Failed: You must call the function BEFORE the line where you define it.'); if (!logs.some(l => l === 'System initialized')) throw new Error('Task Failed: The function did not log the correct string.');"
+---
+
+You've seen `undefined` appear where you expected a value, or called a function before you defined it and it somehow worked. **Hoisting** is why. 
+
+### The Two-Pass Engine
+The JavaScript engine runs in TWO passes:
+* **Pass 1:** Scan the entire file, "hoist" (lift) function declarations and variable declarations to the top of their scope.
+* **Pass 2:** Execute code line by line.
+
+### How it affects your code
+
+**1. Function Declarations are fully hoisted**
+You can call them before they appear in the file.
+```javascript
+sayHello();  // ✓ works even though definition is below
+
+function sayHello() {
+  console.log("Hello");
+}
+```
+
+**2. `let` and `const` are NOT hoisted**
+They live in the "Temporal Dead Zone" until the engine reaches the line they are defined on.
+```javascript
+// console.log(y);  // ✗ ReferenceError: Cannot access 'y' before initialization
+let y = 5;
+```
+
+This is another reason we use `let` and `const` instead of the old `var`. `var` is hoisted but given the value `undefined`, which leads to silent bugs. `let` and `const` loudly throw an error, forcing you to fix it immediately.
