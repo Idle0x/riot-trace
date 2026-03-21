@@ -1,0 +1,50 @@
+---
+tierId: 3
+moduleId: 9
+lessonId: 36
+title: "The JSX Illusion"
+xpReward: 40
+scenario: "Create a React component named 'NodeStatus'. It must return a <div> containing the text 'System Operational'. Log the component itself to see what React actually sees."
+mode: "dom"
+startingCode: "function NodeStatus() {\n  // 1. Return a div with the required text\n  \n}\n\n// 2. Log the component function execution\nconsole.log(NodeStatus());\n"
+syntaxHint: "function MyComponent() {\n  return <div>Hello World</div>;\n}"
+validationLogic: "if (!code.includes('return <div')) throw new Error('Task Failed: You must return a <div> element.'); if (!code.includes('System Operational')) throw new Error('Task Failed: Missing the required text.'); if (!logs.some(l => l.includes('$$typeof'))) throw new Error('Task Failed: Did not log the component execution.');"
+---
+
+When you write React, you type HTML directly inside JavaScript. This is called **JSX**. 
+
+It looks like magic, but it is an illusion. The browser cannot read JSX. Before your code reaches the browser, a transpiler (like Babel or Next.js) reads your file and converts that HTML-looking syntax into pure JavaScript objects.
+
+
+
+### What JSX Actually Is
+When you write this:
+```jsx
+const button = <button>Click Me</button>;
+```
+
+Under the hood, React converts it into this:
+```javascript
+const button = React.createElement(
+  "button",    // The tag name
+  null,        // The props (classes, ids)
+  "Click Me"   // The children (text inside)
+);
+```
+
+### Components are just Functions
+A React Component is simply a JavaScript function (exactly like you learned in Tier 2) that **returns JSX**. 
+
+*Rule: Component names MUST start with a Capital Letter so React knows it's a custom component and not a standard HTML tag.*
+
+```jsx
+// This is a Component
+function Header() {
+  return <h1>Dashboard</h1>;
+}
+```
+
+### Your Assignment
+We are turning on the DOM Renderer. Look at the Crucible:
+1. Complete the `NodeStatus` component by making it return a `<div>` with the text `"System Operational"`.
+2. I have added `console.log(NodeStatus())` at the bottom. When you initiate the build, look at the terminal output. You will not see HTML. You will see a massive JavaScript object containing a `$$typeof: Symbol(react.element)`. That is what React actually builds!
