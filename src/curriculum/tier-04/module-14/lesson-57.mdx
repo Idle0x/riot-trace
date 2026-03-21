@@ -1,0 +1,48 @@
+---
+tierId: 4
+moduleId: 14
+lessonId: 57
+title: "The Cache Pattern: Memory First"
+xpReward: 40
+scenario: "Write an async function called 'loadData'. First, check if 'dashboard_data' exists in localStorage. If it does, parse and log it. If not, log 'Cache Miss'."
+mode: "terminal"
+startingCode: "// Setup: Let's pretend the cache is empty initially.\nlocalStorage.removeItem('dashboard_data');\n\nasync function loadData() {\n  // 1. Check localStorage for 'dashboard_data'\n  \n  // 2. If it exists, parse it and log it\n  \n  // 3. If it does not exist, log 'Cache Miss'\n  \n}\n\nloadData();\n"
+syntaxHint: "const cached = localStorage.getItem('key');\nif (cached) {\n  console.log(JSON.parse(cached));\n} else {\n  console.log('Miss');\n}"
+validationLogic: "if (!code.includes('localStorage.getItem')) throw new Error('Task Failed: You must attempt to read from localStorage.'); if (!logs.some(l => l.includes('Cache Miss'))) throw new Error('Task Failed: Since the cache was cleared, your logic should have logged \\'Cache Miss\\'.');"
+---
+
+The most common performance optimization in frontend engineering is the **Cache-Aside Pattern**. 
+
+Instead of blindly requesting data from an API every time a component loads, your application should first check its own `localStorage`.
+
+
+
+### The Logic Gate
+Because `localStorage.getItem("key")` returns `null` if the data doesn't exist, we can use a simple `if` statement to route our logic.
+
+```javascript
+async function fetchWithCache() {
+  // 1. Check the local memory bank
+  const cachedData = localStorage.getItem("user_profile");
+
+  if (cachedData) {
+    // 2. Cache HIT: We have the data! Parse it and use it instantly.
+    console.log("Loaded from cache:", JSON.parse(cachedData));
+    return; // Exit the function early so we don't hit the API
+  }
+
+  // 3. Cache MISS: The data isn't here. We must fetch it.
+  console.log("Cache miss. Fetching from network...");
+  const res = await fetch("[https://api.example.com/profile](https://api.example.com/profile)");
+  const liveData = await res.json();
+
+  // 4. Save the new data to the cache for next time!
+  localStorage.setItem("user_profile", JSON.stringify(liveData));
+  
+  console.log("Loaded from network:", liveData);
+}
+```
+
+### Your Assignment
+We are building the first half of this pipeline: The Cache Check.
+Write the `loadData` function. Read from `localStorage`. If the data is there, parse it and log it. If it evaluates to `null` (which it will, because I cleared it in the starting code), log the exact string `'Cache Miss'`.
