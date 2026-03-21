@@ -1,0 +1,43 @@
+---
+tierId: 3
+moduleId: 11
+lessonId: 45
+title: "useEffect: The Escape Hatch"
+xpReward: 40
+scenario: "Import the useEffect hook. Write a side effect that logs 'System Initialized' when the component mounts. Ensure it only runs once."
+mode: "dom"
+startingCode: "function Monitor() {\n  // 1. Add React.useEffect here\n  \n\n  return <div className=\"p-4 border font-mono\">Monitor Active</div>;\n}\n\nrender(<Monitor />);\n"
+syntaxHint: "React.useEffect(() => {\n  console.log('Action');\n}, []);"
+validationLogic: "if (!code.includes('React.useEffect')) throw new Error('Task Failed: You must use the React.useEffect hook.'); if (!code.includes('System Initialized')) throw new Error('Task Failed: Missing the exact log string.'); if (!code.includes('[]')) throw new Error('Task Failed: You forgot the empty dependency array. Your effect will run infinitely on every render!');"
+---
+
+A React component is just a factory machine that spits out JSX. It should never do "outside" work (like fetching data) while it is building the JSX. 
+
+If you want the component to do outside work, you must use the `useEffect` escape hatch.
+
+
+
+### The Anatomy of an Effect
+`useEffect` takes two arguments:
+1. **The Setup Function:** The code you want to run (the side effect).
+2. **The Dependency Array:** The rules for *when* the effect should run.
+
+```jsx
+function App() {
+  
+  React.useEffect(() => {
+    // 1. THIS RUNS AFTER THE JSX IS RENDERED
+    console.log("Component has mounted to the screen!");
+  }, []); // 2. EMPTY ARRAY = RUN EXACTLY ONCE
+  
+  // THIS RUNS FIRST
+  return <div>Welcome</div>; 
+}
+```
+
+### The Infinite Loop Danger
+If you forget the empty array `[]` at the end of the `useEffect`, React will run your effect **every single time** the component re-renders. If your effect updates state, updating state causes a re-render... which runs the effect... which updates state. You just killed the browser.
+
+### Your Assignment
+You are building the `Monitor` component. 
+When it mounts to the glass, it needs to log `"System Initialized"` to the terminal exactly once. Add the `useEffect` hook, write your log inside the setup function, and do not forget your empty dependency array!
