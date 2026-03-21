@@ -1,0 +1,40 @@
+---
+tierId: 4
+moduleId: 12
+lessonId: 51
+title: "HTTP POST: Writing Data"
+xpReward: 40
+scenario: "Send a POST request to 'https://jsonplaceholder.typicode.com/posts'. Set the Content-Type header. Send a JSON body with a 'title' property. Log the returned object's ID."
+mode: "terminal"
+startingCode: "async function createRecord() {\n  const payload = { title: 'New Node Sequence' };\n\n  // Write the POST request below\n  \n}\n\ncreateRecord();\n"
+syntaxHint: "fetch('url', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify(data)\n});"
+validationLogic: "if (!code.includes('POST')) throw new Error('Task Failed: Method must be set to POST.'); if (!code.includes('application/json')) throw new Error('Task Failed: Missing or incorrect Content-Type header.'); if (!code.includes('JSON.stringify')) throw new Error('Task Failed: You must stringify the payload before sending it in the body.'); if (!logs.some(l => l === '101' || l.includes('101'))) throw new Error('Task Failed: Did not parse and log the newly created record ID (101).');"
+---
+
+Fetching data is easy. But how do you create a new transaction in *riot-sop*? You can't use a GET request to write to a database. You must use a **POST** request.
+
+
+
+### The Options Object
+To change `fetch()` from a read-only GET to a write-enabled POST, we pass a second argument: the **Options Object**. 
+
+```javascript
+const newTransaction = { amount: 500, type: "deposit" };
+
+const res = await fetch("[https://api.example.com/transactions](https://api.example.com/transactions)", {
+  method: "POST",                   // 1. Change the verb
+  headers: {
+    "Content-Type": "application/json"  // 2. Tell the server what format we are sending
+  },
+  body: JSON.stringify(newTransaction)  // 3. Attach the actual data (must be a string!)
+});
+```
+
+### The Three Requirements of POST
+1. **The Method:** Must explicitly state `"POST"`.
+2. **The Headers:** The server needs to know how to read your data. `"Content-Type": "application/json"` tells the backend, "Hey, I'm sending you JSON, not an image or a PDF."
+3. **The Body:** This is the payload. Because networks only transmit text, you cannot send a raw JavaScript object. You must convert it to a string using `JSON.stringify()`.
+
+### Your Assignment
+You need to create a new record. The `payload` object is provided. 
+Write the `fetch()` call, configure the options object for a POST request, set the correct header, and stringify the payload. Await the response, parse the JSON, and log the `id` of the newly created record. 
