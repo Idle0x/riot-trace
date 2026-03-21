@@ -1,0 +1,53 @@
+---
+tierId: 3
+moduleId: 9
+lessonId: 38
+title: "Events: The User Trigger"
+xpReward: 40
+scenario: "Add an onClick event to the PingButton. When clicked, it must execute a console.log('Ping Sent'). Do not forget to render the component."
+mode: "dom"
+startingCode: "function PingButton() {\n  // 1. Add the onClick attribute to this button\n  return <button className=\"px-4 py-2 bg-accent-blue text-base font-mono rounded-sm\">\n    Send Ping\n  </button>;\n}\n\n// 2. Render it\nrender(<PingButton />);\n"
+syntaxHint: "function Btn() {\n  const handleClick = () => console.log('Clicked');\n  return <button onClick={handleClick}>Click Me</button>;\n}"
+validationLogic: "const btn = domNode.querySelector('button'); if (!btn) throw new Error('Task Failed: No <button> element detected in the DOM.'); btn.click(); if (!logs.includes('Ping Sent')) throw new Error('Task Failed: I simulated a click on your button, but it did not log \\'Ping Sent\\'.');"
+---
+
+A button that does nothing is just a painted rectangle. To make the glass interactive, we have to listen for User Events.
+
+
+
+### Listening to the DOM
+In raw HTML, you might have seen `onclick="doSomething()"`. In React, the syntax changes slightly to camelCase: `onClick`.
+
+Instead of passing a string of code, you pass an **Arrow Function** inside curly braces `{}`.
+
+```jsx
+function FirewallToggle() {
+  
+  // 1. Define the action
+  const triggerFirewall = () => {
+    console.log("Firewall Activated");
+  };
+
+  // 2. Attach the action to the element's onClick attribute
+  return <button onClick={triggerFirewall}>Activate</button>;
+}
+```
+
+### The Inline Arrow (Shortcut)
+If your action is extremely simple (like a single `console.log`), you don't even need to define it on a separate line. You can write the arrow function directly inside the braces.
+
+```jsx
+function FirewallToggle() {
+  // Written entirely inline
+  return <button onClick={() => console.log("Activated")}>Activate</button>;
+}
+```
+
+**CRITICAL RULE:** You must pass a *function definition*, not a *function execution*. 
+* **RIGHT:** `onClick={() => console.log("Hi")}` (React will wait for the click).
+* **WRONG:** `onClick={console.log("Hi")}` (React will execute this immediately when the page loads, before the user even clicks!).
+
+### Your Assignment
+We need a diagnostic button. I have built the visual button for you. Add the `onClick` attribute to it. Pass it an inline arrow function that logs exactly `'Ping Sent'`. 
+
+When you hit INITIATE BUILD, the system will render your button, and my hidden validation logic will immediately simulate a physical click on it. If it doesn't catch the log, you fail.
