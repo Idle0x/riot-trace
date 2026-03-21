@@ -1,0 +1,46 @@
+---
+tierId: 4
+moduleId: 12
+lessonId: 50
+title: "Status Codes: The Server's Reply"
+xpReward: 40
+scenario: "Fetch from 'https://jsonplaceholder.typicode.com/invalid-route'. Check if the response is ok. If it is, log the data. If not, log 'Error: ' followed by the status code."
+mode: "terminal"
+startingCode: "async function checkStatus() {\n  const res = await fetch('https://jsonplaceholder.typicode.com/invalid-route');\n  \n  // Check if res.ok is true or false here\n  \n}\n\ncheckStatus();\n"
+syntaxHint: "if (res.ok) {\n  const data = await res.json();\n} else {\n  console.log(res.status);\n}"
+validationLogic: "if (!code.includes('res.ok')) throw new Error('Task Failed: You must check the res.ok property.'); if (!logs.some(l => l.includes('Error: 404'))) throw new Error('Task Failed: Did not properly log the 404 error code.');"
+---
+
+Not all requests succeed. Sometimes the database is down. Sometimes the user is unauthorized. Sometimes the URL has a typo.
+
+When a server replies, it attaches a 3-digit **Status Code** to the response header.
+
+
+
+### The Standard Codes
+* **200s (Success):** Everything went perfectly. (e.g., `200 OK`, `201 Created`).
+* **400s (Client Error):** You messed up. (e.g., `401 Unauthorized`, `404 Not Found`).
+* **500s (Server Error):** The backend messed up. (e.g., `500 Internal Server Error`).
+
+### Handling Failures Safely
+`fetch()` has a strange quirk: **It does not throw an error for 400 or 500 status codes.** It considers the request "successful" because the server successfully replied with an error! 
+
+If you try to run `.json()` on a 404 page, your app will crash because it's trying to parse an HTML error page as JSON.
+
+To protect your app, you must check the `res.ok` boolean. It is only `true` if the status is in the 200s.
+
+```javascript
+const res = await fetch("[https://api.example.com/data](https://api.example.com/data)");
+
+if (res.ok) {
+  // It is a 200-level success. Safe to parse.
+  const data = await res.json();
+  console.log(data);
+} else {
+  // It is a 400 or 500-level error.
+  console.log("Request failed with status:", res.status);
+}
+```
+
+### Your Assignment
+I have provided an intentionally broken URL. Make the fetch request. Use an `if/else` block to check `res.ok`. Since the URL is broken, your `else` block should trigger and log exactly `"Error: "` followed by the `res.status` number.
