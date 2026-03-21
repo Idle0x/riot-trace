@@ -1,6 +1,6 @@
 import Link from "next/link";
 import LiveCodeRunner from "@/components/LiveCodeRunner";
-import { getLesson } from "@/lib/curriculum";
+import { getAllLessonsForTier, getLesson } from "@/lib/curriculum";
 import { MDXRemote } from "next-mdx-remote/rsc";
 
 export default async function LessonPage({ params }: { params: Promise<{ tierId: string, lessonId: string }> }) {
@@ -8,11 +8,14 @@ export default async function LessonPage({ params }: { params: Promise<{ tierId:
   const tierId = parseInt(resolvedParams.tierId);
   const lessonId = parseInt(resolvedParams.lessonId);
   
-  // For the scale of the architecture, you will eventually want to update your Next.js 
-  // routing to include [moduleId]. For now, we default to Module 1 to fit the current route.
-  const moduleId = 1; 
-
-  const lesson = getLesson(tierId, moduleId, lessonId);
+  // Dynamically find the correct moduleId for this specific lesson
+  const allLessons = getAllLessonsForTier(tierId);
+  const lessonMeta = allLessons.find(l => l.lessonId === lessonId);
+  
+  let lesson = null;
+  if (lessonMeta) {
+    lesson = getLesson(tierId, lessonMeta.moduleId, lessonId);
+  }
 
   if (!lesson) {
     return (
@@ -85,6 +88,7 @@ export default async function LessonPage({ params }: { params: Promise<{ tierId:
           taskId={lesson.lessonId}
           xpReward={lesson.xpReward}
           syntaxHint={lesson.syntaxHint}
+          mode={lesson.mode || "terminal"}
         />
       </div>
 
