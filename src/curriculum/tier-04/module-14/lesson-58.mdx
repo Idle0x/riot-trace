@@ -1,0 +1,31 @@
+---
+tierId: 4
+moduleId: 14
+lessonId: 58
+title: "TIER 04 CAPSTONE: The Full Pipeline"
+xpReward: 500
+scenario: "Fetch data from the API. Check the status. Parse the JSON. Stringify it. Save it to localStorage under the key 'system_cache'. Log the string 'Pipeline Complete'."
+mode: "terminal"
+startingCode: "const endpoint = 'https://jsonplaceholder.typicode.com/todos/1';\n\n// EXECUTE CAPSTONE OBJECTIVE BELOW\n"
+syntaxHint: ""
+validationLogic: "if (!code.includes('fetch(') || !code.includes('res.ok')) throw new Error('Capstone Failed: You must fetch the data and check res.ok.'); if (!code.includes('localStorage.setItem') || !code.includes('JSON.stringify')) throw new Error('Capstone Failed: You must stringify the parsed JSON and save it to localStorage.'); const saved = localStorage.getItem('system_cache'); if (!saved || !saved.includes('userId')) throw new Error('Capstone Failed: I checked localStorage for \\'system_cache\\' but did not find the valid JSON data.'); if (!logs.some(l => l === 'Pipeline Complete')) throw new Error('Capstone Failed: You must log \\'Pipeline Complete\\' at the end of the pipeline.');"
+---
+
+### THE FINAL GATES
+You have completed The Web Platform architecture segment. You understand the asynchronous nature of the internet, how to handle HTTP Status Codes, how to format POST headers, and how to persist data into the browser's physical memory.
+
+This is the Tier 04 Capstone. There are no hints. 
+
+### EXECUTION REQUIREMENTS
+You are building the master sync function that pulls remote data and caches it locally.
+
+1. Create an `async` function.
+2. Inside it, `await` a **GET** request to the provided `endpoint`.
+3. Check `res.ok` to ensure the server responded successfully.
+4. If successful, `await` the `.json()` parsing.
+5. Take that newly parsed JavaScript object and **stringify** it.
+6. Save that string into `localStorage` under the exact key `"system_cache"`.
+7. `console.log()` the exact string `"Pipeline Complete"`.
+8. Execute your function.
+
+Clear this audit, and you have officially mastered the frontend lifecycle. 
