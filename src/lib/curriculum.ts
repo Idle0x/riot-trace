@@ -14,6 +14,7 @@ export interface LessonFrontmatter {
   startingCode: string;
   validationLogic: string;
   syntaxHint?: string;
+  mode?: "terminal" | "dom";
 }
 
 export interface Lesson extends LessonFrontmatter {
@@ -27,7 +28,7 @@ export interface TierSummary {
   lessonCount: number;
 }
 
-// Hardcoded Tier metadata (since folders don't have frontmatter)
+// Hardcoded Tier metadata
 const TIER_METADATA: Record<number, { title: string, description: string }> = {
   1: { title: "Code Literacy", description: "Read code like a sentence. Trace exactly what happens — not guess, but know." },
   2: { title: "JavaScript Deeply", description: "Closures, the event loop, async/await — the mental models behind code you write every day." },
