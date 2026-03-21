@@ -1,0 +1,43 @@
+---
+tierId: 3
+moduleId: 11
+lessonId: 46
+title: "The Dependency Array: Tracking Data"
+xpReward: 40
+scenario: "Fix the dependency array. The effect should only fire when the 'network' state changes, not when the 'ping' state changes."
+mode: "dom"
+startingCode: "function NetworkTracker() {\n  const [ping, setPing] = React.useState(0);\n  const [network, setNetwork] = React.useState('Mainnet');\n\n  React.useEffect(() => {\n    console.log(`Network switched to: ${network}`);\n  }, [ /* Add dependency here */ ]);\n\n  return (\n    <div className=\"flex gap-2\">\n      <button onClick={() => setPing(ping + 1)}>Ping: {ping}</button>\n      <button onClick={() => setNetwork('Devnet')}>Switch Network</button>\n    </div>\n  );\n}\n\nrender(<NetworkTracker />);\n"
+syntaxHint: "React.useEffect(() => {\n  // runs when 'targetVar' changes\n}, [targetVar]);"
+validationLogic: "if (!code.includes('[network]') && !code.includes('[ network ]')) throw new Error('Task Failed: The dependency array must explicitly track the \\'network\\' state variable.'); const btns = domNode.querySelectorAll('button'); btns[1].click(); if (!domNode.innerHTML.includes('Devnet')) throw new Error('Task Failed: Network state did not update.');"
+---
+
+An empty array `[]` tells the effect to run exactly once. But what if you want an effect to run *only* when a specific piece of data changes?
+
+
+
+### Tracking Specific State
+You can place variables inside the dependency array. React will watch them. If the component re-renders, React checks the array. If the variable is identical to the last render, it skips the effect. If the variable changed, it runs the effect.
+
+```jsx
+function Profile() {
+  const [userId, setUserId] = React.useState(1);
+  const [clicks, setClicks] = React.useState(0);
+
+  // This will ONLY run when 'userId' changes.
+  // It completely ignores 'clicks'.
+  React.useEffect(() => {
+    console.log("Fetching data for user: " + userId);
+  }, [userId]); 
+
+  // ... JSX ...
+}
+```
+
+### The Three Rules of Dependencies
+1. **No Array:** Runs on EVERY render (Extremely dangerous).
+2. **Empty Array `[]`:** Runs exactly ONCE on mount (Great for initial setup).
+3. **Filled Array `[data]`:** Runs on mount, AND whenever `data` changes.
+
+### Your Assignment
+Look at the `NetworkTracker` component. It has two pieces of state: `ping` and `network`. 
+The `useEffect` is supposed to log a message when the network switches. Fill in the dependency array so the effect watches the correct variable.
