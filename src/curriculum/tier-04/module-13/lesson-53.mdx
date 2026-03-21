@@ -1,0 +1,43 @@
+---
+tierId: 4
+moduleId: 13
+lessonId: 53
+title: "LocalStorage: The Persistent Memory"
+xpReward: 40
+scenario: "Save a key called 'theme' with the value 'dark' into localStorage. Then, retrieve it and log it to the terminal."
+mode: "terminal"
+startingCode: "// 1. Set the item in localStorage\n\n\n// 2. Get the item and store it in a variable\n\n\n// 3. Log the variable\n"
+syntaxHint: "localStorage.setItem('key', 'value');\nconst data = localStorage.getItem('key');"
+validationLogic: "if (!code.includes('setItem')) throw new Error('Task Failed: You must use setItem to save the data.'); if (!code.includes('getItem')) throw new Error('Task Failed: You must use getItem to retrieve the data.'); if (localStorage.getItem('theme') !== 'dark') throw new Error('Task Failed: The key \\'theme\\' was not correctly saved as \\'dark\\' in the browser storage.'); if (!logs.some(l => l.includes('dark'))) throw new Error('Task Failed: You did not log the retrieved value.');"
+---
+
+Every modern browser acts as a mini-database. It has a feature called `localStorage` that allows you to save data directly to the user's hard drive. 
+
+When the user closes the tab, restarts their computer, and comes back a week later, the data is still there.
+
+
+
+### The Syntax
+The API is incredibly simple. It operates purely on **Key-Value pairs**. 
+
+```javascript
+// 1. Saving Data
+// Syntax: localStorage.setItem("keyName", "valueData");
+localStorage.setItem("username", "Cipher");
+
+// 2. Retrieving Data
+const savedName = localStorage.getItem("username");
+console.log(savedName); // Logs: "Cipher"
+
+// 3. Deleting Data
+localStorage.removeItem("username");
+```
+
+### The Catch: Strings Only
+`localStorage` is dumb. It can **only** store strings. If you try to pass it an array or a number, it will forcefully convert it into a string, which often corrupts the data. (We will fix this in the next lesson).
+
+### Your Assignment
+You are building the settings panel. 
+1. Use `localStorage.setItem()` to save a key named `"theme"` with the string value `"dark"`.
+2. Retrieve that exact key using `getItem()` and save it to a variable.
+3. Log the variable to prove the browser remembered it.
