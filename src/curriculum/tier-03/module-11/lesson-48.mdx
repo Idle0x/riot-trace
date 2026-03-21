@@ -1,0 +1,30 @@
+---
+tierId: 3
+moduleId: 11
+lessonId: 48
+title: "TIER 03 CAPSTONE: The Data Lifecycle"
+xpReward: 500
+scenario: "Initialize state to an empty array. Write a useEffect that runs exactly once on mount. Inside the effect, update the state with the provided mock data. Finally, map over the state to render the UI."
+mode: "dom"
+startingCode: "const mockData = [{ id: 1, name: 'Node Alpha' }, { id: 2, name: 'Node Beta' }];\n\nfunction Dashboard() {\n  // 1. Initialize 'nodes' state as an empty array []\n  \n\n  // 2. Write a useEffect that sets 'nodes' to 'mockData' on mount\n  \n\n  return (\n    <div>\n      {/* 3. Map over 'nodes'. Return a <div key={n.id}>{n.name}</div> for each */}\n      \n    </div>\n  );\n}\n\nrender(<Dashboard />);\n"
+syntaxHint: ""
+validationLogic: "if (!code.includes('React.useState([])')) throw new Error('Capstone Failed: Must initialize state as an empty array.'); if (!code.includes('React.useEffect')) throw new Error('Capstone Failed: Must use an effect to load the data.'); if (!code.includes('[]')) throw new Error('Capstone Failed: Effect must have an empty dependency array.'); if (!domNode.innerHTML.includes('Node Alpha') || !domNode.innerHTML.includes('Node Beta')) throw new Error('Capstone Failed: The DOM did not render the mapped data. Check your map and state update logic.');"
+---
+
+### THE FINAL GATES
+You have completed the React Mental Model. You understand how JSX transpiles to objects, how State triggers renders, how Props pass data down, and how `useEffect` isolates side effects.
+
+This is the Tier 03 Capstone. This is the exact pattern used to fetch and display data in every modern dashboard on earth.
+
+### EXECUTION REQUIREMENTS
+You are building the final `Dashboard` UI. I have provided an array of `mockData` outside the component. 
+
+1. Initialize a piece of state called `nodes`, starting with an empty array `[]`.
+2. Write a `useEffect` hook. Give it an empty dependency array so it only runs once.
+3. Inside the effect, use your state setter function to load the `mockData` into your `nodes` state.
+4. Down in the JSX return block, use `.map()` to iterate over your `nodes` state. 
+5. For each node, return a `<div>`. Remember the `key` prop using the node's `id`! Render the node's `name` inside the div.
+
+*Validation Protocol:* Upon build, the system will verify your state initializers, your effect dependencies, and scan the physical DOM to ensure both Node Alpha and Node Beta rendered perfectly. 
+
+Clear this, and you unlock **Tier 04: The Web Platform**.
