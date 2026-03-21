@@ -1,0 +1,24 @@
+---
+tierId: 3
+moduleId: 10
+lessonId: 44
+title: "MODULE 10 BOSS FIGHT"
+xpReward: 150
+scenario: "Render a list of nodes. Clicking a specific node must set it as the 'Active Node' in the parent's state."
+mode: "dom"
+startingCode: "const nodes = [\n  { id: '1A', name: 'Alpha' },\n  { id: '2B', name: 'Beta' }\n];\n\nfunction Network() {\n  const [activeNode, setActiveNode] = React.useState('None');\n\n  return (\n    <div>\n      <h1>Active: {activeNode}</h1>\n      <div className=\"flex gap-2\">\n        {/* Map over 'nodes' here. Render a <button> for each. */}\n        {/* Ensure each button has a key, and an onClick that sets the activeNode to the node's name */}\n      </div>\n    </div>\n  );\n}\n\nrender(<Network />);\n"
+syntaxHint: ""
+validationLogic: "if (!code.includes('key=')) throw new Error('Task Failed: You forgot the key prop in your map.'); const buttons = domNode.querySelectorAll('button'); if (buttons.length !== 2) throw new Error('Task Failed: Did not map exactly 2 buttons.'); buttons[1].click(); if (!domNode.innerHTML.includes('Active: Beta')) throw new Error('Task Failed: Clicking the second mapped button did not update the state to \\'Beta\\'.');"
+---
+
+### EXECUTION REQUIREMENTS
+This is a Boss Fight. You are combining `useState`, array `.map()`, the `key` prop, and event handling into a single architecture.
+
+1. Look at the `Network` component. It holds state for `activeNode`.
+2. Inside the inner `<div>`, use `.map()` to iterate over the provided `nodes` array.
+3. For every node in the array, return a `<button>` element.
+4. Apply the `key` prop to the button using the node's `id`.
+5. Display the node's `name` inside the button text.
+6. Attach an `onClick` event to the button. When clicked, it must trigger `setActiveNode`, passing in that specific node's `name`. 
+
+*Validation Protocol:* Upon build, the system will verify your mapped elements and keys. It will then physically click the "Beta" button in the DOM. If the `<h1>` does not update to `Active: Beta`, the architecture is flawed and the build will fail.
