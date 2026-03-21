@@ -1,0 +1,24 @@
+---
+tierId: 4
+moduleId: 13
+lessonId: 56
+title: "MODULE 13 BOSS FIGHT"
+xpReward: 150
+scenario: "Stringify the config object, save it to local storage, retrieve it, parse it, and log the 'bandwidth' property."
+mode: "terminal"
+startingCode: "const config = { network: 'mainnet', bandwidth: 8000 };\n\n// EXECUTE OBJECTIVE\n"
+syntaxHint: ""
+validationLogic: "if (!code.includes('localStorage.setItem') || !code.includes('JSON.stringify') || !code.includes('JSON.parse')) throw new Error('Task Failed: You must use localStorage, stringify, and parse in your pipeline.'); if (!logs.some(l => l.includes('8000'))) throw new Error('Task Failed: You did not successfully retrieve, parse, and log the bandwidth property.');"
+---
+
+### EXECUTION REQUIREMENTS
+This is a Boss Fight. The terminal is yours. You are combining the entire storage pipeline into a single, seamless execution.
+
+1. Look at the `config` object provided in the Crucible.
+2. Convert it to a JSON string.
+3. Save that string into `localStorage` using the key `"system_config"`.
+4. Retrieve the string from `localStorage`.
+5. Parse the string back into a JavaScript object.
+6. `console.log()` the `bandwidth` property of your newly parsed object.
+
+If you skip the stringify phase, your object is destroyed. If you skip the parse phase, you will try to read a property off a string and it will return `undefined`. Execute perfectly.
