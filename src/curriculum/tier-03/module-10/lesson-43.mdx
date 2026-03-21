@@ -1,0 +1,51 @@
+---
+tierId: 3
+moduleId: 10
+lessonId: 43
+title: "Lifting State: Parent to Child"
+xpReward: 40
+scenario: "The Dashboard holds the 'power' state. Pass the 'setPower' function down to the Engine component as a prop called 'onRev'. Inside Engine, attach it to the button's onClick event."
+mode: "dom"
+startingCode: "function Engine(props) {\n  // 1. Attach props.onRev to the button\n  return <button>Rev Engine</button>;\n}\n\nfunction Dashboard() {\n  const [power, setPower] = React.useState(0);\n\n  return (\n    <div>\n      <h1>Power: {power}</h1>\n      {/* 2. Pass setPower down to Engine as 'onRev' */}\n      <Engine />\n    </div>\n  );\n}\n\nrender(<Dashboard />);\n"
+syntaxHint: "<ChildComponent onAction={() => setPower(power + 10)} />\n// Inside Child:\n<button onClick={props.onAction}>Click</button>"
+validationLogic: "const btn = domNode.querySelector('button'); if (!btn) throw new Error('Task Failed: No button found.'); btn.click(); if (!domNode.innerHTML.includes('Power: 10') && !domNode.innerHTML.includes('Power: 1')) throw new Error('Task Failed: I clicked the Engine button, but the Dashboard power did not update. Did you pass the function correctly as a prop?');"
+---
+
+Data in React only flows in one direction: **Down**. 
+
+A Parent component can pass data to a Child component via props. But what happens if the Child has a button that needs to update the Parent's data? 
+
+
+
+### The "Lifting State" Architecture
+You cannot pass data *up*. Instead, the Parent passes a **function** *down*. The Child runs that function, which triggers the state update back up in the Parent.
+
+### The Pipeline
+Read this code carefully. It is the most important pattern in React.
+
+```jsx
+// 2. The Child receives the function via props
+function DeleteButton(props) {
+  // 3. When clicked, it executes the function it was handed
+  return <button onClick={props.onDelete}>Delete Account</button>;
+}
+
+// 1. The Parent holds the state AND the state-updater function
+function App() {
+  const [isDeleted, setIsDeleted] = React.useState(false);
+
+  return (
+    <div>
+      {/* We pass the 'setIsDeleted' function down as a prop! */}
+      <DeleteButton onDelete={() => setIsDeleted(true)} />
+    </div>
+  );
+}
+```
+
+### Your Assignment
+You have a `Dashboard` (Parent) and an `Engine` (Child). The Engine button needs to increase the Dashboard's power.
+1. In `Dashboard`, pass a function down to `<Engine />` using a prop named `onRev`. This function should increase `power` (e.g., `() => setPower(power + 10)`).
+2. In `Engine`, attach `props.onRev` to the `<button>`'s `onClick` event. 
+
+When you initiate the build, my validation logic will click the Child button to see if the Parent's text updates.
