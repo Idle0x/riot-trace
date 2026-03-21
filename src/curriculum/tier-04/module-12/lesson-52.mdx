@@ -1,0 +1,28 @@
+---
+tierId: 4
+moduleId: 12
+lessonId: 52
+title: "MODULE 12 BOSS FIGHT"
+xpReward: 150
+scenario: "Write an async function that attempts to POST data. You must handle the network request, the headers, the body, and the status check in one complete pipeline."
+mode: "terminal"
+startingCode: "const apiUrl = 'https://jsonplaceholder.typicode.com/users';\nconst newUser = { name: 'Cipher', role: 'admin' };\n\n// EXECUTE OBJECTIVE\n"
+syntaxHint: ""
+validationLogic: "if (!code.includes('POST') || !code.includes('JSON.stringify') || !code.includes('res.ok')) throw new Error('Task Failed: You must use POST, stringify the body, and check res.ok.'); if (!logs.some(l => l.includes('11'))) throw new Error('Task Failed: Pipeline did not successfully create the user and log the resulting ID (11).');"
+---
+
+### EXECUTION REQUIREMENTS
+This is a Boss Fight. The terminal is yours. You are building a complete, production-grade network request.
+
+1. Write an `async` function named `registerUser`.
+2. Inside it, use `fetch()` to send a **POST** request to the provided `apiUrl`.
+3. Include the `newUser` object as the body (properly stringified).
+4. Include the proper `Content-Type` header.
+5. Once the request completes, check if the response was successful using `res.ok`.
+6. If successful, parse the JSON and log the new user's `id` (the API will assign one).
+7. If it fails, log `"Registration Failed"`.
+8. Execute your function.
+
+If you skip the headers, the server will reject it. If you forget to stringify, the server will crash. If you don't check the status, your architecture is fragile. 
+
+Execute perfectly.
