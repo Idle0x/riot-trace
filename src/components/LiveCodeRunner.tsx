@@ -3,8 +3,11 @@
 import { useState, useRef, useEffect } from "react";
 import { saveTaskProgress } from "@/app/actions";
 import { MagneticButton } from "@/components/ui/MagneticButton";
+import * as Babel from "@babel/standalone";
+import React from "react";
+import { createRoot, Root } from "react-dom/client";
+import { flushSync } from "react-dom";
 
-// We define a strict type for our terminal output so we can color-code warnings and errors.
 type LogEntry = { type: "log" | "warn" | "error" | "system" | "success"; text: string };
 
 export default function LiveCodeRunner({ initialCode, validationLogic, taskId, xpReward, syntaxHint, mode = "terminal" }: any) {
@@ -13,7 +16,10 @@ export default function LiveCodeRunner({ initialCode, validationLogic, taskId, x
   const [status, setStatus] = useState<"idle" | "running" | "success" | "error">("idle");
   const [isFocused, setIsFocused] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const domRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<Root | null>(null);
 
   const lineCount = code.split("\n").length;
   const lines = Array.from({ length: Math.max(lineCount, 5) }, (_, i) => i + 1);
@@ -23,15 +29,21 @@ export default function LiveCodeRunner({ initialCode, validationLogic, taskId, x
     setOutput([]);
     setStatus("idle");
     setShowHint(false);
+    
+    // Clear the DOM pane if we switch lessons
+    if (domRef.current && rootRef.current) {
+      rootRef.current.unmount();
+      rootRef.current = null;
+    }
   }, [initialCode]);
 
   const executeCode = async () => {
     setStatus("running");
     setOutput([]);
-    const logs: string[] = [];       // Flat strings for validation logic to read
-    const displayLogs: LogEntry[] = []; // Typed objects for the UI to render
+    const logs: string[] = [];       
+    const displayLogs: LogEntry[] = []; 
+    const domNode = domRef.current;
 
-    // 1. EXTENDED CONSOLE INTERCEPTION
     const originalConsole = { log: console.log, warn: console.warn, error: console.error };
     
     console.log = (...args) => {
@@ -56,18 +68,38 @@ export default function LiveCodeRunner({ initialCode, validationLogic, taskId, x
     };
 
     try {
-      // 2. STRICT MODE INJECTION
-      const fullCode = `
+      let fullCode = `
         "use strict";
         ${code}
         // --- HIDDEN VALIDATION ---
         ${validationLogic}
       `;
 
+      let executableCode = fullCode;
+
+      // DOM MODE: Transpile JSX to standard React JavaScript on the fly
+      if (mode === "dom") {
+        executableCode = Babel.transform(fullCode, { presets: ["react"] }).code;
+      }
+
       await new Promise(resolve => setTimeout(resolve, 600));
 
-      const sandbox = new Function("logs", "code", fullCode);
-      sandbox(logs, code);
+      // Custom render function injected into the user's scope
+      const render = (element: React.ReactNode) => {
+        if (domNode) {
+          if (!rootRef.current) {
+            rootRef.current = createRoot(domNode);
+          }
+          // flushSync forces React to update the DOM immediately so validationLogic can read it
+          flushSync(() => {
+            rootRef.current!.render(element);
+          });
+        }
+      };
+
+      // Inject React, render(), and the DOM node into the sandbox scope
+      const sandbox = new Function("React", "render", "logs", "code", "domNode", executableCode);
+      sandbox(React, render, logs, code, domNode);
 
       displayLogs.push({ type: "system", text: ">> SYS.VERIFIED" });
       displayLogs.push({ type: "success", text: ">> TASK PASSED: VALIDATION SUCCESSFUL." });
@@ -109,10 +141,19 @@ export default function LiveCodeRunner({ initialCode, validationLogic, taskId, x
         </div>
       )}
 
-      {/* DOM MODE INJECTION POINT (Will be built out in Tier 3) */}
+      {/* THE NEW DOM RENDERER PANE */}
       {mode === "dom" && (
-         <div className="h-48 mb-4 bg-white rounded-sm border border-border-base p-4 overflow-auto shadow-plate text-black flex items-center justify-center font-sans">
-            [ DOM_RENDERER_INITIALIZING... ]
+         <div 
+           id="dom-preview"
+           ref={domRef}
+           className="h-48 mb-4 bg-white rounded-sm border border-border-base p-6 overflow-auto shadow-plate text-black font-sans relative"
+         >
+           {/* If React hasn't mounted yet, show standby text */}
+           {!rootRef.current && (
+             <div className="absolute inset-0 flex items-center justify-center font-mono text-[10px] text-gray-400 tracking-widest uppercase">
+               [ DOM_RENDERER_STANDBY ]
+             </div>
+           )}
          </div>
       )}
 
@@ -148,7 +189,6 @@ export default function LiveCodeRunner({ initialCode, validationLogic, taskId, x
         {status === "success" && <div className="absolute inset-0 bg-accent-green/5 pointer-events-none animate-fade-in"></div>}
         <div className="text-text-dim mb-3 flex items-center gap-2"><span>]</span> <span className="uppercase tracking-widest text-[9px]">Standard Output</span></div>
         
-        {/* Render color-coded typed logs */}
         {output.map((entry, i) => (
           <div key={i} className={`mb-1.5 leading-relaxed overflow-hidden whitespace-nowrap animate-typewriter border-r-2 border-transparent pr-1 
             ${entry.type === 'error' ? 'text-accent-red' : 
