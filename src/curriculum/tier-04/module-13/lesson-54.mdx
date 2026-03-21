@@ -1,0 +1,48 @@
+---
+tierId: 4
+moduleId: 13
+lessonId: 54
+title: "JSON Storage: Objects in Memory"
+xpReward: 40
+scenario: "Stringify the 'user' object and save it to localStorage under the key 'session_user'. Retrieve it, parse it back into a JavaScript object, and log their role."
+mode: "terminal"
+startingCode: "const user = { id: 99, role: 'admin' };\n\n// 1. Stringify and Set\n\n\n// 2. Get and Parse\n\n\n// 3. Log the role property\n"
+syntaxHint: "const stringified = JSON.stringify(obj);\nconst parsedObj = JSON.parse(localStorage.getItem('key'));"
+validationLogic: "if (!code.includes('JSON.stringify')) throw new Error('Task Failed: You must stringify the object before saving it.'); if (!code.includes('JSON.parse')) throw new Error('Task Failed: You must parse the retrieved string back into an object.'); if (!logs.some(l => l.includes('admin'))) throw new Error('Task Failed: Did not successfully parse the object and log the \\'admin\\' role.');"
+---
+
+Because `localStorage` only accepts strings, what happens if you try to save a JavaScript object?
+
+```javascript
+const node = { id: 1, status: "online" };
+
+// WRONG: JavaScript converts the object to a useless string
+localStorage.setItem("nodeData", node); 
+
+console.log(localStorage.getItem("nodeData")); 
+// Logs: "[object Object]" <-- Your data is destroyed!
+```
+
+### The JSON Solution
+To safely store complex data (Objects and Arrays), you must serialize it using `JSON.stringify()`. This turns your entire object into a perfectly formatted text string. 
+
+When you want the data back, you use `JSON.parse()` to rebuild the string back into a living JavaScript object.
+
+```javascript
+const node = { id: 1, status: "online" };
+
+// 1. Pack it into a string and save it
+const packedData = JSON.stringify(node);
+localStorage.setItem("savedNode", packedData);
+
+// 2. Retrieve the string
+const rawString = localStorage.getItem("savedNode");
+
+// 3. Unpack it back into a real object
+const livingObject = JSON.parse(rawString);
+
+console.log(livingObject.status); // Logs: "online"
+```
+
+### Your Assignment
+You have a user object. You cannot save it raw. Use the JSON packing method to stringify it, save it under the key `"session_user"`, pull it back out, parse it, and log the user's `role`.
