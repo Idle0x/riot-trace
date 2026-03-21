@@ -1,0 +1,25 @@
+---
+tierId: 3
+moduleId: 9
+lessonId: 40
+title: "MODULE 09 BOSS FIGHT"
+xpReward: 150
+scenario: "Build an interactive NodeControl component from scratch. Use state to track a power level, and a button to increase it by 10."
+mode: "dom"
+startingCode: "// EXECUTE OBJECTIVE\n"
+syntaxHint: ""
+validationLogic: "const btn = domNode.querySelector('button'); if (!btn) throw new Error('Task Failed: Component must render a <button>.'); if (!domNode.innerHTML.includes('Power: 0')) throw new Error('Task Failed: Initial render must contain the exact text \\'Power: 0\\'.'); btn.click(); btn.click(); if (!domNode.innerHTML.includes('Power: 20')) throw new Error('Task Failed: I simulated 2 clicks, but the text did not update to \\'Power: 20\\'. Check your math and state logic.');"
+---
+
+### EXECUTION REQUIREMENTS
+This is a Boss Fight. You are combining Components, JSX, Variables, Events, and State.
+
+1. Define a React component called `NodeControl`.
+2. Inside it, initialize a piece of state called `power` starting at `0`.
+3. The component must return a `<div>`.
+4. Inside the `<div>`, place an `<h1>` that says exactly `Power: {power}`.
+5. Below the `<h1>`, place a `<button>` element.
+6. When the button is clicked, it must increase the `power` state by exactly `10`.
+7. Call the `render()` function to mount your `NodeControl` component to the DOM.
+
+*Validation Protocol:* When you hit build, the system will verify the initial text says `Power: 0`. It will then forcefully click your button twice at lightspeed. If the glass does not update to say `Power: 20`, you fail.
