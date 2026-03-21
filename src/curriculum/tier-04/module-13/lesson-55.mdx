@@ -1,0 +1,31 @@
+---
+tierId: 4
+moduleId: 13
+lessonId: 55
+title: "SessionStorage: The Temporary Vault"
+xpReward: 40
+scenario: "Save a temporary access token ('xyz-987') into sessionStorage under the key 'temp_token'. Retrieve it and log it."
+mode: "terminal"
+startingCode: "// 1. Set the token in sessionStorage\n\n// 2. Retrieve and log it\n"
+syntaxHint: "sessionStorage.setItem('key', 'value');"
+validationLogic: "if (!code.includes('sessionStorage')) throw new Error('Task Failed: You must use sessionStorage, not localStorage.'); if (sessionStorage.getItem('temp_token') !== 'xyz-987') throw new Error('Task Failed: The token was not saved correctly.'); if (!logs.some(l => l.includes('xyz-987'))) throw new Error('Task Failed: Did not log the token.');"
+---
+
+If `localStorage` is permanent, how do we handle sensitive data?
+
+If you store an authentication token in `localStorage`, it stays there forever. If a user logs in on a public computer and walks away, the next person can open the browser and access their account.
+
+### The Session Sandbox
+`sessionStorage` has the **exact same API** as `localStorage` (`setItem`, `getItem`, `removeItem`). 
+
+The only difference is its lifespan.
+* `localStorage`: Survives browser restarts. Must be manually deleted.
+* `sessionStorage`: **Dies immediately when the tab is closed.** ```javascript
+// This data will vanish the second the user closes this specific tab.
+sessionStorage.setItem("secure_auth_token", "abc-123");
+```
+
+Use `sessionStorage` for temporary state (like multi-page form data) and sensitive session tokens that should not survive a browser restart.
+
+### Your Assignment
+You are handling a temporary authentication flow. Store the string `'xyz-987'` in `sessionStorage` under the key `'temp_token'`. Retrieve it and print it to the console to verify it was stored securely in the temporary vault.
