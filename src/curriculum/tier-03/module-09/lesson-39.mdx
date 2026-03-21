@@ -1,0 +1,50 @@
+---
+tierId: 3
+moduleId: 9
+lessonId: 39
+title: "State: The Memory of Glass"
+xpReward: 40
+scenario: "Create a Toggle component using React.useState. It should start as 'Offline'. When clicked, the state must change, and the button text must change to 'Online'."
+mode: "dom"
+startingCode: "function Toggle() {\n  // 1. Initialize state (starts as 'Offline')\n  const [status, setStatus] = React.useState('Offline');\n\n  // 2. Add onClick to change state to 'Online'\n  return (\n    <button className=\"px-4 py-2 bg-surface border border-border-strong text-white font-mono\">\n      {status}\n    </button>\n  );\n}\n\nrender(<Toggle />);\n"
+syntaxHint: "const [name, setName] = React.useState('Bob');\n<button onClick={() => setName('Alice')}>{name}</button>"
+validationLogic: "const btn = domNode.querySelector('button'); if (!btn) throw new Error('Task Failed: No button found.'); if (!btn.innerHTML.includes('Offline')) throw new Error('Task Failed: Initial button text must be \\'Offline\\'.'); btn.click(); if (!btn.innerHTML.includes('Online')) throw new Error('Task Failed: I clicked the button, but the state did not update the text to \\'Online\\'.');"
+---
+
+You know how to use variables (`let x = 0`). But if you try to use a normal variable inside a React component and change it, **the screen will not update**. 
+
+React does not watch normal variables. If you want the glass to change when data changes, you must use **State**.
+
+
+
+### React.useState
+State is simply "data that React watches." When state changes, React destroys the old HTML and instantly redraws the new HTML. We do this using the `useState` hook.
+
+*(Note: Because we are in a sandbox without import statements, we access it via `React.useState`)*.
+
+```jsx
+function Counter() {
+  // Destructuring! 
+  // 'count' is the variable. 'setCount' is the specific function to change it.
+  const [count, setCount] = React.useState(0);
+
+  return (
+    <button onClick={() => setCount(count + 1)}>
+      Clicks: {count}
+    </button>
+  );
+}
+```
+
+### The Rendering Cycle
+Let's trace exactly what happens in the code above:
+1. Component mounts. `count` is `0`. Button renders as `Clicks: 0`.
+2. User clicks the button.
+3. The `onClick` fires: `setCount(0 + 1)`.
+4. React sees state was updated to `1`.
+5. React completely **re-runs** the `Counter` function.
+6. This time, `count` is `1`. Button re-renders as `Clicks: 1`.
+
+### Your Assignment
+Look at the starting code. I have initialized the state for you using array destructuring (Module 4). 
+Your job is to attach an `onClick` event to the button that uses the `setStatus` function to overwrite the memory from `'Offline'` to `'Online'`.
