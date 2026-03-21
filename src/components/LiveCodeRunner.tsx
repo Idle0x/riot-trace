@@ -4,9 +4,12 @@ import { useState, useRef, useEffect } from "react";
 import { saveTaskProgress } from "@/app/actions";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 
-export default function LiveCodeRunner({ initialCode, validationLogic, taskId, xpReward, syntaxHint }: any) {
+// We define a strict type for our terminal output so we can color-code warnings and errors.
+type LogEntry = { type: "log" | "warn" | "error" | "system" | "success"; text: string };
+
+export default function LiveCodeRunner({ initialCode, validationLogic, taskId, xpReward, syntaxHint, mode = "terminal" }: any) {
   const [code, setCode] = useState(initialCode);
-  const [output, setOutput] = useState<string[]>([]);
+  const [output, setOutput] = useState<LogEntry[]>([]);
   const [status, setStatus] = useState<"idle" | "running" | "success" | "error">("idle");
   const [isFocused, setIsFocused] = useState(false);
   const [showHint, setShowHint] = useState(false);
@@ -25,16 +28,37 @@ export default function LiveCodeRunner({ initialCode, validationLogic, taskId, x
   const executeCode = async () => {
     setStatus("running");
     setOutput([]);
-    const logs: string[] = [];
+    const logs: string[] = [];       // Flat strings for validation logic to read
+    const displayLogs: LogEntry[] = []; // Typed objects for the UI to render
 
-    const originalConsoleLog = console.log;
+    // 1. EXTENDED CONSOLE INTERCEPTION
+    const originalConsole = { log: console.log, warn: console.warn, error: console.error };
+    
     console.log = (...args) => {
-      logs.push(args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(" "));
-      originalConsoleLog(...args);
+      const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(" ");
+      logs.push(msg);
+      displayLogs.push({ type: "log", text: msg });
+      originalConsole.log(...args);
+    };
+    
+    console.warn = (...args) => {
+      const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(" ");
+      logs.push(msg);
+      displayLogs.push({ type: "warn", text: msg });
+      originalConsole.warn(...args);
+    };
+
+    console.error = (...args) => {
+      const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(" ");
+      logs.push(msg);
+      displayLogs.push({ type: "error", text: msg });
+      originalConsole.error(...args);
     };
 
     try {
+      // 2. STRICT MODE INJECTION
       const fullCode = `
+        "use strict";
         ${code}
         // --- HIDDEN VALIDATION ---
         ${validationLogic}
@@ -42,13 +66,12 @@ export default function LiveCodeRunner({ initialCode, validationLogic, taskId, x
 
       await new Promise(resolve => setTimeout(resolve, 600));
 
-      // Inject 'logs' and 'code' directly into the sandbox scope
       const sandbox = new Function("logs", "code", fullCode);
       sandbox(logs, code);
 
-      logs.push(">> SYS.VERIFIED");
-      logs.push(">> TASK PASSED: VALIDATION SUCCESSFUL.");
-      setOutput(logs);
+      displayLogs.push({ type: "system", text: ">> SYS.VERIFIED" });
+      displayLogs.push({ type: "success", text: ">> TASK PASSED: VALIDATION SUCCESSFUL." });
+      setOutput(displayLogs);
       setStatus("success");
 
       const userId = localStorage.getItem("riot_trace_user_id") || "anon_" + Math.random().toString(36).substring(2, 9);
@@ -58,35 +81,39 @@ export default function LiveCodeRunner({ initialCode, validationLogic, taskId, x
       window.dispatchEvent(new Event("xp_updated"));
 
     } catch (err: any) {
-      logs.push(`>> FATAL_ERROR: ${err.message}`);
-      setOutput(logs);
+      displayLogs.push({ type: "error", text: `>> FATAL_ERROR: ${err.message}` });
+      setOutput(displayLogs);
       setStatus("error");
     } finally {
-      console.log = originalConsoleLog;
+      console.log = originalConsole.log;
+      console.warn = originalConsole.warn;
+      console.error = originalConsole.error;
     }
   };
 
   return (
     <div className="flex flex-col h-full relative z-10 min-h-[50vh]">
       
-      {/* Syntax Hint Toggle Header */}
       {syntaxHint && (
         <div className="mb-2 flex justify-end">
-          <button 
-            onClick={() => setShowHint(!showHint)}
-            className="font-mono text-[9px] tracking-widest uppercase text-text-muted hover:text-accent-blue transition-colors flex items-center gap-1 border border-border-base bg-surface px-3 py-1.5 rounded-sm"
-          >
+          <button onClick={() => setShowHint(!showHint)} className="font-mono text-[9px] tracking-widest uppercase text-text-muted hover:text-accent-blue transition-colors flex items-center gap-1 border border-border-base bg-surface px-3 py-1.5 rounded-sm">
             {showHint ? "[-] HIDE_PATTERN" : "[+] REVEAL_SYNTAX_PATTERN"}
           </button>
         </div>
       )}
 
-      {/* Syntax Hint Dropdown */}
       {showHint && syntaxHint && (
         <div className="mb-4 p-4 border-l-2 border-accent-blue bg-accent-blue/5 font-mono text-xs text-text-primary animate-fade-up shadow-plate">
           <div className="text-[9px] text-accent-blue mb-2 tracking-widest">SYNTAX_PATTERN // REFERENCE</div>
           <pre className="text-text-primary/90">{syntaxHint}</pre>
         </div>
+      )}
+
+      {/* DOM MODE INJECTION POINT (Will be built out in Tier 3) */}
+      {mode === "dom" && (
+         <div className="h-48 mb-4 bg-white rounded-sm border border-border-base p-4 overflow-auto shadow-plate text-black flex items-center justify-center font-sans">
+            [ DOM_RENDERER_INITIALIZING... ]
+         </div>
       )}
 
       <div className={`flex-1 flex flex-col bg-base border rounded-t-sm overflow-hidden transition-colors duration-300 shadow-plate ${isFocused ? 'border-accent-blue' : status === 'error' ? 'border-accent-red' : status === 'success' ? 'border-accent-green' : 'border-border-base'}`}>
@@ -95,7 +122,7 @@ export default function LiveCodeRunner({ initialCode, validationLogic, taskId, x
             <div className={`w-2 h-2 rounded-full ${status === 'error' ? 'bg-accent-red' : status === 'success' ? 'bg-accent-green' : 'bg-border-strong'}`}></div>
             <span className="font-mono text-[9px] text-text-muted tracking-widest uppercase">{isFocused ? 'SYSTEM_LISTENING' : 'EDITOR_STANDBY'}</span>
           </div>
-          <span className="font-mono text-[9px] text-text-dim">main.js</span>
+          <span className="font-mono text-[9px] text-text-dim">{mode === "dom" ? "component.jsx" : "main.js"}</span>
         </div>
 
         <div className="flex-1 flex relative bg-surface-sunken shadow-sunken">
@@ -120,9 +147,17 @@ export default function LiveCodeRunner({ initialCode, validationLogic, taskId, x
       <div className={`h-48 shrink-0 bg-[#020203] border-x border-b rounded-b-sm p-4 font-mono text-[11px] overflow-y-auto relative shadow-sunken custom-scrollbar transition-all ${status === 'error' ? 'border-accent-red animate-[shake_0.4s_cubic-bezier(.36,.07,.19,.97)_both]' : status === 'success' ? 'border-accent-green' : 'border-border-base'}`}>
         {status === "success" && <div className="absolute inset-0 bg-accent-green/5 pointer-events-none animate-fade-in"></div>}
         <div className="text-text-dim mb-3 flex items-center gap-2"><span>]</span> <span className="uppercase tracking-widest text-[9px]">Standard Output</span></div>
-        {output.map((line, i) => (
-          <div key={i} className={`mb-1.5 leading-relaxed overflow-hidden whitespace-nowrap animate-typewriter border-r-2 border-transparent pr-1 ${line.includes("FATAL_ERROR") ? "text-accent-red" : line.includes("SYS.VERIFIED") || line.includes("TASK PASSED") ? "text-phosphor" : "text-text-secondary"}`} style={{ animationDelay: `${i * 0.15}s` }}>
-            {line}
+        
+        {/* Render color-coded typed logs */}
+        {output.map((entry, i) => (
+          <div key={i} className={`mb-1.5 leading-relaxed overflow-hidden whitespace-nowrap animate-typewriter border-r-2 border-transparent pr-1 
+            ${entry.type === 'error' ? 'text-accent-red' : 
+              entry.type === 'warn' ? 'text-accent-yellow' : 
+              entry.type === 'success' ? 'text-phosphor' : 
+              entry.type === 'system' ? 'text-text-muted' : 
+              'text-text-secondary'}`} 
+            style={{ animationDelay: `${i * 0.15}s` }}>
+            {entry.text}
           </div>
         ))}
         {status !== "idle" && status !== "running" && <div className={`inline-block w-2 h-3 ml-1 animate-blink ${status === 'error' ? 'bg-accent-red' : 'bg-accent-green'}`}></div>}
