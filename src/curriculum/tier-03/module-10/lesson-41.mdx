@@ -1,0 +1,51 @@
+---
+tierId: 3
+moduleId: 10
+lessonId: 41
+title: "Mapping to Glass: Rendering Lists"
+xpReward: 40
+scenario: "You have an array of strings. Map over the array inside the <ul> tag to return an <li> element for each network. Render the NodeList component."
+mode: "dom"
+startingCode: "const networks = ['Mainnet', 'Devnet', 'Testnet'];\n\nfunction NodeList() {\n  return (\n    <ul>\n      {/* Map over 'networks' here */}\n    </ul>\n  );\n}\n\n// Render NodeList\n"
+syntaxHint: "<ul>\n  {items.map(item => <li>{item}</li>)}\n</ul>"
+validationLogic: "const listItems = domNode.querySelectorAll('li'); if (listItems.length !== 3) throw new Error('Task Failed: I did not find exactly 3 <li> elements in the DOM.'); if (!domNode.innerHTML.includes('Devnet')) throw new Error('Task Failed: The rendered list did not contain the correct network names.'); if (!code.includes('.map(')) throw new Error('Task Failed: You must use the .map() array method.');"
+---
+
+In Tier 2, you learned how to use `.map()` to transform an array of objects into an array of strings or numbers. 
+
+In React, we use `.map()` to transform an array of raw data into an array of **JSX Elements**. 
+
+
+
+### The Dynamic List
+You will rarely hardcode `<li>Node 1</li>`, `<li>Node 2</li>`. Instead, you will receive an array from your database and map it directly to the glass.
+
+Because `.map()` returns a new array, and React knows exactly how to render arrays of JSX, we can write it directly inside our component's return block using curly braces `{}`.
+
+```jsx
+const users = ["Alice", "Bob", "Charlie"];
+
+function UserList() {
+  return (
+    <div>
+      <h2>Active Users</h2>
+      {/* We open JS mode with { } and immediately map */}
+      {users.map((user) => {
+        // We MUST return JSX for every item!
+        return <div className="user-card">{user}</div>;
+      })}
+    </div>
+  );
+}
+```
+
+### The Concise Map
+Just like standard arrow functions, if you are only returning one element, you can drop the `return` keyword and the curly braces around the arrow function body.
+
+```jsx
+// Exact same logic, much cleaner syntax:
+{users.map(user => <div className="user-card">{user}</div>)}
+```
+
+### Your Assignment
+You are building the sidebar navigation. I have provided the `networks` array. Inside the `<ul>` tags of the `NodeList` component, use `.map()` to generate an `<li>` for every item in the array. Finally, render the component.
