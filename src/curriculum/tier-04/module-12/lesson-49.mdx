@@ -1,0 +1,45 @@
+---
+tierId: 4
+moduleId: 12
+lessonId: 49
+title: "HTTP GET: Querying the World"
+xpReward: 40
+scenario: "Write an async function called 'getUser'. Use fetch() to request data from 'https://jsonplaceholder.typicode.com/users/1'. Await the response, parse the JSON, and log the user's name."
+mode: "terminal"
+startingCode: "// 1. Create async function getUser()\n\n// 2. Await the fetch() call\n\n// 3. Await the .json() parsing\n\n// 4. Log the user.name\n"
+syntaxHint: "const res = await fetch('url');\nconst data = await res.json();\nconsole.log(data);"
+validationLogic: "if (!code.includes('fetch(')) throw new Error('Task Failed: You must use the fetch() API.'); if (!code.includes('.json()')) throw new Error('Task Failed: You must parse the response using .json().'); if (!logs.some(l => l.includes('Leanne Graham'))) throw new Error('Task Failed: Did not log the correct user name. Did you await the fetch and the json parse?');"
+---
+
+When your app needs data, it makes an HTTP Request. The browser has a built-in tool for this called `fetch()`.
+
+
+
+### The Request-Response Cycle
+1. **Request:** Your frontend sends a message to a URL (a server).
+2. **Processing:** The server reads the message, queries its database, and bundles the data.
+3. **Response:** The server sends the data back to your frontend over the network.
+
+Because this travels over physical fiber-optic cables, it takes time. Therefore, `fetch()` is always **Asynchronous** (it returns a Promise). 
+
+### Fetching Data (GET)
+By default, `fetch()` makes a **GET** request. It is simply asking to "get" data, not change anything.
+
+```javascript
+async function getDashboardData() {
+  // 1. We make the request and wait for the raw response
+  const response = await fetch("[https://api.example.com/data](https://api.example.com/data)");
+  
+  // 2. The data arrives as a raw text stream. 
+  // We must parse it into a JavaScript Object using .json()
+  const data = await response.json();
+  
+  console.log(data);
+}
+```
+
+*Crucial Rule:* You must `await` twice. Once for the network to return the headers (`fetch`), and once for the body stream to finish downloading and parsing (`.json()`).
+
+### Your Assignment
+We are hitting a real, live API on the internet. 
+Create an `async` function. Fetch the data from `https://jsonplaceholder.typicode.com/users/1`. Parse it. Log the `name` property from the resulting object. Don't forget to call your function at the bottom!
