@@ -1,0 +1,47 @@
+---
+tierId: 3
+moduleId: 11
+lessonId: 47
+title: "Memory Leaks: The Cleanup"
+xpReward: 40
+scenario: "The component creates a recurring timer on mount. Inside the useEffect, return an arrow function that calls clearInterval(timer) to prevent a memory leak."
+mode: "dom"
+startingCode: "function Engine() {\n  React.useEffect(() => {\n    const timer = setInterval(() => {\n      console.log('Engine running...');\n    }, 1000);\n\n    // Return the cleanup function below:\n    \n  }, []);\n\n  return <div className=\"p-4 border\">Engine Online</div>;\n}\n\nrender(<Engine />);\n"
+syntaxHint: "React.useEffect(() => {\n  const connection = connect();\n  return () => connection.disconnect();\n}, []);"
+validationLogic: "if (!code.includes('return () =>')) throw new Error('Task Failed: You must return an arrow function from the effect.'); if (!code.includes('clearInterval(timer)')) throw new Error('Task Failed: Your cleanup function must call clearInterval(timer).');"
+---
+
+If you open a websocket connection to the Xandeum network when a component loads, what happens when the user clicks away and the component is destroyed?
+
+The component dies, but the websocket stays open. Do this 10 times, and your browser crashes. This is a **Memory Leak**. 
+
+### The Cleanup Phase
+If an effect creates something that runs continuously (like an interval, an event listener, or a network subscription), you must tell React how to destroy it.
+
+You do this by returning a function from your effect.
+
+```jsx
+function NodeListener() {
+  
+  React.useEffect(() => {
+    // 1. Setup Phase (Runs on Mount)
+    const socket = createConnection();
+    socket.connect();
+
+    // 2. Cleanup Phase (Runs right before Unmount)
+    return () => {
+      socket.disconnect();
+      console.log("Connection closed securely.");
+    };
+    
+  }, []);
+
+}
+```
+
+### How React Executes This
+When the `NodeListener` component is removed from the screen, React looks at the `useEffect` and asks: *"Did this effect leave me a cleanup function?"* If it did, React fires it immediately before destroying the component, keeping your memory completely clean.
+
+### Your Assignment
+The `Engine` component starts an infinite timer using `setInterval`. If this component is removed, that timer will keep running in the background forever. 
+Inside the `useEffect`, `return` an arrow function. Inside that arrow function, run `clearInterval(timer)` to kill the engine securely.
