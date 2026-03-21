@@ -1,0 +1,50 @@
+---
+tierId: 3
+moduleId: 9
+lessonId: 37
+title: "Props: Passing Data to Glass"
+xpReward: 40
+scenario: "Create a NodeBadge component that accepts a 'network' prop. It should return an <h1> that says 'Network: [network]'. Use the render() function to mount <NodeBadge network='Mainnet' /> to the DOM."
+mode: "dom"
+startingCode: "function NodeBadge(props) {\n  // 1. Return the <h1> with the network prop\n  \n}\n\n// 2. Call render() to mount the component\n"
+syntaxHint: "function Title(props) {\n  return <h1>{props.text}</h1>;\n}\nrender(<Title text='Hello' />);"
+validationLogic: "if (!code.includes('render(')) throw new Error('Task Failed: You must use the render() function to mount your component.'); if (!domNode.innerHTML.includes('<h1')) throw new Error('Task Failed: I did not detect an <h1> element rendered in the DOM.'); if (!domNode.innerHTML.includes('Mainnet')) throw new Error('Task Failed: The rendered DOM does not contain the word \\'Mainnet\\'. Did you pass the prop correctly?');"
+---
+
+A component is just a function. But a function is useless if it can't accept data. In standard JavaScript, we pass data via *Arguments*. In React, we pass data via **Props** (short for Properties).
+
+
+
+### The Props Object
+When you use a component and pass it an attribute, React automatically bundles all attributes into a single object called `props` and hands it to your component.
+
+```jsx
+// 1. We define the component to accept 'props'
+function Alert(props) {
+  // We use curly braces { } to insert JavaScript variables inside JSX
+  return <div>Alert: {props.message}</div>; 
+}
+
+// 2. We use the component and pass a 'message' prop
+const ui = <Alert message="Database Offline" />;
+```
+
+### The Render Function
+In your standard Next.js apps, Next handles the mounting for you. But in a raw environment, we have to tell React exactly what component to paint onto the screen.
+
+I have injected a `render()` function into your Crucible. You hand it JSX, and it paints it to the white glass pane above the editor.
+
+```jsx
+function Button() {
+  return <button>Click</button>;
+}
+
+// Paints the button to the glass
+render(<Button />); 
+```
+
+### Your Assignment
+You are building the UI for a node monitor.
+1. Build the `NodeBadge` component. Access the network name via `props.network` and insert it into the `<h1>` tag using curly braces `{}`.
+2. Use the `render()` command. Pass it your `<NodeBadge />` component, making sure to include the attribute `network="Mainnet"`. 
+3. Initiate the build. Watch the white DOM pane.
