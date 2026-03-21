@@ -1,0 +1,48 @@
+---
+tierId: 3
+moduleId: 10
+lessonId: 42
+title: "The Key Prop: Tracking the DOM"
+xpReward: 40
+scenario: "Fix the provided mapping function. Add the 'key' prop to the <div> being returned by the map, using the node's unique 'id'."
+mode: "dom"
+startingCode: "const activeNodes = [\n  { id: '1A', name: 'Alpha' },\n  { id: '2B', name: 'Beta' }\n];\n\nfunction NodeRoster() {\n  return (\n    <div>\n      {activeNodes.map(node => (\n        <div className=\"p-2 border\">\n          {node.name}\n        </div>\n      ))}\n    </div>\n  );\n}\n\nrender(<NodeRoster />);\n"
+syntaxHint: "{items.map(item => <div key={item.id}>{item.name}</div>)}"
+validationLogic: "if (!code.includes('key={node.id}')) throw new Error('Task Failed: You must assign the node\\'s id to the key prop on the outermost element returned by the map.');"
+---
+
+If you successfully completed the last lesson and opened your browser's real developer console, you would have seen a bright red warning: `Warning: Each child in a list should have a unique "key" prop.`
+
+### Why React Needs Keys
+React's entire job is to update the DOM as fast as possible. When you render a list of 100 nodes, and Node #42 gets deleted, React needs to know *which* specific `<div>` to remove from the glass. 
+
+If you don't provide a unique identifier, React has to destroy the entire list and rebuild it from scratch, which destroys performance.
+
+
+
+### Applying the Key
+The `key` prop must be applied to the **outermost element** returned inside the `.map()` function. 
+It must be a unique string or number (usually an ID from your database). **Do not use the array index** (e.g., 0, 1, 2) as a key unless the list will absolutely never change, reorder, or filter.
+
+```jsx
+const transactions = [
+  { txHash: "0x123", amount: 50 },
+  { txHash: "0x456", amount: 100 }
+];
+
+function Ledger() {
+  return (
+    <div>
+      {transactions.map(tx => (
+        // The key goes on the outermost wrapper!
+        <div key={tx.txHash} className="ledger-row">
+          <span>{tx.amount}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+### Your Assignment
+Look at the starting code. It maps perfectly, but it lacks performance safety. Fix the `.map()` return block by adding the `key` prop to the generated `<div>`, assigning it the unique `id` of the current `node`.
