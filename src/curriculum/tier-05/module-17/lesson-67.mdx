@@ -1,0 +1,44 @@
+---
+tierId: 5
+moduleId: 17
+lessonId: 67
+title: "Relational Data: Primary & Foreign Keys"
+xpReward: 40
+scenario: "Query the 'transactions' table to find all records that belong to the user with an ID of 42."
+mode: "sql"
+dbSeed: "CREATE TABLE transactions (id INTEGER PRIMARY KEY, amount INTEGER, user_id INTEGER); INSERT INTO transactions (amount, user_id) VALUES (500, 42), (1000, 7), (250, 42);"
+startingCode: "-- Write your query targeting the foreign key below\n\n"
+syntaxHint: "SELECT * FROM table_name WHERE foreign_key_column = 42;"
+validationLogic: "const upperCode = code.toUpperCase(); if (!upperCode.includes('USER_ID')) throw new Error('Task Failed: You must filter using the user_id foreign key.'); if (sqlResults.length !== 2) throw new Error('Task Failed: Your query should have returned exactly 2 transactions belonging to user 42.');"
+---
+
+How does a database know that a specific transaction belongs to Cipher, and not to Alice? 
+
+It uses a mathematical link between the tables called **Keys**.
+
+
+
+### The Primary Key (PK)
+Every table must have one column that uniquely identifies the row. We already saw this: it's the `id` column. No two users can have the same `id`.
+
+### The Foreign Key (FK)
+To link a transaction to a user, we add a column to the `transactions` table called `user_id`. 
+This column holds the Primary Key of the user it belongs to. Because it references a Primary Key from an *outside* table, it is called a **Foreign Key**.
+
+```sql
+-- users table
+| id (PK) | username |
+|---------|----------|
+| 1       | Alice    |
+| 42      | Cipher   |
+
+-- transactions table
+| id (PK) | amount | user_id (FK) |
+|---------|--------|--------------|
+| 99      | 500    | 42           | <-- Belongs to Cipher
+| 100     | 1000   | 1            | <-- Belongs to Alice
+```
+
+### Your Assignment
+Before we join tables, prove you understand the relationship. 
+I have seeded a `transactions` table containing an `amount` and a `user_id` Foreign Key. Write a query to `SELECT` all columns `FROM` the `transactions` table `WHERE` the `user_id` is exactly `42`.
