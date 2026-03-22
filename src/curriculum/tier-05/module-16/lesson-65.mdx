@@ -1,0 +1,37 @@
+---
+tierId: 5
+moduleId: 16
+lessonId: 65
+title: "DELETE: Pruning the Tree"
+xpReward: 40
+scenario: "Write a query to DELETE from the 'nodes' table WHERE the status is 'offline'."
+mode: "sql"
+dbSeed: "CREATE TABLE nodes (id INTEGER PRIMARY KEY, name TEXT, status TEXT); INSERT INTO nodes (name, status) VALUES ('Alpha', 'online'), ('Beta', 'offline'), ('Gamma', 'offline');"
+startingCode: "-- Write your DELETE query below\n\n"
+syntaxHint: "DELETE FROM table_name WHERE condition;"
+validationLogic: "const upperCode = code.toUpperCase(); if (!upperCode.includes('DELETE FROM')) throw new Error('Task Failed: You must use DELETE FROM.'); if (!upperCode.includes('WHERE')) throw new Error('Task Failed: FATAL DANGER. You forgot the WHERE clause and wiped the entire table.'); if (!code.includes('offline')) throw new Error('Task Failed: You must specifically target the offline nodes.');"
+---
+
+When a user closes their account or a temporary node drops off the network forever, you must remove the data to keep your storage costs low and your queries fast.
+
+
+
+### The Syntax Map
+`DELETE` is simpler than `UPDATE`, which makes it even more dangerous. 
+
+```sql
+DELETE FROM transactions WHERE status = 'failed';
+```
+
+*Note: You do not specify columns when deleting. You cannot delete a single cell in SQL. `DELETE` removes the **entire row** from existence.*
+
+### Soft Deletes vs Hard Deletes
+In real-world applications (like banking or healthcare), we almost never use the `DELETE` command. It is too destructive. 
+
+Instead, we use a **Soft Delete**. We add a column called `is_deleted` and use an `UPDATE` command to set it to `true`. Then, we just modify all our `SELECT` queries to `WHERE is_deleted = false`. The data is hidden from the user, but the engineers still have the backup.
+
+For this lesson, however, we are doing a real, permanent **Hard Delete**.
+
+### Your Assignment
+Two nodes have completely dropped off the network.
+Write a query to `DELETE FROM` the `nodes` table `WHERE` the `status` is exactly `'offline'`. 
