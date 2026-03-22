@@ -1,0 +1,54 @@
+---
+tierId: 6
+moduleId: 18
+lessonId: 72
+title: "The N-Squared Trap: O(N²)"
+xpReward: 40
+scenario: "You have an array of mainnet nodes and an array of devnet nodes. Find the ONE node ID that exists in both arrays. DO NOT use a nested loop."
+mode: "terminal"
+startingCode: "function findDuplicate(mainnet, devnet) {\n  // 1. Create a Set or Map from mainnet for O(1) lookups\n  \n\n  // 2. Loop through devnet and check if the ID exists in your Map/Set\n  \n\n  // 3. Return the duplicate ID\n  \n}\n"
+syntaxHint: "const mySet = new Set(mainnet);\nfor (const id of devnet) {\n  if (mySet.has(id)) return id;\n}"
+validationLogic: "const t0 = performance.now(); const large1 = Array.from({length: 20000}, (_, i) => i); const large2 = Array.from({length: 20000}, (_, i) => i + 19999); const result = findDuplicate(large1, large2); const t1 = performance.now(); if (result !== 19999) throw new Error('Task Failed: Did not return the correct duplicate ID.'); if ((t1 - t0) > 50) throw new Error(`TIME LIMIT EXCEEDED: Your code took ${Math.round(t1-t0)}ms. You wrote an O(N²) nested loop. Use a Hash Map or Set to optimize to O(N).`);"
+---
+
+This is the most common algorithmic failure in junior engineering. 
+
+You have two lists. You need to find the items that match. The natural instinct is to write a loop inside a loop.
+
+### The Danger of Nested Loops
+```javascript
+// NEVER DO THIS FOR LARGE DATA
+for (const nodeA of listA) {
+  for (const nodeB of listB) {
+    if (nodeA === nodeB) console.log("Match!");
+  }
+}
+```
+If `listA` has 10,000 items, and `listB` has 10,000 items, the inner loop runs 10,000 times *for every single item in the outer loop*. 
+
+$10,000 \times 10,000 = 100,000,000$ operations. 
+
+This is **$O(n^2)$ (Quadratic Time)**. The time cost explodes exponentially as the data grows.
+
+### The Set: A Faster Map
+To solve this in $O(n)$ time, we use a `Set`. A Set is like an Array, but it is built on a Hash Map structure, meaning checking if an item exists inside a Set is **instant ($O(1)$)**.
+
+```javascript
+// 1. Convert the first array into a Set (Takes O(n) time)
+const fastLookup = new Set(listA);
+
+// 2. Loop through the second array ONCE (Takes O(n) time)
+for (const item of listB) {
+  // .has() is an O(1) instant lookup!
+  if (fastLookup.has(item)) {
+    console.log("Match found:", item);
+  }
+}
+// Total Time: O(n) + O(n) = O(n). We just saved 99 million operations.
+```
+
+### Your Assignment
+Write the `findDuplicate` function. My validation logic will pass two arrays of **20,000 items** into your function. 
+If you write a nested loop or use `mainnet.includes()` inside a loop (which is technically a nested loop under the hood), your code will take over 100 milliseconds and the build will be rejected. 
+
+Use a `Set` to execute the logic in under 10 milliseconds.
