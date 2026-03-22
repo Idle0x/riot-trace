@@ -1,0 +1,30 @@
+---
+tierId: 6
+moduleId: 19
+lessonId: 77
+title: "MODULE 19 BOSS FIGHT: The Parser"
+xpReward: 150
+scenario: "Write a function 'isValid(string)' that returns true if a string of parentheses '()' and brackets '[]' is perfectly balanced, and false if it is not. You MUST use a Stack."
+mode: "terminal"
+startingCode: "function isValid(s) {\n  const stack = [];\n  const pairs = { ')': '(', ']': '[' };\n\n  // Loop through the string 's'\n  // If it's an open bracket, push it to the stack\n  // If it's a closed bracket, pop the stack and check if it matches\n  \n}\n\nconsole.log(isValid('()[]')); // Should be true\nconsole.log(isValid('([)]')); // Should be false\n"
+syntaxHint: ""
+validationLogic: "if (isValid('()[]') !== true) throw new Error('Task Failed: ()[] is valid but returned false.'); if (isValid('([)]') !== false) throw new Error('Task Failed: ([)] is invalid but returned true. You are closing a bracket before its inner parenthesis is closed!'); if (isValid('(((') !== false) throw new Error('Task Failed: ((( is invalid (never closed), but returned true. Check if your stack is empty at the end.'); if (isValid(']') !== false) throw new Error('Task Failed: ] is invalid (closes nothing), but returned true.');"
+---
+
+### EXECUTION REQUIREMENTS
+This is a Boss Fight. You are building the exact logic that your code editor uses to check if your `{ }` and `( )` brackets match up correctly. This is one of the most famous algorithmic tests in computer science.
+
+You are given a string containing only parentheses `()` and brackets `[]`. 
+You must write the `isValid(s)` function to determine if they are closed in the exact correct order. 
+
+**The Stack Strategy:**
+1. Loop through every character in the string.
+2. If the character is an **open** bracket ( `(` or `[` ), `push` it onto your array stack.
+3. If the character is a **closed** bracket ( `)` or `]` ):
+   * `pop` the top item off your stack.
+   * Check if the popped item is the correct matching pair. (e.g., if you found a `]`, the popped item MUST be a `[`).
+   * If it doesn't match, return `false` immediately. The string is broken.
+4. After the loop finishes, if there is anything left in your stack, it means an open bracket was never closed. Return `false`.
+5. If the stack is completely empty, return `true`. It is perfectly balanced.
+
+Execute perfectly.
