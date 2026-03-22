@@ -1,0 +1,40 @@
+---
+tierId: 5
+moduleId: 16
+lessonId: 64
+title: "UPDATE: Mutating State"
+xpReward: 40
+scenario: "Update the 'nodes' table. Set the health to 100 WHERE the name is 'Alpha'."
+mode: "sql"
+dbSeed: "CREATE TABLE nodes (id INTEGER PRIMARY KEY, name TEXT, health INTEGER); INSERT INTO nodes (name, health) VALUES ('Alpha', 45), ('Beta', 90);"
+startingCode: "-- Write your UPDATE query below\n\n"
+syntaxHint: "UPDATE table_name SET column1 = 'new_value' WHERE condition;"
+validationLogic: "const upperCode = code.toUpperCase(); if (!upperCode.includes('UPDATE')) throw new Error('Task Failed: You must use the UPDATE keyword.'); if (!upperCode.includes('SET')) throw new Error('Task Failed: You must use the SET keyword to change the value.'); if (!upperCode.includes('WHERE')) throw new Error('Task Failed: FATAL DANGER. You forgot the WHERE clause. You just updated every node in the database instead of just Alpha!'); if (!code.includes('100') || !code.includes('Alpha')) throw new Error('Task Failed: You must set health to 100 for Alpha.');"
+---
+
+Data changes. A node goes offline, a transaction clears, a user upgrades their tier. To change data that already exists, we use the `UPDATE` statement.
+
+
+
+### The Syntax Map
+Updating requires three keywords: `UPDATE`, `SET`, and the incredibly critical `WHERE`.
+
+```sql
+UPDATE users 
+SET role = 'admin' 
+WHERE username = 'Alice';
+```
+
+### The Most Dangerous Command in SQL
+Look closely at the query above. What happens if you forget the `WHERE` clause and just run this?
+
+```sql
+UPDATE users SET role = 'admin';
+```
+**Catastrophe.** Because you didn't specify *who* to update, the database assumes you meant *everyone*. Every single user in your entire system just became an admin. 
+
+In enterprise environments, forgetting a `WHERE` clause on an `UPDATE` or `DELETE` statement is a fireable offense. Always triple-check your conditions before executing.
+
+### Your Assignment
+Node Alpha just repaired its sectors. 
+Write a query to `UPDATE` the `nodes` table. `SET` the `health` to `100`. Protect your data by ensuring this *only* happens `WHERE` the `name` is `'Alpha'`.
