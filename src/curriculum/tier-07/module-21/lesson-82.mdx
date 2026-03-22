@@ -1,0 +1,30 @@
+---
+tierId: 7
+moduleId: 21
+lessonId: 82
+title: "CAPSTONE STAGE 1: The Ledger"
+xpReward: 200
+scenario: "Write the master SQL query to find the healthiest active node. JOIN 'nodes' and 'metrics'. Filter for 'online' status. Sort by 'health' descending. Limit to 1."
+mode: "sql"
+dbSeed: "CREATE TABLE nodes (id INTEGER PRIMARY KEY, name TEXT, status TEXT); CREATE TABLE metrics (id INTEGER PRIMARY KEY, health INTEGER, node_id INTEGER); INSERT INTO nodes (id, name, status) VALUES (1, 'Alpha', 'online'), (2, 'Beta', 'offline'), (3, 'Gamma', 'online'); INSERT INTO metrics (health, node_id) VALUES (88, 1), (99, 2), (95, 3);"
+startingCode: "-- STAGE 1: THE DATABASE PIPELINE\n-- Write your SELECT query below\n\n"
+syntaxHint: ""
+validationLogic: "const upperCode = code.toUpperCase(); if (!upperCode.includes('JOIN') || !upperCode.includes('WHERE') || !upperCode.includes('ORDER BY') || !upperCode.includes('LIMIT 1')) throw new Error('Task Failed: You must use JOIN, WHERE, ORDER BY, and LIMIT.'); if (sqlResults.length !== 1 || sqlResults[0][1] !== 'Gamma' || sqlResults[0][4] !== 95) throw new Error('Task Failed: Your query returned the wrong node. Beta has higher health (99), but is offline. Gamma (95) is the healthiest online node.');"
+---
+
+### STAGE 1: DATA RETRIEVAL
+Every full-stack application begins at the database. Before the UI can render anything, the backend must extract the correct data from the ledger efficiently.
+
+I have seeded the WebAssembly engine with two tables for the Xandeum Pulse network:
+1. `nodes` (`id`, `name`, `status`)
+2. `metrics` (`id`, `health`, `node_id`)
+
+### EXECUTION REQUIREMENTS
+Write a single, highly optimized SQL query to find the best node for the next transaction block.
+1. `SELECT` all columns.
+2. `JOIN` the `nodes` and `metrics` tables on their foreign key relationship.
+3. Filter the results so you only look at nodes `WHERE` the `status` is `'online'`.
+4. `ORDER BY` the `health` metric in descending order (highest health first).
+5. `LIMIT` the output to exactly `1` row.
+
+Execute the query. Prove your backend architecture is secure.
