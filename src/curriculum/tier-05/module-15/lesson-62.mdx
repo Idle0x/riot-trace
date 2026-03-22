@@ -1,0 +1,29 @@
+---
+tierId: 5
+moduleId: 15
+lessonId: 62
+title: "MODULE 15 BOSS FIGHT"
+xpReward: 150
+scenario: "Query the 'nodes' table. Return ONLY the 'name' and 'health' columns. Filter for nodes on 'mainnet'. Sort them by health from highest to lowest. Limit to the top 1."
+mode: "sql"
+dbSeed: "CREATE TABLE nodes (id INTEGER PRIMARY KEY, name TEXT, network TEXT, health INTEGER); INSERT INTO nodes (name, network, health) VALUES ('Alpha', 'mainnet', 95), ('Beta', 'mainnet', 99), ('Gamma', 'devnet', 100), ('Delta', 'mainnet', 45);"
+startingCode: "-- EXECUTE OBJECTIVE\n\n"
+syntaxHint: ""
+validationLogic: "const upperCode = code.toUpperCase(); if (upperCode.includes('*')) throw new Error('Task Failed: Do not use the * wildcard. Select specific columns.'); if (!upperCode.includes('WHERE') || !upperCode.includes('ORDER BY') || !upperCode.includes('LIMIT')) throw new Error('Task Failed: You must use WHERE, ORDER BY, and LIMIT.'); if (sqlResults.length !== 1) throw new Error('Task Failed: You must return exactly 1 row.'); if (sqlResults[0][0] !== 'Beta' || sqlResults[0][1] !== 99) throw new Error('Task Failed: Your query did not return the correct data. Gamma has 100 health, but it is on devnet! Alpha is on mainnet, but Beta has higher health.'); if (sqlResults[0].length > 2) throw new Error('Task Failed: You returned too many columns. I only want name and health.');"
+---
+
+### EXECUTION REQUIREMENTS
+This is a Boss Fight. The terminal is yours. You are combining the complete basic SQL pipeline into a single execution block.
+
+**Table:** `nodes`
+**Columns available:** `id`, `name`, `network`, `health`
+
+Your query must:
+1. Return **ONLY** the `name` and `health` columns (do not use `*`).
+2. Filter the rows so you only look at nodes where the `network` is exactly `'mainnet'`.
+3. Sort the results by `health` in **descending** order (highest first).
+4. Restrict the output to exactly **1** row.
+
+*Architectural Note: The order of SQL commands is strict. It must always be: SELECT -> FROM -> WHERE -> ORDER BY -> LIMIT.*
+
+Execute perfectly.
