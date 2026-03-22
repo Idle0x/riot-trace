@@ -1,0 +1,33 @@
+---
+tierId: 5
+moduleId: 17
+lessonId: 69
+title: "TIER 05 CAPSTONE: The Data Architect"
+xpReward: 500
+scenario: "JOIN nodes and telemetry. Filter for mainnet. Sort by latency ascending. Limit to the top 1."
+mode: "sql"
+dbSeed: "CREATE TABLE nodes (id INTEGER PRIMARY KEY, name TEXT, network TEXT); CREATE TABLE telemetry (id INTEGER PRIMARY KEY, latency INTEGER, node_id INTEGER); INSERT INTO nodes (id, name, network) VALUES (1, 'Alpha', 'mainnet'), (2, 'Beta', 'mainnet'), (3, 'Gamma', 'devnet'); INSERT INTO telemetry (latency, node_id) VALUES (120, 1), (45, 2), (10, 3);"
+startingCode: "-- EXECUTE CAPSTONE OBJECTIVE BELOW\n\n"
+syntaxHint: ""
+validationLogic: "const upperCode = code.toUpperCase(); if (!upperCode.includes('JOIN')) throw new Error('Capstone Failed: You must use JOIN.'); if (!upperCode.includes('WHERE')) throw new Error('Capstone Failed: You must filter the network using WHERE.'); if (!upperCode.includes('ORDER BY') || !upperCode.includes('ASC')) throw new Error('Capstone Failed: You must sort the latency ascending (ASC).'); if (!upperCode.includes('LIMIT 1')) throw new Error('Capstone Failed: You must limit to the top 1 result.'); if (sqlResults.length !== 1 || sqlResults[0][1] !== 'Beta' || sqlResults[0][4] !== 45) throw new Error('Capstone Failed: The resulting row is incorrect. Gamma has the lowest latency (10), but is on devnet. Alpha is on mainnet, but has high latency (120). Beta is the correct winner.');"
+---
+
+### THE FINAL GATES
+You have completed the Relational Database segment. You understand schemas, mutations, primary keys, and cross-table joins.
+
+This is the Tier 05 Capstone. You are building the master query for the *Xandeum Pulse* routing engine.
+
+### EXECUTION REQUIREMENTS
+I have seeded two tables:
+1. `nodes` (`id`, `name`, `network`)
+2. `telemetry` (`id`, `latency`, `node_id`)
+
+Write a single SQL query that executes the following pipeline:
+1. `SELECT` all columns `*`.
+2. Start `FROM` the `nodes` table.
+3. `JOIN` the `telemetry` table `ON` the proper primary/foreign key relationship.
+4. Filter the results `WHERE` the `nodes.network` is `'mainnet'`.
+5. Sort the results (`ORDER BY`) the `telemetry.latency` in ascending order (`ASC` - lowest latency first).
+6. Restrict the output (`LIMIT`) to exactly `1` row.
+
+Clear this audit, and you unlock **Tier 06: Computer Science Essentials**.
