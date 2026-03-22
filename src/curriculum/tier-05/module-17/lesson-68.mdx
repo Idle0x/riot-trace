@@ -1,0 +1,42 @@
+---
+tierId: 5
+moduleId: 17
+lessonId: 68
+title: "INNER JOIN: Stitching Tables"
+xpReward: 40
+scenario: "JOIN the 'users' and 'transactions' tables ON the condition that the user's id matches the transaction's user_id."
+mode: "sql"
+dbSeed: "CREATE TABLE users (id INTEGER PRIMARY KEY, username TEXT); CREATE TABLE transactions (id INTEGER PRIMARY KEY, amount INTEGER, user_id INTEGER); INSERT INTO users (id, username) VALUES (1, 'Cipher'); INSERT INTO transactions (amount, user_id) VALUES (5000, 1);"
+startingCode: "-- Write your JOIN query below\n\n"
+syntaxHint: "SELECT * FROM table1 JOIN table2 ON table1.id = table2.foreign_id;"
+validationLogic: "const upperCode = code.toUpperCase(); if (!upperCode.includes('JOIN')) throw new Error('Task Failed: You must use the JOIN keyword.'); if (!upperCode.includes('ON')) throw new Error('Task Failed: You must specify the relationship using ON.'); if (!upperCode.includes('USERS.ID = TRANSACTIONS.USER_ID') && !upperCode.includes('TRANSACTIONS.USER_ID = USERS.ID')) throw new Error('Task Failed: Your ON condition must strictly equate users.id to transactions.user_id.'); if (sqlResults.length !== 1 || sqlResults[0].length < 4) throw new Error('Task Failed: The JOIN did not execute properly. It should return a combined row with columns from both tables.');"
+---
+
+Querying the Foreign Key directly is useful, but what if you want to display the transaction amount AND the username on the same dashboard? 
+
+You need data from both tables at the exact same time. You need a **JOIN**.
+
+
+
+### The Syntax Map
+An `INNER JOIN` merges rows from two tables into a single mega-row, but *only* if there is a match between the tables.
+
+```sql
+SELECT * FROM users 
+JOIN transactions 
+-- The ON keyword tells the database exactly how the tables connect
+ON users.id = transactions.user_id;
+```
+
+### Resolving Ambiguity
+Notice how we used `users.id` instead of just `id`. 
+Because *both* tables have an `id` column (the user has an ID, and the transaction has an ID), if you just type `id`, the database will crash with an "Ambiguous Column" error. 
+
+You must prepend the table name to the column using dot notation when doing JOINs.
+
+### Your Assignment
+I have seeded two tables: `users` and `transactions`.
+Write a query to `SELECT` all columns `*`. 
+Start `FROM` the `users` table. 
+`JOIN` the `transactions` table. 
+Connect them `ON` the strict mathematical rule that the `users.id` must equal the `transactions.user_id`.
