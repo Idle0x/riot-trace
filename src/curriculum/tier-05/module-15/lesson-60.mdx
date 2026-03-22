@@ -1,0 +1,40 @@
+---
+tierId: 5
+moduleId: 15
+lessonId: 60
+title: "The WHERE Clause: Filtering Data"
+xpReward: 40
+scenario: "Write a query to SELECT all columns FROM the 'nodes' table, but ONLY return rows WHERE the health is strictly less than 50."
+mode: "sql"
+dbSeed: "CREATE TABLE nodes (id INTEGER PRIMARY KEY, name TEXT, network TEXT, health INTEGER); INSERT INTO nodes (name, network, health) VALUES ('Alpha', 'mainnet', 95), ('Beta', 'devnet', 82), ('Gamma', 'mainnet', 45), ('Delta', 'testnet', 20);"
+startingCode: "-- Write your filtered query below\n\n"
+syntaxHint: "SELECT * FROM table_name WHERE column_name < 100;"
+validationLogic: "const upperCode = code.toUpperCase(); if (!upperCode.includes('WHERE')) throw new Error('Task Failed: You must use the WHERE keyword.'); if (!code.includes('< 50') && !code.includes('<50')) throw new Error('Task Failed: You must check for health less than 50.'); if (sqlResults.length !== 2) throw new Error('Task Failed: Your query should have returned exactly 2 rows (Gamma and Delta).');"
+---
+
+In JavaScript, you used `array.filter()` to remove items you didn't want. In SQL, we use the **WHERE** clause. 
+
+It is always faster to filter data *inside the database* rather than sending 10,000 rows over the internet and filtering it on the frontend.
+
+### The Syntax
+The `WHERE` clause comes immediately after the `FROM` statement.
+
+```sql
+SELECT * FROM users WHERE role = 'admin';
+```
+*(Crucial Note: In JavaScript, you use `===` for equality and double quotes `" "` for strings. In SQL, you use a single `=` for equality and single quotes `' '` for strings!)*
+
+### Logic Operators
+You can use standard mathematical operators to filter numbers, and you can combine conditions using `AND` / `OR`.
+
+```sql
+-- Find nodes with low health
+SELECT * FROM nodes WHERE health < 50;
+
+-- Find specific active nodes
+SELECT * FROM nodes WHERE status = 'online' AND network = 'mainnet';
+```
+
+### Your Assignment
+You are triage for the network. I have seeded 4 nodes into the database. 
+Write a query to retrieve all columns `*` from the `nodes` table, but filter the results so you only see the nodes `WHERE` the `health` is less than `50`. 
