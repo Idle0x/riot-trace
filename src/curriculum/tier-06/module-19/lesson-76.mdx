@@ -1,0 +1,36 @@
+---
+tierId: 6
+moduleId: 19
+lessonId: 76
+title: "The Linked List: Memory Chains"
+xpReward: 40
+scenario: "Create three Node instances with values 10, 20, and 30. Link node1's next property to node2, and node2's next property to node3."
+mode: "terminal"
+startingCode: "class Node {\n  constructor(value) {\n    this.value = value;\n    this.next = null;\n  }\n}\n\n// 1. Instantiate node1, node2, node3\n\n\n// 2. Link them together\n\n\n// 3. Log node1.next.next.value\n"
+syntaxHint: "node1.next = node2;"
+validationLogic: "if (!code.includes('new Node(10)')) throw new Error('Task Failed: Must instantiate nodes with the correct values.'); if (!code.includes('node1.next = node2') || !code.includes('node2.next = node3')) throw new Error('Task Failed: You must link the nodes in sequence.'); if (!logs.some(l => l.includes('30'))) throw new Error('Task Failed: Did not log the value of the third node by traversing from the first node.');"
+---
+
+Underneath the hood, a JavaScript Array requires a continuous, unbroken block of physical memory in your RAM. If you need an array of 10 million items, your computer might struggle to find a single, unbroken block of memory that large.
+
+A **Linked List** solves this by scattering data randomly throughout the computer's memory.
+
+
+
+### Nodes and Pointers
+In a Linked List, every piece of data is wrapped in an object called a `Node`. 
+A Node contains two things:
+1. **Value:** The actual data.
+2. **Next:** A pointer (memory address) telling the computer exactly where to find the next node in the chain.
+
+Because each node points to the next, the data does not need to sit next to each other physically.
+
+### Traversing the Chain
+You cannot jump straight to index `[5]` in a Linked List. To find the 5th item, you must start at the 1st item, follow its pointer to the 2nd, follow its pointer to the 3rd, and so on. Searching is always $O(n)$. 
+
+However, inserting a new item at the very beginning of a Linked List is $O(1)$ (Instant), whereas adding an item to the beginning of an Array is $O(n)$ because every other item has to shift its index over by one.
+
+### Your Assignment
+We are building a manual chain. 
+I have provided the `Node` class. Instantiate three separate nodes with the values `10`, `20`, and `30`. 
+Then, manually set `node1.next` to equal `node2`, and `node2.next` to equal `node3`. Finally, traverse the chain by logging `node1.next.next.value`.
