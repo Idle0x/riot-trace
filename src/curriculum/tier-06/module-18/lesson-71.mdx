@@ -1,0 +1,52 @@
+---
+tierId: 6
+moduleId: 18
+lessonId: 71
+title: "The Hash Map: Instant Lookup"
+xpReward: 40
+scenario: "Convert the array of node objects into a Dictionary (Hash Map) object where the keys are the node IDs. Then use the map to look up node 'C'."
+mode: "terminal"
+startingCode: "const nodesArray = [\n  { id: 'A', health: 100 },\n  { id: 'B', health: 90 },\n  { id: 'C', health: 45 }\n];\n\nconst nodeMap = {};\n\n// 1. Loop through nodesArray and populate nodeMap\n\n\n// 2. Log node 'C' directly from the nodeMap\n"
+syntaxHint: "for (const item of array) {\n  map[item.id] = item;\n}\nconsole.log(map['C']);"
+validationLogic: "if (!nodeMap['C']) throw new Error('Task Failed: You did not correctly populate the nodeMap object.'); if (nodeMap['C'].health !== 45) throw new Error('Task Failed: The value in the map must be the whole node object.'); if (!logs.some(l => l.includes('45'))) throw new Error('Task Failed: Did not log the correct node from the map.');"
+---
+
+If searching an array for a specific user takes $O(n)$ time, how does a database of 1 billion users find your profile instantly when you log in?
+
+It doesn't use an array. It uses a **Hash Map** (also called a Dictionary).
+
+### The Power of Objects
+In JavaScript, an Object is a Hash Map. Retrieving a value from an object using its key (e.g., `map["target"]`) is an **$O(1)$ Constant Time** operation. The machine does not have to search; it mathematically calculates the exact memory address of that key.
+
+### Converting $O(n)$ to $O(1)$
+If you know you are going to look up data frequently, you should convert your Array into a Map.
+
+```javascript
+const usersArray = [
+  { id: "u1", name: "Alice" },
+  { id: "u2", name: "Bob" }
+];
+
+// 1. Create the empty Map
+const usersMap = {};
+
+// 2. Populate the Map (This loop takes O(n) time, but we only do it ONCE)
+for (const user of usersArray) {
+  usersMap[user.id] = user; 
+}
+
+/* usersMap now looks like this:
+{
+  "u1": { id: "u1", name: "Alice" },
+  "u2": { id: "u2", name: "Bob" }
+}
+*/
+
+// 3. INSTANT LOOKUP! (O(1) time forever)
+console.log(usersMap["u2"].name); // "Bob"
+```
+
+### Your Assignment
+You are receiving raw array data from an API. You need to convert it into a Hash Map for high-performance routing. 
+Loop through `nodesArray`. For every node, add a new key to `nodeMap` using the node's `id`, and set the value to the node itself. 
+Finally, use your new $O(1)$ map to directly log node `'C'`.
