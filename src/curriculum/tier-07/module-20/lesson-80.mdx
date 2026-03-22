@@ -1,0 +1,31 @@
+---
+tierId: 7
+moduleId: 20
+lessonId: 80
+title: "Data Hydration: Injecting the Glass"
+xpReward: 40
+scenario: "You have a blank UI. Write a useEffect that triggers on mount, sets the status to 'loading', waits 500ms, then 'hydrates' the data state with the mock array and sets status to 'success'."
+mode: "dom"
+startingCode: "const mockDB = [{id: 1, name: 'Mainnet'}, {id: 2, name: 'Testnet'}];\n\nfunction NetworkView() {\n  const [status, setStatus] = React.useState('idle');\n  const [data, setData] = React.useState([]);\n\n  React.useEffect(() => {\n    // 1. Set loading\n    \n    // 2. Simulate network delay with setTimeout\n    // 3. Set data to mockDB and status to success\n    \n  }, []);\n\n  if (status === 'loading') return <div>Connecting...</div>;\n  if (status === 'success') return <div>{data.map(d => <span key={d.id}>{d.name} </span>)}</div>;\n  return <div>Standby</div>;\n}\nrender(<NetworkView />);\n"
+syntaxHint: "setStatus('loading');\nsetTimeout(() => {\n  setData(mockDB);\n  setStatus('success');\n}, 500);"
+validationLogic: "if (!code.includes('setTimeout')) throw new Error('Task Failed: You must simulate the async delay.'); if (!code.includes('setData(mockDB)')) throw new Error('Task Failed: You must hydrate the state with the mock database array.');"
+---
+
+When the browser first loads your HTML, it is empty. It has no data. The process of fetching data from the Server and injecting it into the Client's React components is called **Hydration**.
+
+### The Hydration Pipeline
+You combine `useEffect` (for the side effect of fetching data) and your FSM (for managing the UI during the delay).
+
+1. Component mounts (Status: `idle`).
+2. `useEffect` fires immediately. It sets Status to `loading`.
+3. The glass repaints to show a spinning wheel.
+4. The `fetch` request goes out to the database.
+5. The data returns. You save it into state (`setData`).
+6. You set Status to `success`.
+7. The glass repaints, mapping the new data to the screen.
+
+If the network fails at step 5, you catch the error and set Status to `error`. 
+
+### Your Assignment
+You are hydrating the `NetworkView` component. 
+Inside the `useEffect`, write the exact pipeline: set the status to `'loading'`, start a `setTimeout` for 500ms, and inside that timeout, inject the `mockDB` into your `data` state and flip the status to `'success'`. 
