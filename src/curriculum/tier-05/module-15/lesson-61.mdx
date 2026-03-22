@@ -1,0 +1,37 @@
+---
+tierId: 5
+moduleId: 15
+lessonId: 61
+title: "ORDER BY & LIMIT: Sorting the Output"
+xpReward: 40
+scenario: "Write a query to SELECT all columns FROM the 'transactions' table. ORDER them BY amount in DESCENDING order, and LIMIT the output to exactly 2 rows."
+mode: "sql"
+dbSeed: "CREATE TABLE transactions (id INTEGER PRIMARY KEY, hash TEXT, amount INTEGER); INSERT INTO transactions (hash, amount) VALUES ('0x1A', 500), ('0x2B', 1200), ('0x3C', 300), ('0x4D', 8500);"
+startingCode: "-- Write your sorted and limited query below\n\n"
+syntaxHint: "SELECT * FROM table_name ORDER BY column_name DESC LIMIT 5;"
+validationLogic: "const upperCode = code.toUpperCase(); if (!upperCode.includes('ORDER BY')) throw new Error('Task Failed: You must use ORDER BY.'); if (!upperCode.includes('DESC')) throw new Error('Task Failed: You must sort in descending order (DESC).'); if (!upperCode.includes('LIMIT 2')) throw new Error('Task Failed: You must restrict the output to 2 rows using LIMIT 2.'); if (sqlResults.length !== 2) throw new Error('Task Failed: Did not return exactly 2 rows.'); if (sqlResults[0][2] !== 8500) throw new Error('Task Failed: The first row returned was not the largest amount. Check your sorting.');"
+---
+
+You know how to get specific data. Now you need to order it. 
+If a user wants to see their 10 most recent transactions, you don't ask the database for their entire 5-year history. You ask the database to sort it by date and stop after 10 rows.
+
+### Sorting Data (ORDER BY)
+Just like `array.sort()`, SQL allows you to order data based on a specific column. It goes *after* the `WHERE` clause (if you have one).
+
+* `ASC` = Ascending (Smallest to Largest / A to Z). This is the default if you don't specify.
+* `DESC` = Descending (Largest to Smallest / Z to A).
+
+```sql
+SELECT * FROM transactions ORDER BY amount DESC;
+```
+
+### Restricting Output (LIMIT)
+If you only want the top 5 results, you use `LIMIT`. This is always the absolute last command in your query.
+
+```sql
+-- "Get the 3 largest transactions"
+SELECT * FROM transactions ORDER BY amount DESC LIMIT 3;
+```
+
+### Your Assignment
+We need to find the "Whale" transactions. Look at the Crucible. Query the `transactions` table. Sort it by `amount` from largest to smallest, and chop the list off so we only see the top `2`. 
