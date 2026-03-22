@@ -1,0 +1,30 @@
+---
+tierId: 6
+moduleId: 19
+lessonId: 75
+title: "The Queue: FIFO Processing"
+xpReward: 40
+scenario: "Finish the Queue class. Implement enqueue(item) to add to the back, and dequeue() to remove and return the item at the front."
+mode: "terminal"
+startingCode: "class NodeQueue {\n  constructor() {\n    this.items = [];\n  }\n\n  // 1. Write enqueue(item) - Adds to the end\n  \n\n  // 2. Write dequeue() - Removes from the front\n  \n}\n\nconst pendingNodes = new NodeQueue();\npendingNodes.enqueue('Node_Alpha');\npendingNodes.enqueue('Node_Beta');\nconsole.log(pendingNodes.dequeue()); // Should log 'Node_Alpha'\n"
+syntaxHint: "enqueue(item) { this.items.push(item); }\ndequeue() { return this.items.shift(); }"
+validationLogic: "const testQ = new NodeQueue(); testQ.enqueue('1'); testQ.enqueue('2'); const first = testQ.dequeue(); if (first !== '1') throw new Error('Task Failed: dequeue() did not return the first item added (FIFO).'); if (testQ.items.length !== 1) throw new Error('Task Failed: dequeue() did not remove the item from the queue.'); if (!logs.some(l => l.includes('Node_Alpha'))) throw new Error('Task Failed: Did not log the correct dequeued node.');"
+---
+
+A **Queue** is the exact opposite of a Stack. It follows the **FIFO** principle: *First In, First Out*.
+
+Think of a line at a coffee shop. The first person to enter the line is the first person to get served. 
+
+
+
+### The Queue Methods
+In computer science, the actions of a Queue have specific names:
+* **Enqueue:** To join the back of the line. (In JS arrays, this is `.push()`).
+* **Dequeue:** To leave the front of the line. (In JS arrays, this is `.shift()`).
+
+### When to use a Queue
+If a server receives 1,000 requests in a single second, it cannot process them all instantly. It places them in a Queue. The server then pulls them off the front of the line one by one, ensuring the oldest request gets handled first. This prevents the server from crashing and guarantees fairness.
+
+### Your Assignment
+You are building the traffic controller for incoming node connections. 
+Complete the `NodeQueue` class. Add an `enqueue(item)` method that adds to the end of the array. Add a `dequeue()` method that removes and returns the very first item from the array.
