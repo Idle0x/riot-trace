@@ -1,0 +1,30 @@
+---
+tierId: 6
+moduleId: 18
+lessonId: 73
+title: "MODULE 18 BOSS FIGHT: O(N) Routing"
+xpReward: 150
+scenario: "Write an O(N) algorithm that finds two node bandwidths in the array that add up EXACTLY to the target bandwidth. Return them as an array: [nodeA, nodeB]."
+mode: "terminal"
+startingCode: "function findPair(bandwidths, target) {\n  // 1. Initialize a Hash Map or Set\n  \n  // 2. Loop through the bandwidths array ONE TIME\n  \n  // 3. Calculate the 'difference' needed to hit the target\n  \n  // 4. Check if that difference exists in your Map/Set\n  \n  // 5. If yes, return the pair. If no, add the current bandwidth to the Map/Set.\n  \n}\n"
+syntaxHint: ""
+validationLogic: "const t0 = performance.now(); const largeArr = Array.from({length: 40000}, (_, i) => i * 2); const res = findPair(largeArr, 79996); const t1 = performance.now(); if (!res || res.length !== 2 || res[0] + res[1] !== 79996) throw new Error('Task Failed: Did not return the correct pair of bandwidths that sum to the target.'); if ((t1 - t0) > 40) throw new Error(`TIME LIMIT EXCEEDED: Your algorithm took ${Math.round(t1-t0)}ms. You wrote a nested loop (O(N²)). You must use a Map or Set to achieve O(N) time.`);"
+---
+
+### EXECUTION REQUIREMENTS
+This is a Boss Fight. There are no hints. You must achieve **O(N) Time Complexity**.
+
+You are writing the pairing logic for Xandeum pNodes. You are given an array of available `bandwidths`, and a `target` bandwidth. 
+You must find the **two** bandwidths in the array that add up exactly to the target, and return them.
+
+**The Catch:**
+If you use a nested loop (checking every number against every other number), my validation engine will feed your function an array of 40,000 nodes. A nested loop will require 1.6 billion operations. The engine will detect the CPU strain, flag a `TIME LIMIT EXCEEDED` error, and fail your build.
+
+**The Strategy:**
+1. Loop through the array **exactly once**.
+2. For each number, calculate what its "partner" would need to be to hit the target (`target - currentNumber`).
+3. Check if you have already seen that partner by looking inside a `Set` or Hash Map (Instant O(1) lookup).
+4. If you haven't seen it, store the `currentNumber` in the Set for future numbers to find.
+5. If you have seen it, you found your pair! Return them as an array.
+
+Execute perfectly.
