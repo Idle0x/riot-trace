@@ -1,0 +1,48 @@
+---
+tierId: 7
+moduleId: 20
+lessonId: 79
+title: "Finite State Machines: Managing Chaos"
+xpReward: 40
+scenario: "Build a UI component with a 'status' state ('idle', 'loading', 'success'). Render a different <div> depending on which state is currently active."
+mode: "dom"
+startingCode: "function SystemBoot() {\n  const [status, setStatus] = React.useState('idle');\n\n  // 1. Write conditional returns based on 'status'\n  if (status === 'idle') return <button onClick={() => setStatus('loading')}>Boot Sequence</button>;\n  \n  // Add 'loading' and 'success' UI returns here\n  \n}\nrender(<SystemBoot />);\n"
+syntaxHint: "if (status === 'loading') return <div>Loading...</div>;"
+validationLogic: "const btn = domNode.querySelector('button'); if (!btn) throw new Error('Task Failed: Initial idle state must render the button.'); btn.click(); if (!domNode.innerHTML.includes('Loading') && !domNode.innerHTML.includes('loading')) throw new Error('Task Failed: State did not transition to a loading UI.');"
+---
+
+When fetching data across the Client-Server boundary, your UI exists in time. 
+
+A common mistake is using multiple boolean variables to track this:
+`const [isLoading, setIsLoading] = React.useState(false);`
+`const [isError, setIsError] = React.useState(false);`
+`const [isSuccess, setIsSuccess] = React.useState(false);`
+
+What happens if `isLoading` and `isError` are both `true` at the same time? The UI breaks. This is an "Impossible State".
+
+
+
+### The State Machine Pattern
+Instead of multiple booleans, enterprise apps use a **Finite State Machine (FSM)**. You use a single string variable that can only ever be one of a few strict values: `'idle'`, `'loading'`, `'success'`, or `'error'`. 
+
+Because it can only be one value at a time, impossible states are mathematically prevented.
+
+```jsx
+function Dashboard() {
+  const [status, setStatus] = React.useState('idle');
+
+  // We explicitly map out every possible reality of the glass
+  if (status === 'loading') return <div>Spinning Wheel...</div>;
+  if (status === 'error') return <div className="text-red">Connection Failed</div>;
+  if (status === 'success') return <div>Data Loaded!</div>;
+
+  // Fallback (Idle)
+  return <button onClick={() => setStatus('loading')}>Fetch Data</button>;
+}
+```
+
+### Your Assignment
+Look at the `SystemBoot` component. It starts in the `'idle'` state. 
+Write the conditional `if` statements so that if the status is `'loading'`, it returns a `<div>` containing the word `"Loading"`. If it is `'success'`, it returns a `<div>` containing the word `"Success"`. 
+
+When you hit build, the engine will physically click your idle button to ensure the FSM transitions to the loading UI.
