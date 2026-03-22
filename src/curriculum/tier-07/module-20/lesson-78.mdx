@@ -1,0 +1,32 @@
+---
+tierId: 7
+moduleId: 20
+lessonId: 78
+title: "The Client-Server Boundary"
+xpReward: 40
+scenario: "Write a mock API function 'fetchNodeStatus' that simulates a 500ms server delay, then returns an object { status: 'Operational', latency: 12 }. Await and log it."
+mode: "terminal"
+startingCode: "function fetchNodeStatus() {\n  // 1. Return a Promise that resolves after 500ms\n  \n}\n\nasync function init() {\n  // 2. Await the mock server and log the result\n  \n}\ninit();\n"
+syntaxHint: "return new Promise(res => setTimeout(() => res(data), 500));"
+validationLogic: "if (!code.includes('new Promise')) throw new Error('Task Failed: You must simulate the server boundary using a Promise.'); if (!code.includes('setTimeout')) throw new Error('Task Failed: You must simulate network latency using setTimeout.'); if (!logs.some(l => l.includes('Operational') && l.includes('12'))) throw new Error('Task Failed: Did not successfully await and log the mocked server data.');"
+---
+
+When you build a platform like a sovereign financial operating system, you are actually building two completely separate applications that talk to each other.
+
+
+
+### 1. The Client (Frontend)
+This is the React code running in the user's browser. It is responsible for painting the glass (DOM), managing temporary State, and listening for User Events. **The Client cannot trust the user.** A user can open the developer tools and modify your React code. You never put secret API keys or raw database credentials in the Client.
+
+### 2. The Server (Backend)
+This is the Node.js/Python code running on a secure machine. It holds the database (`sqlite`, `postgres`), handles authentication, and processes heavy algorithms. **The Server is the source of truth.**
+
+### The Boundary
+The Client and Server are separated by the internet. They can only communicate via HTTP requests (`fetch`). Because of physical distance, this communication always takes time. 
+
+In System Design, you must explicitly design for this delay. If you assume the database will reply instantly, your UI will feel broken and unresponsive to the user.
+
+### Your Assignment
+We are simulating the boundary. 
+Write the `fetchNodeStatus` function to return a `Promise`. Inside the Promise, use `setTimeout` to wait 500 milliseconds, and then `resolve` the object `{ status: 'Operational', latency: 12 }`. 
+Finally, `await` that function inside `init()` and log the result.
