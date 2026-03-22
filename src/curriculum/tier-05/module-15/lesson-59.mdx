@@ -1,0 +1,52 @@
+---
+tierId: 5
+moduleId: 15
+lessonId: 59
+title: "The SELECT Statement: Querying the Ledger"
+xpReward: 40
+scenario: "Write a SQL query to retrieve all columns and all rows from the 'nodes' table."
+mode: "sql"
+dbSeed: "CREATE TABLE nodes (id INTEGER PRIMARY KEY, name TEXT, network TEXT, health INTEGER); INSERT INTO nodes (name, network, health) VALUES ('Alpha', 'mainnet', 95), ('Beta', 'devnet', 82), ('Gamma', 'mainnet', 45);"
+startingCode: "-- 1. Write your SELECT query below\n\n"
+syntaxHint: "SELECT * FROM table_name;"
+validationLogic: "const upperCode = code.toUpperCase(); if (!upperCode.includes('SELECT')) throw new Error('Task Failed: You must use the SELECT keyword.'); if (!code.includes('*')) throw new Error('Task Failed: Use the * wildcard to select all columns.'); if (!upperCode.includes('FROM NODES')) throw new Error('Task Failed: You must query FROM the nodes table.'); if (sqlResults.length === 0) throw new Error('Task Failed: Your query returned no results. Check your syntax.'); if (sqlResults.length !== 3) throw new Error('Task Failed: Expected exactly 3 rows. Did you filter something by accident?');"
+---
+
+Arrays in JavaScript are temporary. If the server crashes, the array is destroyed. 
+To store mission-critical data permanently, we use a **Relational Database** (like PostgreSQL, MySQL, or SQLite).
+
+In a relational database, data is not stored as loose objects. It is stored in strict, highly organized **Tables**.
+
+
+
+### The Anatomy of a Table
+Think of a table exactly like a spreadsheet.
+* **Table:** The spreadsheet itself (e.g., `nodes`).
+* **Columns:** The strict categories of data (e.g., `id`, `name`, `health`).
+* **Rows:** The actual individual records (e.g., Node Alpha, Node Beta).
+
+### The SELECT Keyword
+You cannot write JavaScript to ask a database for data. You must write **SQL**. 
+To read data, you use the `SELECT` statement. 
+
+```sql
+-- This gets the specific 'name' and 'health' columns from the 'nodes' table
+SELECT name, health FROM nodes;
+```
+
+*(Note: In SQL, comments start with `--` instead of `//`)*.
+
+### The Wildcard (*)
+If you want to grab *every single column* without typing them all out manually, you use the asterisk `*` (pronounced "star" or "wildcard").
+
+```sql
+-- Read as: "Select ALL columns from the users table"
+SELECT * FROM users;
+```
+
+**Rule of SQL:** Every complete SQL command should end with a semicolon `;`. This tells the engine the query is finished. 
+
+### Your Assignment
+I have silently spun up a WebAssembly database in your browser and injected a table called `nodes`. 
+
+In the Crucible, write a single SQL query to `SELECT` all columns (`*`) `FROM` the `nodes` table. Don't forget your semicolon. When you hit Build, the engine will execute the query and print the raw rows to your terminal.
