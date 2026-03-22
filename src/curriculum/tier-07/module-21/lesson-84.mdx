@@ -1,0 +1,30 @@
+---
+tierId: 7
+moduleId: 21
+lessonId: 84
+title: "CAPSTONE STAGE 3: The Glass"
+xpReward: 1000
+scenario: "Build the final Xandeum Pulse Dashboard. Implement a Finite State Machine, hydrate the mock data on mount using useEffect, map the active nodes, and provide a manual refresh button."
+mode: "dom"
+startingCode: "const mockNetworkData = [\n  { id: '1A', name: 'Alpha_Node', status: 'Active' },\n  { id: '2B', name: 'Beta_Node', status: 'Active' }\n];\n\nfunction PulseDashboard() {\n  // 1. Initialize 'status' state ('idle', 'loading', 'success', 'error')\n  // 2. Initialize 'nodes' state (empty array)\n\n  const syncNetwork = () => {\n    // 3. Set loading, wait 400ms, then set nodes to mockNetworkData and status to success\n    \n  };\n\n  // 4. Write a useEffect that runs syncNetwork() EXACTLY ONCE on mount\n  \n\n  // 5. Write the UI returns for 'loading', 'error', and 'success' states.\n  // 6. In the success UI, map the nodes AND include a <button onClick={syncNetwork}>Refresh</button>\n  \n}\n\nrender(<PulseDashboard />);\n"
+syntaxHint: ""
+validationLogic: "if (!code.includes('React.useEffect') || !code.includes('[]')) throw new Error('Capstone Failed: You must use useEffect with an empty dependency array to fetch on mount.'); const btn = domNode.querySelector('button'); if (!btn) throw new Error('Capstone Failed: I cannot find your Refresh button in the success UI.'); if (!domNode.innerHTML.includes('Alpha_Node') || !domNode.innerHTML.includes('Beta_Node')) throw new Error('Capstone Failed: The DOM did not render the mapped network data.'); if (!code.includes('status === \\'loading\\'')) throw new Error('Capstone Failed: You must handle the loading state UI.');"
+---
+
+### STAGE 3: THE GLASS
+This is the absolute final milestone of the curriculum. The database is secure. The routing algorithm is $O(N)$. Now, you must paint the glass.
+
+You are building the full React UI for the Xandeum Pulse Dashboard. It must be resilient, state-driven, and perfectly mapped.
+
+### EXECUTION REQUIREMENTS
+1.  Initialize a Finite State Machine (`status`) starting at `'idle'`.
+2.  Initialize your data state (`nodes`) as an empty array `[]`.
+3.  Complete the `syncNetwork` function. It must set the status to `'loading'`, wait 400ms using `setTimeout`, and then hydrate the `nodes` state with the `mockNetworkData` while flipping the status to `'success'`.
+4.  Write a `useEffect` hook with an empty dependency array `[]` that calls `syncNetwork()` so the dashboard automatically fetches data the second it opens.
+5.  Write your conditional UI returns.
+    * If `'loading'`, return a `<div>` that says `"Syncing Pulse..."`.
+    * If `'success'`, return a `<div>`. Inside it, `.map()` over your `nodes` and render their names. **Crucially**, also include a `<button>` with an `onClick` that triggers `syncNetwork()` again, so the user can manually refresh the dashboard.
+
+*Validation Protocol:* The engine will verify your effect dependencies, check for the loading state implementation, scan the DOM for the properly mapped node names, and verify the physical existence of your interactive Refresh button.
+
+Execute. 
