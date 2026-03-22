@@ -1,0 +1,27 @@
+---
+tierId: 7
+moduleId: 20
+lessonId: 81
+title: "MODULE 20 BOSS FIGHT: FSM Architecture"
+xpReward: 150
+scenario: "Architect a complete FSM component. It must fetch data, handle the loading state, handle a simulated error state, and correctly map the success data to the DOM."
+mode: "dom"
+startingCode: "function Ledger() {\n  const [status, setStatus] = React.useState('idle');\n  const [logs, setLogs] = React.useState([]);\n\n  const fetchLogs = () => {\n    setStatus('loading');\n    setTimeout(() => {\n      // Simulate a 50% chance of network failure\n      const didFail = Math.random() > 0.5;\n      \n      if (didFail) {\n        // 1. Handle error state\n        \n      } else {\n        // 2. Handle success state and hydrate with [{id: 1, tx: '0xABC'}]\n        \n      }\n    }, 400);\n  };\n\n  // 3. Return the correct JSX for all 4 states (idle, loading, error, success)\n  \n}\nrender(<Ledger />);\n"
+syntaxHint: ""
+validationLogic: "if (!code.includes('setStatus(\\'error\\')')) throw new Error('Task Failed: You must handle the error state.'); if (!code.includes('setStatus(\\'success\\')') || !code.includes('setLogs')) throw new Error('Task Failed: You must handle the success state and hydrate the logs.'); if (!code.includes('0xABC')) throw new Error('Task Failed: You must hydrate the exact requested mock data.'); if (!code.includes('if (status === \\'loading\\')')) throw new Error('Task Failed: You must return distinct UI for the loading state.');"
+---
+
+### EXECUTION REQUIREMENTS
+This is a Boss Fight. You are wiring up a production-grade component architecture that can survive unpredictable network conditions. 
+
+1. Look at the `Ledger` component. It has `status` and `logs` state.
+2. Inside `fetchLogs`, complete the conditional logic. 
+   * If `didFail` is true, transition the machine to the `'error'` state.
+   * If `didFail` is false, transition to the `'success'` state AND hydrate `logs` with the array `[{id: 1, tx: '0xABC'}]`.
+3. At the bottom of the component, write the UI returns for all 4 states:
+   * `'idle'`: Return a button with an `onClick` that fires `fetchLogs()`.
+   * `'loading'`: Return a `<div>` that says `"Fetching..."`.
+   * `'error'`: Return a `<div>` that says `"Network Error"`.
+   * `'success'`: Map over the `logs` state and return a `<div>` for each transaction containing the `tx` string. Don't forget the `key` prop!
+
+Execute perfectly.
