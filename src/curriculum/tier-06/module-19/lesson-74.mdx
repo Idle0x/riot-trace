@@ -1,0 +1,29 @@
+---
+tierId: 6
+moduleId: 19
+lessonId: 74
+title: "The Stack: LIFO Memory"
+xpReward: 40
+scenario: "Finish the Stack class. Implement the push() method to add an item to the top, and the pop() method to remove and return the top item."
+mode: "terminal"
+startingCode: "class TransactionStack {\n  constructor() {\n    this.items = [];\n  }\n\n  // 1. Write the push(item) method\n  \n\n  // 2. Write the pop() method\n  \n}\n\n// 3. Test it\nconst history = new TransactionStack();\nhistory.push('TX_1');\nhistory.push('TX_2');\nconsole.log(history.pop()); // Should log 'TX_2'\n"
+syntaxHint: "push(item) { this.items.push(item); }\npop() { return this.items.pop(); }"
+validationLogic: "const testStack = new TransactionStack(); testStack.push('A'); testStack.push('B'); const popped = testStack.pop(); if (popped !== 'B') throw new Error('Task Failed: pop() did not return the last item added.'); if (testStack.items.length !== 1) throw new Error('Task Failed: pop() did not remove the item from the stack.'); if (!logs.some(l => l.includes('TX_2'))) throw new Error('Task Failed: Did not log the popped transaction from your test execution.');"
+---
+
+A **Stack** is a data structure that follows the **LIFO** principle: *Last In, First Out*. 
+
+Think of it like a stack of plates in a cafeteria. You can only add a new plate to the very top, and you can only remove a plate from the very top. You cannot pull a plate from the middle without shattering the stack.
+
+[attachment_0](attachment)
+
+### Why not just use an Array?
+We *do* use an array under the hood to store the data. However, standard arrays give developers too much power. You can use `.splice()` to delete data from the middle, or `.unshift()` to add data to the beginning. 
+
+If you are building an "Undo History" feature, allowing another engineer to inject a random action into the middle of the history timeline will corrupt the entire application. 
+
+By wrapping the array inside a `Class`, we **restrict access**. We only expose a `push` method and a `pop` method. This guarantees the data can only ever flow in a strict LIFO order.
+
+### Your Assignment
+You are building the undo state for a financial ledger. 
+Complete the `TransactionStack` class. Add a `push(item)` method that appends the item to `this.items`. Add a `pop()` method that removes and returns the last item from `this.items`.
