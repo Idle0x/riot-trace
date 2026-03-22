@@ -1,0 +1,39 @@
+---
+tierId: 5
+moduleId: 16
+lessonId: 63
+title: "INSERT: Writing to the Ledger"
+xpReward: 40
+scenario: "Insert a new record into the 'nodes' table. The name should be 'Epsilon' and the network should be 'mainnet'."
+mode: "sql"
+dbSeed: "CREATE TABLE nodes (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, network TEXT);"
+startingCode: "-- Write your INSERT query below\n\n"
+syntaxHint: "INSERT INTO table_name (column1, column2) VALUES ('value1', 'value2');"
+validationLogic: "const upperCode = code.toUpperCase(); if (!upperCode.includes('INSERT INTO')) throw new Error('Task Failed: You must use the INSERT INTO keyword.'); if (!upperCode.includes('VALUES')) throw new Error('Task Failed: You must use the VALUES keyword.'); if (!code.includes('Epsilon') || !code.includes('mainnet')) throw new Error('Task Failed: You must insert \\'Epsilon\\' and \\'mainnet\\'.');"
+---
+
+When a new user signs up for *riot-sop*, or a new node connects to *Xandeum Pulse*, you must write that data into the database permanently. 
+
+In SQL, we create new rows using the `INSERT INTO` statement.
+
+[attachment_0](attachment)
+
+### The Syntax Map
+Inserting data requires two pairs of parentheses. The first pair targets the **columns**. The second pair holds the actual **values**.
+
+```sql
+-- 1. Specify the table and the columns you want to write to
+INSERT INTO users (username, role) 
+-- 2. Provide the exact values in the exact same order!
+VALUES ('Cipher', 'admin');
+```
+
+### Auto-Incrementing IDs
+Notice that we did not insert an `id` number. In almost all relational databases, the `id` column is set up as a `PRIMARY KEY AUTOINCREMENT`. This means the database acts like an automatic counter. 
+
+When you insert a row, the database automatically assigns it `id: 1`. The next row gets `id: 2`. You never have to manually manage IDs.
+
+### Your Assignment
+The `nodes` table is currently empty. 
+Write an `INSERT INTO` query to add a new node. You need to target the `name` and `network` columns. The values must be `'Epsilon'` and `'mainnet'`. 
+*(Remember: SQL requires single quotes `' '` for text strings!)*
