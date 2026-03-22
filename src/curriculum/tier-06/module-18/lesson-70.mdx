@@ -1,0 +1,42 @@
+---
+tierId: 6
+moduleId: 18
+lessonId: 70
+title: "Big O: The Cost of Scale"
+xpReward: 40
+scenario: "Write a function 'getFirstNode(nodes)' that returns the first item in an array. Write a second function 'findNode(nodes, target)' that searches the array for a specific ID."
+mode: "terminal"
+startingCode: "function getFirstNode(nodes) {\n  // Return the first item (Index 0)\n  \n}\n\nfunction findNode(nodes, targetId) {\n  // Use a for loop or .find() to return the target node\n  \n}\n"
+syntaxHint: "return array[0];\nreturn array.find(item => item.id === target);"
+validationLogic: "const testArray = Array.from({length: 1000}, (_, i) => ({id: i})); if (getFirstNode(testArray)?.id !== 0) throw new Error('Task Failed: getFirstNode did not return the first item.'); if (findNode(testArray, 999)?.id !== 999) throw new Error('Task Failed: findNode did not return the correct item.');"
+---
+
+How do we measure if code is "fast"? We don't use seconds, because a supercomputer will always run code faster than an old laptop. 
+
+Instead, we measure **how the number of operations grows as the data grows**. This is called **Big O Notation**.
+
+
+
+### $O(1)$: Constant Time (The Holy Grail)
+If an operation takes the exact same amount of effort regardless of whether you have 10 items or 10 billion items, it is $O(1)$.
+
+```javascript
+// Reading the first item of an array is O(1). 
+// The machine knows exactly where index 0 is in memory. 
+// It does not have to look at the rest of the array.
+const first = nodes[0]; 
+```
+
+### $O(n)$: Linear Time (The Standard)
+If you have to search through an array one by one to find something, the cost scales linearly with the data size ($n$). If the array doubles in size, the worst-case search time doubles.
+
+```javascript
+// This is O(n). In the worst case, the node we want 
+// is at the very end, so we must check every single item.
+const target = nodes.find(node => node.id === "Alpha");
+```
+
+### Your Assignment
+We are warming up. In the Crucible, complete the two functions. 
+1. `getFirstNode` is an $O(1)$ operation. Just return the item at index `0`.
+2. `findNode` is an $O(n)$ operation. Use `.find()` or a `for` loop to search the array and return the node where `id === targetId`.
