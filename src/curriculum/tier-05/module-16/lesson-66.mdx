@@ -1,0 +1,27 @@
+---
+tierId: 5
+moduleId: 16
+lessonId: 66
+title: "MODULE 16 BOSS FIGHT"
+xpReward: 150
+scenario: "Write two separate SQL queries. First: UPDATE the balance of user 'Cipher' to 5000. Second: DELETE all rows where the role is 'banned'."
+mode: "sql"
+dbSeed: "CREATE TABLE users (id INTEGER PRIMARY KEY, username TEXT, balance INTEGER, role TEXT); INSERT INTO users (username, balance, role) VALUES ('Cipher', 100, 'user'), ('Hacker', 0, 'banned');"
+startingCode: "-- 1. UPDATE Query\n\n\n-- 2. DELETE Query\n\n"
+syntaxHint: ""
+validationLogic: "const upperCode = code.toUpperCase(); if (!upperCode.includes('UPDATE') || !upperCode.includes('DELETE')) throw new Error('Task Failed: You must write both an UPDATE and a DELETE query.'); if (!upperCode.includes('WHERE')) throw new Error('Task Failed: You are missing WHERE clauses. Unsafe execution halted.'); if (!code.includes('5000') || !code.includes('banned')) throw new Error('Task Failed: You did not use the exact required values (5000 and banned).'); if (!code.includes(';')) throw new Error('Task Failed: When writing multiple queries, you MUST separate them with a semicolon (;).');"
+---
+
+### EXECUTION REQUIREMENTS
+This is a Boss Fight. The terminal is yours. You are running a database cleanup script containing multiple commands. 
+
+**Table:** `users`
+**Columns:** `username`, `balance`, `role`
+
+You must write exactly two SQL statements. 
+**CRITICAL:** Because you are running multiple statements in one script, you **must** place a semicolon `;` at the end of each statement so the database engine knows where one stops and the next begins.
+
+1. Write an `UPDATE` query to change the `balance` to `5000` for the user `WHERE` the `username` is `'Cipher'`.
+2. Write a `DELETE` query to remove any rows `WHERE` the `role` is `'banned'`.
+
+Execute the mutation perfectly.
