@@ -1,0 +1,25 @@
+---
+tierId: 7
+moduleId: 21
+lessonId: 83
+title: "CAPSTONE STAGE 2: The Router"
+xpReward: 200
+scenario: "Write an O(N) function 'findFastest(nodes)' that loops through an array of node objects exactly ONCE and returns the ID of the node with the lowest latency."
+mode: "terminal"
+startingCode: "function findFastest(nodes) {\n  // STAGE 2: THE ALGORITHMIC ROUTER\n  // Return the ID of the node with the lowest latency.\n  // DO NOT use .sort() - it is O(N log N) and will fail the time limit.\n  \n}\n"
+syntaxHint: ""
+validationLogic: "const t0 = performance.now(); const largeArr = Array.from({length: 100000}, (_, i) => ({id: i, latency: 50000 - i})); largeArr.push({id: 'WINNER', latency: -1}); const res = findFastest(largeArr); const t1 = performance.now(); if (res !== 'WINNER') throw new Error('Task Failed: Did not return the correct node ID.'); if ((t1 - t0) > 30) throw new Error(`TIME LIMIT EXCEEDED: Your algorithm took ${Math.round(t1-t0)}ms. You used .sort() or a nested loop. You must use a single O(N) loop to track the lowest value.`);"
+---
+
+### STAGE 2: MIDDLEWARE LOGIC
+The data has been pulled from the database. It is now sitting in the backend server's RAM. Before we send it over the internet to the React frontend, we must process it. 
+
+### EXECUTION REQUIREMENTS
+You are receiving an array of 100,000 node objects. 
+`{ id: '1A', latency: 45 }`
+
+You must write an **$O(N)$ Time Complexity** algorithm to find the node with the lowest `latency`.
+* You cannot use `array.sort()`. Sorting an array takes $O(N \log N)$ time. For 100,000 items, sorting is too slow and will trigger a `TIME LIMIT EXCEEDED` failure.
+* **The Strategy:** Create a variable to track the `lowestLatency` seen so far, and another for the `bestNodeId`. Loop through the array exactly **once**. If the current node's latency is lower than your tracker, update the tracker.
+
+Return the `id` of the winning node.
