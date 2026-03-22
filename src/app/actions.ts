@@ -1,46 +1,63 @@
 "use server";
 
-import { supabase } from "@/lib/supabase";
+import { cookies } from 'next/headers';
+import { createServerClient } from '@supabase/ssr';
 
-export async function saveTaskProgress(userId: string, taskId: number, xpReward: number) {
-  // 1. Check if the user already has progress for this task
-  const { data: existingProgress } = await supabase
-    .from("user_progress")
-    .select("score, next_review_date")
-    .eq("user_id", userId)
-    .eq("task_id", taskId)
-    .single();
+const REWARDS = {
+  theory: 2,
+  drill: 5,
+  task_1: 10,    // Replication
+  task_2: 20,    // Mutation
+  task_3: 40,    // Synthesis
+  boss: 150,     // Module Boss Fight
+  capstone: 500  // Tier Capstone
+};
 
-  const now = new Date();
-  const nextReview = new Date();
-
-  // 2. Simple Spaced Repetition Logic
-  if (existingProgress) {
-    // If they are reviewing it, push the next review out by 3 days
-    nextReview.setDate(now.getDate() + 3);
-  } else {
-    // First time passing: review tomorrow
-    nextReview.setDate(now.getDate() + 1);
-  }
-
-  // 3. Upsert the new progress
-  const { error } = await supabase
-    .from("user_progress")
-    .upsert(
+export async function saveTaskProgress(taskId: string, type: keyof typeof REWARDS) {
+  try {
+    const cookieStore = cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
-        user_id: userId,
-        task_id: taskId,
-        status: "completed",
-        score: existingProgress ? existingProgress.score : xpReward, // Don't give double XP for reviews
-        next_review_date: nextReview.toISOString(),
-      },
-      { onConflict: "user_id, task_id" }
+        cookies: {
+          get(name: string) { return cookieStore.get(name)?.value; },
+        },
+      }
     );
 
-  if (error) {
-    console.error("Failed to save progress:", error);
-    throw new Error("Database update failed.");
-  }
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) throw new Error("Unauthorized");
 
-  return { success: true };
+    const xpToAward = REWARDS[type];
+
+    // 1. Log the Transaction (The Ledger)
+    const { error: ledgerError } = await supabase
+      .from('xp_ledger')
+      .insert({ 
+        user_id: user.id, 
+        amount: xpToAward, 
+        reason: `completion_${type}`, 
+        reference_id: taskId 
+      });
+
+    if (ledgerError) throw ledgerError;
+
+    // 2. Update the Completion State (The Pulse)
+    // This resets the 48-hour decay timer automatically
+    const { error: completionError } = await supabase
+      .from('lesson_completions')
+      .upsert({ 
+        user_id: user.id, 
+        lesson_id: taskId,
+        last_reviewed_at: new Array().toISOString() 
+      }, { onConflict: 'user_id, lesson_id' });
+
+    if (completionError) throw completionError;
+    
+    return { success: true, xp: xpToAward };
+  } catch (error) {
+    console.error("CRITICAL_LEDGER_FAILURE:", error);
+    return { success: false };
+  }
 }
