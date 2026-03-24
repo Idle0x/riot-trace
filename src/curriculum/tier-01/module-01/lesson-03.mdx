@@ -2,48 +2,44 @@
 tierId: 1
 moduleId: 1
 lessonId: 3
-title: "The Logic Gates"
-xpReward: 40
-scenario: "Log the evaluation of 5 > 10. On the next line, fix the provided comparison so it evaluates to true. On the final line, log the typeof the boolean false."
-startingCode: "// 1. Evaluate 5 > 10\n\n// 2. Fix this strict equality check\nconsole.log('true' === true);\n\n// 3. Log typeof false\n"
-syntaxHint: "5 > 3; // true\n10 === 10; // true (strict equality)\ntypeof true; // 'boolean'"
-validationLogic: "if (logs[0] !== 'false') throw new Error('Task 1 Failed: 5 is not greater than 10. It should log false.'); if (logs[1] !== 'true') throw new Error('Task 2 Failed: You must fix the types in the starting code so they strictly equal each other.'); if (logs[2] !== 'boolean') throw new Error('Task 3 Failed: Third log must be the typeof false.');"
+title: "The Logic Gate: Booleans & Conditionals"
+mode: "terminal"
+syntaxHint: "if (10 > 5) { console.log('Passed'); } else { console.log('Failed'); }"
+
+task1Code: "// 1. Replication: Use the strict equality operator (===) to log the evaluation of 100 === 100\n\n"
+task1Logic: "if (!logs.some(l => l === 'true' || l === true) || !code.includes('===')) throw new Error('Task Failed: Must evaluate 100 === 100 and log true.');"
+
+task2Code: "// 2. Mutation: Fix this conditional block so it executes the code inside the 'if' statement\nlet accessLevel = 1;\nif (accessLevel > 5) {\n  console.log('Access Granted');\n} else {\n  console.log('Access Denied');\n}"
+task2Logic: "if (!logs.some(l => l === 'Access Granted')) throw new Error('Task Failed: You must modify the code so the if block executes.');"
+
+task3Code: "// 3. Synthesis: Write an if/else block. If 50 is less than 100, log 'System Stable'. Otherwise, log 'System Overload'.\n\n"
+task3Logic: "if (!logs.some(l => l === 'System Stable') || !code.includes('if') || !code.includes('else')) throw new Error('Task Failed: Must write a complete if/else block that correctly logs System Stable.');"
 ---
 
-Is the user logged in? Is this node healthy? Is the XP above zero? Every conditional, every filter, every auth check — all of it reduces to `true` or `false`. This is the foundation of all decision-making in code.
-
 ### The Boolean
-A boolean has exactly two possible values. They are not strings; do not wrap them in quotes. If you wrap them in quotes, they become dumb text.
-```javascript
-true    
-false   
-```
-
-### Comparison Operators
-These operators compare two values and **always** produce a boolean result.
-```javascript
-5 > 3           // true
-5 < 3           // false
-5 >= 5          // true  (greater than OR equal)
-5 <= 4          // false
-```
-
-### The Golden Rule: `===` vs `==`
-This is one of the most critical concepts in JavaScript.
-
-
-
-* `==` (Loose Equality): Converts types before comparing. This is dangerous and causes unpredictable bugs. Example: `0 == false` returns `true`.
-* `===` (Strict Equality): Never converts types. It checks both VALUE and TYPE. Example: `0 === false` returns `false`.
-
-**RULE: Always use `===`. Never use `==`.**
+The machine only understands binary states: On or Off. True or False. In JavaScript, these are called **Booleans**. We generate them using comparison operators.
 
 ```javascript
-5 === 5         // true
-"5" === 5       // false (String vs Number)
-true === true   // true
-"true" === true // false (String vs Boolean)
+10 > 5    // true
+10 < 5    // false
+10 === 10 // true (Strict Equality - always use 3 equals signs)
+10 !== 5  // true (Strict Inequality)
 ```
 
-### Your Assignment
-In the Crucible, I have given you one broken line of code. Fix it, and write the other two requirements from scratch.
+### Control Flow (If / Else)
+We use Booleans to route the execution of our program. If a condition is true, open one gate. If it's false, open another.
+
+```javascript
+let gasPrice = 45;
+
+if (gasPrice > 50) {
+  console.log("Delaying transaction.");
+} else {
+  console.log("Executing transaction.");
+}
+```
+
+### The Crucible
+* **Task 1 (Replication):** Log a strictly equal boolean expression.
+* **Task 2 (Mutation):** A security clearance check is failing. Modify the code so the `if` block executes successfully.
+* **Task 3 (Synthesis):** Write an entirely new control flow block from scratch using `if` and `else`.
