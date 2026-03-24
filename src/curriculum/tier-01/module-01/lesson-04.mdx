@@ -2,23 +2,36 @@
 tierId: 1
 moduleId: 1
 lessonId: 4
-title: "MODULE 01 BOSS FIGHT"
-xpReward: 150
-scenario: "1. Log the exact string: [INITIALIZING_NODE...] | 2. Calculate and log total bandwidth: 1024 * 8 | 3. Log a strict equality check: does 'MAINNET' equal 'DEVNET' | 4. Log the typeof the result from step 3."
-startingCode: "// EXECUTE OBJECTIVE\n"
-syntaxHint: ""
-validationLogic: "if (logs[0] !== '[INITIALIZING_NODE...]') throw new Error('Task 1 Failed: Exact string match required.'); if (logs[1] !== '8192') throw new Error('Task 2 Failed: Math calculation incorrect.'); if (logs[2] !== 'false') throw new Error('Task 3 Failed: Strict equality check incorrect.'); if (logs[3] !== 'boolean') throw new Error('Task 4 Failed: Typeof check incorrect.');"
+title: "The Function: Packaging Logic"
+mode: "terminal"
+syntaxHint: "function calculate(x) { return x * 2; } \ncalculate(5);"
+
+task1Code: "// 1. Replication: Call the existing systemBoot() function.\nfunction systemBoot() {\n  console.log('Engine Started');\n}\n\n// Call it below this line:\n"
+task1Logic: "if (!logs.some(l => l === 'Engine Started')) throw new Error('Task Failed: You must call the systemBoot function.');"
+
+task2Code: "// 2. Mutation: This function calculates ROI but doesn't hand the data back. Add the 'return' keyword.\nfunction getProfit(revenue, cost) {\n  let profit = revenue - cost;\n  // Fix the line below\n  profit;\n}\n\nconsole.log(getProfit(1000, 200));"
+task2Logic: "if (!logs.some(l => l === '800' || l === 800) || !code.includes('return')) throw new Error('Task Failed: The function must use the return keyword to pass data back out.');"
+
+task3Code: "// 3. Synthesis: Write a function named multiply that takes two parameters (a, b) and returns their product. Then call it and log the result.\n\n"
+task3Logic: "if (!code.includes('function multiply') || !code.includes('return') || !logs.length) throw new Error('Task Failed: Must define multiply(a,b), return the math, and log the output.');"
 ---
 
-### EXECUTION REQUIREMENTS
-This is a Boss Fight. The terminal is yours. There is no theory pane. There is no starting code. There are no syntax hints.
+### Encapsulation
+Writing code line-by-line is fine for scripts, but software is built with reusable blocks. A **Function** is a machine. You pass raw materials in (parameters), the machine processes them, and it spits a finished product out (return).
 
-Your output must match exactly:
-1. Log the exact string: `[INITIALIZING_NODE...]`
-2. Calculate and log total bandwidth: multiply `1024` by `8`
-3. Log a strict equality check: is the string `"MAINNET"` equal to `"DEVNET"`?
-4. Log the `typeof` of the result from step 3.
+```javascript
+// 1. Defining the Function
+function calculateTax(amount) {
+  let tax = amount * 0.20;
+  return tax; // <--- The 'return' keyword is critical. It hands data back.
+}
 
-If you fail, the system will reject the build. If you pass, you will clear Module 01 and route a massive 150 XP to your global registry. 
+// 2. Calling the Function
+let finalTax = calculateTax(500); 
+console.log(finalTax); // Logs 100
+```
 
-Good luck.
+### The Crucible
+* **Task 1 (Replication):** The system function is defined, but it hasn't been executed. Call it.
+* **Task 2 (Mutation):** A financial calculation is running, but the data is trapped inside the function. Use `return` to extract it.
+* **Task 3 (Synthesis):** Build a mathematical function from scratch. Define it, pass parameters into it, and log the returned data.
