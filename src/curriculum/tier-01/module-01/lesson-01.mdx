@@ -3,29 +3,43 @@ tierId: 1
 moduleId: 1
 lessonId: 1
 title: "The String: Making the Machine Speak"
-taskType: "task_1"
 mode: "terminal"
-scenario: "Replicate the system boot sequence by logging exactly: '[SYS.BOOT] riot-trace v1.0.0'"
-startingCode: "// Write your first log below\n\n"
-syntaxHint: "console.log('[SYS.BOOT] riot-trace v1.0.0');"
-validationLogic: "if (!logs.some(l => l === '[SYS.BOOT] riot-trace v1.0.0')) throw new Error('Task Failed: The output must match the scenario exactly.');"
+syntaxHint: "console.log('Your text here');"
+
+task1Code: "// 1. Replication: Log exactly '[SYS.BOOT] riot-trace v1.0.0'\n\n"
+task1Logic: "if (!logs.some(l => l === '[SYS.BOOT] riot-trace v1.0.0')) throw new Error('Task Failed: The output must match the scenario exactly.');"
+
+task2Code: "// 2. Mutation: Fix this broken string\nconsole.log('System's booting');"
+task2Logic: "if (!logs.some(l => l.includes(\"System's booting\"))) throw new Error('Task Failed: You must fix the quote collision. Use double quotes or backticks.');"
+
+task3Code: "// 3. Synthesis: Log '[SYS.VERIFIED]' and 'Connecting...' on two separate lines\n\n"
+task3Logic: "if (!logs.some(l => l === '[SYS.VERIFIED]') || !logs.some(l => l === 'Connecting...')) throw new Error('Task Failed: Must log both strings exactly on separate lines.');"
 ---
 
-### The String
-Every monitoring dashboard and transaction log starts as a **String**. In JavaScript, strings are text data wrapped in quotes.
+### The Context
+Every monitoring dashboard, transaction log, and error message starts as a string. Before you can build *riot-sop* or query *xandeum-pulse*, you must be able to talk to the machine and have it talk back.
+
+### The Anatomy
+A string is text data. It must be wrapped in quotes. JavaScript provides three types of quotes, and they are not interchangeable by accident:
 
 ```javascript
-'Single quotes'
-"Double quotes"
-`Backticks (Template Literals)`
+'Single quotes' // Used for basic text
+"Double quotes" // Used when text contains an apostrophe
+`Backticks`     // Used for embedding variables (Template Literals)
 ```
 
-### The Anatomy of a Log
+**The Logging Mechanism:**
 ```javascript
 console.log("System Online");
-// ^-----^ Object and Method
-//         ^-----------^ The String Argument
+//  ^------^  = the console object
+//          ^ = dot notation accessing a method
+//           ^--^ = log — the method name
+//               ^-----------^ = the string argument
 ```
 
-### Task 1: Replication
-Type the exact string required to boot the system. Precision is the first skill of an engineer. You must use `console.log()` to output the exact string: `[SYS.BOOT] riot-trace v1.0.0`
+### The Crucible
+You must pass three consecutive tasks to clear this lesson. The environment will automatically advance you as you clear each stage.
+
+* **Task 1 (Replication):** Output the exact boot sequence required by the system.
+* **Task 2 (Mutation):** The provided code is broken because a single quote is colliding with an apostrophe. Fix it.
+* **Task 3 (Synthesis):** Output two separate system messages back-to-back.
