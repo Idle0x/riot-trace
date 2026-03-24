@@ -13,29 +13,30 @@ type LogEntry = { type: "log" | "warn" | "error" | "system" | "success"; text: s
 
 export default function LiveCodeRunner({ 
   lessonId, 
-  tasks, // Array of { code, logic, type } passed from the MDX
+  tasks, 
   mode = "terminal",
-  dbSeed = ""
+  dbSeed = "",
+  syntaxHint
 }: any) {
-  // --- MULTI-STAGE STATE ---
   const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
-  const currentTask = tasks[currentTaskIndex];
+  const currentTask = tasks && tasks.length > 0 ? tasks[currentTaskIndex] : null;
   
   const [code, setCode] = useState(currentTask?.code || "");
   const [output, setOutput] = useState<LogEntry[]>([]);
   const [status, setStatus] = useState<"idle" | "running" | "success" | "error">("idle");
   const [isFocused, setIsFocused] = useState(false);
+  const [showHint, setShowHint] = useState(false);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const domRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<Root | null>(null);
 
-  // When moving to a new task, reset the editor
   useEffect(() => {
     if (currentTask) {
       setCode(currentTask.code);
       setOutput([]);
       setStatus("idle");
+      setShowHint(false);
     }
   }, [currentTaskIndex, currentTask]);
 
@@ -95,7 +96,12 @@ export default function LiveCodeRunner({
 
       } else {
         let fullCode = `"use strict";\n${code}\n${currentTask.logic}`;
-        let executableCode = mode === "dom" ? Babel.transform(fullCode, { presets: ["react"] }).code : fullCode;
+        
+        // FIX: Ensure executableCode is strictly a string to satisfy TypeScript
+        let executableCode = fullCode;
+        if (mode === "dom") {
+           executableCode = Babel.transform(fullCode, { presets: ["react"] }).code || fullCode;
+        }
 
         const render = (element: React.ReactNode) => {
           if (domNode) {
@@ -111,14 +117,12 @@ export default function LiveCodeRunner({
       displayLogs.push({ type: "system", text: ">> SYS.VERIFIED // SYNCING LEDGER..." });
       setOutput([...displayLogs]);
 
-      // Save XP for this specific task
       const saveResult = await saveTaskProgress(lessonId, currentTask.type);
 
       if (saveResult.success) {
         displayLogs.push({ type: "success", text: `>> TASK PASSED: +${saveResult.xp} XP SECURED.` });
         window.dispatchEvent(new Event("xp_updated"));
         
-        // --- STAGE ADVANCEMENT LOGIC ---
         if (currentTaskIndex < tasks.length - 1) {
           displayLogs.push({ type: "system", text: `>> ADVANCING TO TASK ${currentTaskIndex + 2}...` });
           setTimeout(() => setCurrentTaskIndex(prev => prev + 1), 2000);
@@ -146,7 +150,7 @@ export default function LiveCodeRunner({
   const lineCount = code.split("\n").length;
   const lines = Array.from({ length: Math.max(lineCount, 5) }, (_, i) => i + 1);
 
-  if (!currentTask) return <div>NO TASKS FOUND</div>;
+  if (!currentTask) return <div className="p-4 text-accent-red font-mono">NO TASKS FOUND</div>;
 
   return (
     <div className="flex flex-col h-full relative z-10 min-h-[50vh]">
@@ -162,6 +166,21 @@ export default function LiveCodeRunner({
           STAGE {currentTaskIndex + 1} / {tasks.length}
         </span>
       </div>
+
+      {syntaxHint && (
+        <div className="mb-2 flex justify-end">
+          <button onClick={() => setShowHint(!showHint)} className="font-mono text-[9px] tracking-widest uppercase text-text-muted hover:text-accent-blue transition-colors flex items-center gap-1 border border-border-base bg-surface px-3 py-1.5 rounded-sm">
+            {showHint ? "[-] HIDE_PATTERN" : "[+] REVEAL_SYNTAX_PATTERN"}
+          </button>
+        </div>
+      )}
+
+      {showHint && syntaxHint && (
+        <div className="mb-4 p-4 border-l-2 border-accent-blue bg-accent-blue/5 font-mono text-xs text-text-primary animate-fade-up shadow-plate">
+          <div className="text-[9px] text-accent-blue mb-2 tracking-widest">SYNTAX_PATTERN // REFERENCE</div>
+          <pre className="text-text-primary/90">{syntaxHint}</pre>
+        </div>
+      )}
 
       {mode === "dom" && (
          <div id="dom-preview" ref={domRef} className="h-48 mb-4 bg-white rounded-sm border border-border-base p-6 overflow-auto shadow-plate text-black font-sans relative">
