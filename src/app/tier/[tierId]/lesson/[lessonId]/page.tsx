@@ -1,104 +1,93 @@
-import fs from 'fs';
-import path from 'path';
-import matter from 'gray-matter';
-import { MDXRemote } from 'next-mdx-remote/rsc';
-import LiveCodeRunner from '@/components/LiveCodeRunner';
+import Link from "next/link";
+import LiveCodeRunner from "@/components/LiveCodeRunner";
+import { getLesson } from "@/lib/curriculum";
+import { MDXRemote } from "next-mdx-remote/rsc";
 
-export default async function LessonPage({ params }: { params: { tierId: string, moduleId: string, lessonId: string } }) {
-  // 1. Force the URL parameters to match the 2-digit folder/file structure (e.g. 1 -> 01)
-  const paddedTier = String(params.tierId).padStart(2, '0');
-  const paddedModule = String(params.moduleId).padStart(2, '0');
-  const paddedLesson = String(params.lessonId).padStart(2, '0');
+export default async function LessonPage({ params }: { params: Promise<{ tierId: string, lessonId: string }> }) {
+  const resolvedParams = await params;
+  const tierId = parseInt(resolvedParams.tierId);
+  const lessonId = parseInt(resolvedParams.lessonId);
+  
+  // For the scale of the architecture, you will eventually want to update your Next.js 
+  // routing to include [moduleId]. For now, we default to Module 1 to fit the current route.
+  const moduleId = 1; 
 
-  // 2. Locate the MDX file
-  let filePath = path.join(
-    process.cwd(), 
-    'src', 
-    'curriculum', 
-    `tier-${paddedTier}`, 
-    `module-${paddedModule}`, 
-    `lesson-${paddedLesson}.mdx`
-  );
+  const lesson = getLesson(tierId, moduleId, lessonId);
 
-  // Fallback: If it's a boss fight and named boss-XX.mdx instead of lesson-XX.mdx
-  if (!fs.existsSync(filePath)) {
-    const bossPath = path.join(
-      process.cwd(), 
-      'src', 
-      'curriculum', 
-      `tier-${paddedTier}`, 
-      `module-${paddedModule}`, 
-      `boss-${paddedLesson}.mdx`
-    );
-    if (fs.existsSync(bossPath)) {
-      filePath = bossPath;
-    }
-  }
-
-  let source;
-  try {
-    source = fs.readFileSync(filePath, 'utf8');
-  } catch (err) {
-    // If it STILL fails, scan the directory to show exactly what IS in there for easy debugging
-    let folderContents = "Folder does not exist";
-    try {
-      const dirPath = path.join(process.cwd(), 'src', 'curriculum', `tier-${paddedTier}`, `module-${paddedModule}`);
-      folderContents = fs.readdirSync(dirPath).join(", ");
-    } catch(e) {}
-
+  if (!lesson) {
     return (
-      <div className="flex items-center justify-center h-screen bg-[#0a0a0c] p-8">
-        <div className="border border-accent-red bg-accent-red/10 p-6 rounded-sm shadow-plate max-w-2xl w-full">
-          <div className="text-accent-red font-mono font-bold tracking-widest text-sm mb-4">CRITICAL ERROR: FILE NOT FOUND</div>
-          <div className="text-text-primary font-mono text-xs mb-2">The engine attempted to load:</div>
-          <div className="text-accent-yellow font-mono text-[10px] bg-[#020203] p-2 border border-border-dim mb-4">{filePath}</div>
-          <div className="text-text-primary font-mono text-xs mb-2">Files currently found in that directory:</div>
-          <div className="text-phosphor font-mono text-[10px] bg-[#020203] p-2 border border-border-dim">{folderContents}</div>
+      <main className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-8">
+        <div className="border border-accent-red/30 bg-accent-red/5 p-6 rounded font-mono text-accent-red text-xs max-w-lg w-full text-center shadow-[0_0_20px_rgba(255,68,102,0.1)] animate-[pulse_2s_infinite]">
+          [FATAL_ERROR] // MODULE ARCHIVE CORRUPTED OR MISSING FROM LOCAL DIRECTORY.
         </div>
-      </div>
+      </main>
     );
   }
-
-  // 3. Parse the Frontmatter and Content
-  const { content, data: frontmatter } = matter(source);
-
-  // 4. The Compatibility Mapper (Handles 3-Task vs 1-Task legacy files)
-  const tasks = frontmatter.task1Code 
-    ? [
-        { code: frontmatter.task1Code, logic: frontmatter.task1Logic, type: "task_1" },
-        { code: frontmatter.task2Code, logic: frontmatter.task2Logic, type: "task_2" },
-        { code: frontmatter.task3Code, logic: frontmatter.task3Logic, type: "task_3" }
-      ]
-    : [
-        { code: frontmatter.startingCode, logic: frontmatter.validationLogic, type: "task_3" }
-      ];
 
   return (
-    <div className="flex h-screen bg-[#0a0a0c] text-text-primary overflow-hidden">
-      {/* THEORY PANE (Left) */}
-      <div className="w-1/2 h-full overflow-y-auto custom-scrollbar border-r border-border-dim">
-        <div className="p-8 max-w-3xl mx-auto prose prose-invert prose-pre:bg-[#020203] prose-pre:border prose-pre:border-border-dim prose-headings:font-mono prose-a:text-accent-blue">
-          <header className="mb-8 border-b border-border-dim pb-4">
-            <div className="text-[10px] font-mono tracking-widest text-accent-blue uppercase mb-2">
-              Tier {frontmatter.tierId} // Module {frontmatter.moduleId} // Lesson {frontmatter.lessonId}
-            </div>
-            <h1 className="text-2xl font-sans tracking-tight m-0">{frontmatter.title}</h1>
-          </header>
+    <main className="flex-1 flex flex-col lg:flex-row h-full min-h-[calc(100vh-3.5rem)] bg-base animate-fade-up">
+      
+      {/* LEFT PANE: The Manual (Theory) */}
+      <div className="w-full lg:w-5/12 xl:w-1/3 border-b lg:border-b-0 lg:border-r border-border-base flex flex-col bg-surface/30 relative">
+        
+        {/* Header Breadcrumbs */}
+        <div className="p-4 md:p-6 border-b border-border-base bg-base/50 sticky top-0 z-10">
+          <Link href={`/tier/${tierId}`} className="font-mono text-[9px] text-text-muted hover:text-white transition-colors flex items-center gap-2 mb-6 group w-max">
+            <span className="text-accent-blue group-hover:-translate-x-1 transition-transform">←</span> 
+            RETURN TO TIER 0{tierId}
+          </Link>
           
-          <MDXRemote source={content} />
+          <div className="flex items-center gap-3 mb-2">
+            <span className="font-mono text-[9px] tracking-[0.2em] px-2 py-0.5 rounded-sm border border-accent-blue/30 bg-accent-blue/10 text-accent-blue">
+              MODULE 0{lesson.moduleId}
+            </span>
+            <span className="font-mono text-[9px] tracking-[0.2em] text-accent-yellow border border-accent-yellow/20 bg-accent-yellow/5 px-2 py-0.5 rounded-sm shadow-[0_0_8px_rgba(255,209,102,0.1)]">
+              {lesson.xpReward} XP
+            </span>
+          </div>
+          
+          <h1 className="heading-lg text-text-primary leading-tight">
+            {lesson.title}
+          </h1>
+        </div>
+
+        {/* Content Scroll Area */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar">
+          <div className="font-mono text-[10px] text-text-muted border-b border-border-dim pb-2 mb-6 tracking-widest uppercase">
+            THEORY // MENTAL MODEL
+          </div>
+
+          {/* MDX Compiler Rendering Local Markdown */}
+          <div className="space-y-6 text-sm text-text-secondary leading-relaxed font-mono prose prose-invert prose-p:text-text-primary/90 prose-pre:bg-surface-sunken prose-pre:border prose-pre:border-border-dim prose-pre:shadow-sunken prose-code:text-accent-blue">
+            <MDXRemote source={lesson.content} />
+          </div>
+
+          {lesson.scenario && (
+            <div className="mt-12 p-4 border border-accent-red/20 bg-accent-red/5 rounded-sm relative overflow-hidden group">
+              <div className="absolute left-0 top-0 bottom-0 w-1 bg-accent-red shadow-glow-red"></div>
+              <div className="font-mono text-[10px] text-accent-red mb-2 tracking-widest flex items-center gap-2">
+                <div className="w-1.5 h-1.5 bg-accent-red rounded-full animate-pulse"></div>
+                CRUCIBLE OBJECTIVE
+              </div>
+              <p className="text-xs font-mono text-text-primary">{lesson.scenario}</p>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* EXECUTION PANE (Right) */}
-      <div className="w-1/2 h-full bg-base p-4 flex flex-col">
-        <LiveCodeRunner
-          lessonId={frontmatter.lessonId}
-          tasks={tasks}
-          mode={frontmatter.mode || "terminal"}
-          dbSeed={frontmatter.dbSeed || ""}
-          syntaxHint={frontmatter.syntaxHint}
+      {/* RIGHT PANE: The Machine (Crucible Execution) */}
+      <div className="w-full lg:w-7/12 xl:w-2/3 p-4 md:p-6 bg-surface-sunken flex flex-col relative z-0">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(77,166,255,0.03),transparent_70%)] pointer-events-none"></div>
+
+        <LiveCodeRunner 
+          initialCode={lesson.startingCode || ""}
+          validationLogic={lesson.validationLogic || ""}
+          taskId={lesson.lessonId}
+          xpReward={lesson.xpReward}
+          syntaxHint={lesson.syntaxHint}
         />
       </div>
-    </div>
+
+    </main>
   );
 }
