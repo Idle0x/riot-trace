@@ -2,66 +2,30 @@
 tierId: 1
 moduleId: 1
 lessonId: 1
-title: "Making the Machine Speak"
-xpReward: 40
-scenario: "Follow the instructions in the starting code precisely. Type the console command to log the phrase 'System Online' to the terminal."
-startingCode: "// 1. Click on line 3 below.\n// 2. Type: console.log('System Online');\n\n\n// 3. Click [ INITIATE BUILD ] in the bottom right."
-syntaxHint: "console.log('Your text here');"
-validationLogic: "if (!logs.some(l => l.includes('System Online'))) throw new Error('Task Failed: I did not detect the exact phrase \\'System Online\\' in the output.');"
+title: "The String: Making the Machine Speak"
+taskType: "task_1"
+mode: "terminal"
+scenario: "Replicate the system boot sequence by logging exactly: '[SYS.BOOT] riot-trace v1.0.0'"
+startingCode: "// Write your first log below\n\n"
+syntaxHint: "console.log('[SYS.BOOT] riot-trace v1.0.0');"
+validationLogic: "if (!logs.some(l => l === '[SYS.BOOT] riot-trace v1.0.0')) throw new Error('Task Failed: The output must match the scenario exactly.');"
 ---
 
-Welcome to the matrix. 
+### The String
+Every monitoring dashboard and transaction log starts as a **String**. In JavaScript, strings are text data wrapped in quotes.
 
-Right now, looking at applications like xandeum-pulse or riot-sop might feel like looking at an alien language. That is normal. Code is just a set of extremely literal instructions given to a very fast, very literal machine.
-
-Before you can build complex dashboards, you must learn how to make the machine talk back to you.
-
-### The Console
-When you type a prompt into an AI, the AI responds in a chat window. 
-When you type code into a browser or a server, the machine responds in a hidden window called the **Console** (or Terminal). 
-
-The dark panel you see below on the right is your Console. To make the machine print a message there, we use a built-in command called `console.log()`.
-
-### The String (Text Data)
-The machine does not speak English. If you just type the words `System Online` into the editor, the machine will panic and crash because it thinks those are mathematical commands or variables that don't exist. 
-
-To tell the machine *"this is just a piece of text, do not try to calculate it,"* you must wrap the text in **quotes**. In programming, a piece of text wrapped in quotes is called a **String**.
-
-You can use single quotes, double quotes, or backticks. They all create strings:
 ```javascript
-'This is a string'
-"This is also a string"
-`This is a backtick string`
+'Single quotes'
+"Double quotes"
+`Backticks (Template Literals)`
 ```
 
-### Anatomy Breakdown — Character by Character
-To print a string to the console, we combine the command and the string. Look closely at this exact syntax:
-
+### The Anatomy of a Log
 ```javascript
 console.log("System Online");
+// ^-----^ Object and Method
+//         ^-----------^ The String Argument
 ```
 
-Here is exactly what every single character does:
-* `console` = The Object. This is a tool built into every JavaScript environment.
-* `.` = Dot notation. This tells the machine we want to access a specific capability of the console object.
-* `log` = The Method. "log" literally means "print to output."
-* `(` = Opening parenthesis. This acts like a funnel. You put the data you want to print inside it.
-* `"` = Opening double quote. Begins the string.
-* `System Online` = The actual text data.
-* `"` = Closing double quote. Ends the string.
-* `)` = Closing parenthesis. Closes the funnel.
-* `;` = Semicolon. This acts like a period at the end of a sentence. It tells the machine "this specific command is finished."
-
-### Micro-Drill
-*Mentally verify these rules before moving to the Crucible on the right.*
-1. If you write `console.log(System Online);` without quotes, the machine will crash.
-2. If you write `console.log("System Online")` without the semicolon, it might run, but it is sloppy architecture. Always close your statements.
-
-### Your Assignment
-Look at the dark panel on the right. That is your active Execution Environment (The Crucible). 
-
-I have left comments in the code editor. (Comments start with `//` and are ignored by the machine — they are just notes for humans). 
-
-Follow the instructions in the editor to print the phrase `'System Online'` to the terminal. If you forget the exact syntax, click **[+] REVEAL_SYNTAX_PATTERN** above the editor. 
-
-When you are ready, press **[ INITIATE BUILD ]**.
+### Task 1: Replication
+Type the exact string required to boot the system. Precision is the first skill of an engineer. You must use `console.log()` to output the exact string: `[SYS.BOOT] riot-trace v1.0.0`
