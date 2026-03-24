@@ -1,52 +1,48 @@
-import fs from "fs";
-import path from "path";
-import matter from "gray-matter";
+import fs from 'fs';
+import path from 'path';
+import matter from 'gray-matter';
 
-// 1. THE CORE FRONTMATTER INTERFACE
-export interface LessonFrontmatter {
-  tierId: number;
-  moduleId: number;
-  lessonId: number;
-  title: string;
-  xpReward: number;
-  scenario: string;
-  startingCode: string;
-  validationLogic: string;
-  syntaxHint?: string;
+const CURRICULUM_DIR = path.join(process.cwd(), 'src', 'curriculum');
+
+// 1. Return the strict 7-Tier Master Architecture
+export function getAllTiers() {
+  return [
+    { id: 1, title: "Code Literacy", subtitle: "The Syntax Decoder" },
+    { id: 2, title: "JavaScript Deeply", subtitle: "The Logic Engine" },
+    { id: 3, title: "React — The Mental Model", subtitle: "State & Glass" },
+    { id: 4, title: "The Web Platform", subtitle: "Network & Transport" },
+    { id: 5, title: "Databases & Backend", subtitle: "Data Persistence" },
+    { id: 6, title: "CS Essentials", subtitle: "Algorithms & Optimization" },
+    { id: 7, title: "System Design", subtitle: "Architecture" }
+  ];
+}
+
+// 2. Dynamically crawl the MDX folders to find all lessons for a specific tier
+export function getAllLessonsForTier(tierId: string | number) {
+  // Pad tierId to match folder structure (e.g., '1' -> '01')
+  const formattedTierId = String(tierId).padStart(2, '0');
+  const tierDir = path.join(CURRICULUM_DIR, `tier-${formattedTierId}`);
   
-  // THE NEW UPGRADES
-  mode?: "terminal" | "dom" | "sql"; 
-  dbSeed?: string; 
-}
+  if (!fs.existsSync(tierDir)) return [];
 
-// 2. THE LESSON PAYLOAD INTERFACE
-export interface Lesson {
-  frontmatter: LessonFrontmatter;
-  content: string;
-}
+  const lessons: any[] = [];
+  
+  // Find all module folders inside the tier
+  const modules = fs.readdirSync(tierDir).filter(f => f.startsWith('module-'));
 
-// 3. UTILITY: FETCH A SPECIFIC LESSON
-// This ensures that when your page.tsx asks for a lesson, it correctly extracts the new 'mode' and 'dbSeed' properties.
-export function getLesson(tierId: string, moduleId: string, lessonId: string): Lesson | null {
-  try {
-    const filePath = path.join(
-      process.cwd(),
-      "src",
-      "curriculum",
-      `tier-${tierId.padStart(2, "0")}`,
-      `module-${moduleId.padStart(2, "0")}`,
-      `lesson-${lessonId.padStart(2, "0")}.mdx`
-    );
+  for (const mod of modules) {
+    const modDir = path.join(tierDir, mod);
+    const files = fs.readdirSync(modDir).filter(f => f.endsWith('.mdx'));
 
-    const fileContents = fs.readFileSync(filePath, "utf8");
-    const { data, content } = matter(fileContents);
-
-    return {
-      frontmatter: data as LessonFrontmatter,
-      content,
-    };
-  } catch (error) {
-    console.error("Error reading lesson file:", error);
-    return null;
+    for (const file of files) {
+      const filePath = path.join(modDir, file);
+      const source = fs.readFileSync(filePath, 'utf8');
+      const { data } = matter(source);
+      
+      lessons.push(data);
+    }
   }
+
+  // Sort by lessonId so the UI always renders the exact sequential progression
+  return lessons.sort((a, b) => Number(a.lessonId) - Number(b.lessonId));
 }
