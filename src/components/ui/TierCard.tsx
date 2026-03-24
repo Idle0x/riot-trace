@@ -8,11 +8,13 @@ interface TierCardProps {
     subtitle: string;
     lessonCount?: number;
   };
+  lessonCount?: number; // Allows page.tsx to pass this prop directly
   isUnlocked: boolean;
 }
 
-export function TierCard({ tier, isUnlocked }: TierCardProps) {
-  const lessonCount = tier.lessonCount || 0;
+export function TierCard({ tier, lessonCount, isUnlocked }: TierCardProps) {
+  // Use the explicit prop if passed, otherwise fall back to tier object, otherwise 0
+  const displayCount = lessonCount ?? tier.lessonCount ?? 0;
 
   return (
     <div className={`relative w-full border border-border-base bg-base overflow-hidden transition-all duration-300 ${isUnlocked ? 'hover:border-accent-green' : 'opacity-60'}`}>
@@ -52,7 +54,7 @@ export function TierCard({ tier, isUnlocked }: TierCardProps) {
         <div className="flex items-center gap-8 md:border-l md:border-border-dim md:pl-8">
           <div className="flex flex-col">
             <span className="text-3xl font-sans font-bold tracking-tighter text-text-primary">
-              {lessonCount}
+              {displayCount}
             </span>
             <span className="text-[10px] font-mono tracking-widest uppercase text-text-muted mt-1">
               LESSONS
