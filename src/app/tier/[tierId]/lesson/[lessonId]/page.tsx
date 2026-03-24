@@ -1,87 +1,68 @@
-import { notFound } from "next/navigation";
-import { getLesson } from "@/lib/curriculum";
-import LiveCodeRunner from "@/components/LiveCodeRunner";
+import fs from 'fs';
+import path from 'path';
+import matter from 'gray-matter';
+import { MDXRemote } from 'next-mdx-remote/rsc';
+import LiveCodeRunner from '@/components/LiveCodeRunner';
 
-// Adjust your params interface based on your exact folder names
-interface LessonPageProps {
-  params: {
-    tierId: string;
-    moduleId: string;
-    lessonId: string;
-  };
-}
+export default async function LessonPage({ params }: { params: { tierId: string, moduleId: string, lessonId: string } }) {
+  // 1. Locate and read the MDX file
+  const filePath = path.join(
+    process.cwd(), 
+    'src', 
+    'curriculum', 
+    `tier-${params.tierId}`, 
+    `module-${params.moduleId}`, 
+    `lesson-${params.lessonId}.mdx`
+  );
 
-export default async function LessonPage({ params }: LessonPageProps) {
-  // 1. Fetch the lesson data using the updated curriculum function
-  const lesson = getLesson(params.tierId, params.moduleId, params.lessonId);
-
-  // 2. 404 Fallback if the MDX file doesn't exist
-  if (!lesson) {
-    notFound();
+  let source;
+  try {
+    source = fs.readFileSync(filePath, 'utf8');
+  } catch (err) {
+    return <div className="p-8 text-accent-red font-mono">ERROR: LESSON FILE NOT FOUND.</div>;
   }
 
-  const { frontmatter, content } = lesson;
+  // 2. Parse the Frontmatter and Content
+  const { content, data: frontmatter } = matter(source);
+
+  // 3. The Compatibility Mapper
+  // If it's a new file, it loads all 3 tasks.
+  // If it's an old file (only has startingCode), it creates a 1-task array defaulting to Synthesis (+40 XP).
+  const tasks = frontmatter.task1Code 
+    ? [
+        { code: frontmatter.task1Code, logic: frontmatter.task1Logic, type: "task_1" },
+        { code: frontmatter.task2Code, logic: frontmatter.task2Logic, type: "task_2" },
+        { code: frontmatter.task3Code, logic: frontmatter.task3Logic, type: "task_3" }
+      ]
+    : [
+        { code: frontmatter.startingCode, logic: frontmatter.validationLogic, type: "task_3" }
+      ];
 
   return (
-    <div className="flex h-screen w-full bg-[#020203] text-white overflow-hidden">
-      
-      {/* ========================================= */}
-      {/* LEFT PANE: Theory & MDX Content           */}
-      {/* ========================================= */}
-      <div className="w-1/2 h-full overflow-y-auto border-r border-border-base p-8 custom-scrollbar">
-        <div className="max-w-3xl mx-auto">
-          <div className="mb-8">
-            <span className="text-[10px] font-mono tracking-widest text-accent-blue uppercase mb-2 block">
+    <div className="flex h-screen bg-[#0a0a0c] text-text-primary overflow-hidden">
+      {/* THEORY PANE (Left) */}
+      <div className="w-1/2 h-full overflow-y-auto custom-scrollbar border-r border-border-dim">
+        <div className="p-8 max-w-3xl mx-auto prose prose-invert prose-pre:bg-[#020203] prose-pre:border prose-pre:border-border-dim prose-headings:font-mono prose-a:text-accent-blue">
+          <header className="mb-8 border-b border-border-dim pb-4">
+            <div className="text-[10px] font-mono tracking-widest text-accent-blue uppercase mb-2">
               Tier {frontmatter.tierId} // Module {frontmatter.moduleId} // Lesson {frontmatter.lessonId}
-            </span>
-            <h1 className="text-3xl font-bold tracking-tight text-text-primary">
-              {frontmatter.title}
-            </h1>
-          </div>
-
-          {/* Note: If you are using next-mdx-remote or next/mdx, 
-            replace this div with your <MDXRemote /> component 
-          */}
-          <div className="prose prose-invert prose-blue max-w-none text-text-secondary">
-            <div dangerouslySetInnerHTML={{ __html: content }} />
-          </div>
+            </div>
+            <h1 className="text-2xl font-sans tracking-tight m-0">{frontmatter.title}</h1>
+          </header>
+          
+          <MDXRemote source={content} />
         </div>
       </div>
 
-      {/* ========================================= */}
-      {/* RIGHT PANE: The Crucible                  */}
-      {/* ========================================= */}
-      <div className="w-1/2 h-full p-6 flex flex-col bg-[#050505]">
-        
-        {/* Crucible Header & Scenario */}
-        <div className="mb-4 shrink-0">
-          <div className="flex justify-between items-end mb-2">
-            <h2 className="text-sm font-mono tracking-widest text-text-primary uppercase flex items-center gap-2">
-              <span className="w-2 h-2 bg-accent-blue rounded-full animate-pulse"></span>
-              Execution Environment
-            </h2>
-            <span className="text-[10px] font-mono text-phosphor border border-phosphor/30 bg-phosphor/5 px-2 py-1 rounded-sm">
-              +{frontmatter.xpReward} XP
-            </span>
-          </div>
-          <p className="text-xs text-text-muted leading-relaxed font-mono bg-surface-sunken p-3 rounded-sm border border-border-dim">
-            <span className="text-accent-yellow">OBJECTIVE:</span> {frontmatter.scenario}
-          </p>
-        </div>
-
-        {/* The Upgraded Engine */}
-        <div className="flex-1 min-h-0 relative">
-          <LiveCodeRunner
-            initialCode={frontmatter.startingCode || ""}
-            validationLogic={frontmatter.validationLogic || ""}
-            taskId={frontmatter.lessonId}
-            xpReward={frontmatter.xpReward}
-            syntaxHint={frontmatter.syntaxHint}
-            mode={frontmatter.mode || "terminal"} // <-- The Mode Switch
-            dbSeed={frontmatter.dbSeed || ""}     // <-- The SQL Setup Injector
-          />
-        </div>
-        
+      {/* EXECUTION PANE (Right) */}
+      <div className="w-1/2 h-full bg-base p-4 flex flex-col">
+        <LiveCodeRunner
+          lessonId={frontmatter.lessonId}
+          tasks={tasks}
+          mode={frontmatter.mode || "terminal"}
+          dbSeed={frontmatter.dbSeed || ""}
+          syntaxHint={frontmatter.syntaxHint}
+        />
       </div>
     </div>
   );
