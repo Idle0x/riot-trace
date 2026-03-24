@@ -7,16 +7,25 @@ import * as Babel from "@babel/standalone";
 import React from "react";
 import { createRoot, Root } from "react-dom/client";
 import { flushSync } from "react-dom";
+import initSqlJs from "sql.js";
 
 type LogEntry = { type: "log" | "warn" | "error" | "system" | "success"; text: string };
 
-export default function LiveCodeRunner({ initialCode, validationLogic, taskId, xpReward, syntaxHint, mode = "terminal" }: any) {
+export default function LiveCodeRunner({ 
+  initialCode, 
+  validationLogic, 
+  taskId, 
+  taskType = "task_3", // Maps to the deflationary XP rewards in actions.ts
+  syntaxHint, 
+  mode = "terminal",
+  dbSeed = "" // Silent SQL to setup tables for SQL mode
+}: any) {
   const [code, setCode] = useState(initialCode);
   const [output, setOutput] = useState<LogEntry[]>([]);
   const [status, setStatus] = useState<"idle" | "running" | "success" | "error">("idle");
   const [isFocused, setIsFocused] = useState(false);
   const [showHint, setShowHint] = useState(false);
-  
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const domRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<Root | null>(null);
@@ -29,8 +38,7 @@ export default function LiveCodeRunner({ initialCode, validationLogic, taskId, x
     setOutput([]);
     setStatus("idle");
     setShowHint(false);
-    
-    // Clear the DOM pane if we switch lessons
+
     if (domRef.current && rootRef.current) {
       rootRef.current.unmount();
       rootRef.current = null;
@@ -43,16 +51,17 @@ export default function LiveCodeRunner({ initialCode, validationLogic, taskId, x
     const logs: string[] = [];       
     const displayLogs: LogEntry[] = []; 
     const domNode = domRef.current;
+    let sqlResults: any[] = [];
 
     const originalConsole = { log: console.log, warn: console.warn, error: console.error };
-    
+
     console.log = (...args) => {
       const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(" ");
       logs.push(msg);
       displayLogs.push({ type: "log", text: msg });
       originalConsole.log(...args);
     };
-    
+
     console.warn = (...args) => {
       const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(" ");
       logs.push(msg);
@@ -68,48 +77,82 @@ export default function LiveCodeRunner({ initialCode, validationLogic, taskId, x
     };
 
     try {
-      let fullCode = `
-        "use strict";
-        ${code}
-        // --- HIDDEN VALIDATION ---
-        ${validationLogic}
-      `;
-
-      let executableCode = fullCode;
-
-      // DOM MODE: Transpile JSX to standard React JavaScript on the fly
-      if (mode === "dom") {
-        executableCode = Babel.transform(fullCode, { presets: ["react"] }).code;
-      }
-
       await new Promise(resolve => setTimeout(resolve, 600));
 
-      // Custom render function injected into the user's scope
-      const render = (element: React.ReactNode) => {
-        if (domNode) {
-          if (!rootRef.current) {
-            rootRef.current = createRoot(domNode);
-          }
-          // flushSync forces React to update the DOM immediately so validationLogic can read it
-          flushSync(() => {
-            rootRef.current!.render(element);
-          });
+      // --- BRANCH: SQL MODE (WebAssembly SQLite) ---
+      if (mode === "sql") {
+        const SQL = await initSqlJs({ locateFile: file => `/${file}` });
+        const db = new SQL.Database();
+        
+        // Inject invisible setup data if provided
+        if (dbSeed) {
+          db.run(dbSeed);
         }
-      };
 
-      // Inject React, render(), and the DOM node into the sandbox scope
-      const sandbox = new Function("React", "render", "logs", "code", "domNode", executableCode);
-      sandbox(React, render, logs, code, domNode);
+        const result = db.exec(code);
+        if (result.length > 0) {
+          sqlResults = result[0].values;
+          const columns = result[0].columns;
+          displayLogs.push({ type: "log", text: `COLUMNS: ${columns.join(" | ")}` });
+          sqlResults.forEach(row => {
+            const rowStr = row.join(" | ");
+            logs.push(rowStr);
+            displayLogs.push({ type: "log", text: `ROW: ${rowStr}` });
+          });
+        } else {
+          displayLogs.push({ type: "system", text: ">> QUERY EXECUTED: 0 ROWS RETURNED." });
+        }
+        
+        // Validate the SQL results
+        const validate = new Function("logs", "code", "sqlResults", validationLogic);
+        validate(logs, code, sqlResults);
+        db.close();
 
-      displayLogs.push({ type: "system", text: ">> SYS.VERIFIED" });
-      displayLogs.push({ type: "success", text: ">> TASK PASSED: VALIDATION SUCCESSFUL." });
+      } else {
+        // --- BRANCH: TERMINAL & DOM MODES ---
+        let fullCode = `
+          "use strict";
+          ${code}
+          // --- HIDDEN VALIDATION ---
+          ${validationLogic}
+        `;
+
+        let executableCode = fullCode;
+
+        if (mode === "dom") {
+          executableCode = Babel.transform(fullCode, { presets: ["react"] }).code;
+        }
+
+        const render = (element: React.ReactNode) => {
+          if (domNode) {
+            if (!rootRef.current) {
+              rootRef.current = createRoot(domNode);
+            }
+            flushSync(() => {
+              rootRef.current!.render(element);
+            });
+          }
+        };
+
+        const sandbox = new Function("React", "render", "logs", "code", "domNode", executableCode);
+        sandbox(React, render, logs, code, domNode);
+      }
+
+      // --- SUCCESS PIPELINE ---
+      displayLogs.push({ type: "system", text: ">> SYS.VERIFIED // SYNCING LEDGER..." });
+      setOutput([...displayLogs]);
+
+      // Secure Save: Backend identifies user via cookies/session
+      const saveResult = await saveTaskProgress(taskId, taskType);
+
+      if (saveResult.success) {
+        displayLogs.push({ type: "success", text: `>> TASK PASSED: +${saveResult.xp} XP SECURED.` });
+      } else {
+        displayLogs.push({ type: "warn", text: ">> WARNING: XP SYNC FAILED. ARE YOU LOGGED IN?" });
+      }
+
       setOutput(displayLogs);
       setStatus("success");
-
-      const userId = localStorage.getItem("riot_trace_user_id") || "anon_" + Math.random().toString(36).substring(2, 9);
-      localStorage.setItem("riot_trace_user_id", userId);
-
-      await saveTaskProgress(userId, taskId, xpReward);
       window.dispatchEvent(new Event("xp_updated"));
 
     } catch (err: any) {
@@ -125,7 +168,7 @@ export default function LiveCodeRunner({ initialCode, validationLogic, taskId, x
 
   return (
     <div className="flex flex-col h-full relative z-10 min-h-[50vh]">
-      
+
       {syntaxHint && (
         <div className="mb-2 flex justify-end">
           <button onClick={() => setShowHint(!showHint)} className="font-mono text-[9px] tracking-widest uppercase text-text-muted hover:text-accent-blue transition-colors flex items-center gap-1 border border-border-base bg-surface px-3 py-1.5 rounded-sm">
@@ -141,14 +184,12 @@ export default function LiveCodeRunner({ initialCode, validationLogic, taskId, x
         </div>
       )}
 
-      {/* THE NEW DOM RENDERER PANE */}
       {mode === "dom" && (
          <div 
            id="dom-preview"
            ref={domRef}
            className="h-48 mb-4 bg-white rounded-sm border border-border-base p-6 overflow-auto shadow-plate text-black font-sans relative"
          >
-           {/* If React hasn't mounted yet, show standby text */}
            {!rootRef.current && (
              <div className="absolute inset-0 flex items-center justify-center font-mono text-[10px] text-gray-400 tracking-widest uppercase">
                [ DOM_RENDERER_STANDBY ]
@@ -163,7 +204,7 @@ export default function LiveCodeRunner({ initialCode, validationLogic, taskId, x
             <div className={`w-2 h-2 rounded-full ${status === 'error' ? 'bg-accent-red' : status === 'success' ? 'bg-accent-green' : 'bg-border-strong'}`}></div>
             <span className="font-mono text-[9px] text-text-muted tracking-widest uppercase">{isFocused ? 'SYSTEM_LISTENING' : 'EDITOR_STANDBY'}</span>
           </div>
-          <span className="font-mono text-[9px] text-text-dim">{mode === "dom" ? "component.jsx" : "main.js"}</span>
+          <span className="font-mono text-[9px] text-text-dim">{mode === "dom" ? "component.jsx" : mode === "sql" ? "query.sql" : "main.js"}</span>
         </div>
 
         <div className="flex-1 flex relative bg-surface-sunken shadow-sunken">
@@ -188,7 +229,7 @@ export default function LiveCodeRunner({ initialCode, validationLogic, taskId, x
       <div className={`h-48 shrink-0 bg-[#020203] border-x border-b rounded-b-sm p-4 font-mono text-[11px] overflow-y-auto relative shadow-sunken custom-scrollbar transition-all ${status === 'error' ? 'border-accent-red animate-[shake_0.4s_cubic-bezier(.36,.07,.19,.97)_both]' : status === 'success' ? 'border-accent-green' : 'border-border-base'}`}>
         {status === "success" && <div className="absolute inset-0 bg-accent-green/5 pointer-events-none animate-fade-in"></div>}
         <div className="text-text-dim mb-3 flex items-center gap-2"><span>]</span> <span className="uppercase tracking-widest text-[9px]">Standard Output</span></div>
-        
+
         {output.map((entry, i) => (
           <div key={i} className={`mb-1.5 leading-relaxed overflow-hidden whitespace-nowrap animate-typewriter border-r-2 border-transparent pr-1 
             ${entry.type === 'error' ? 'text-accent-red' : 
@@ -208,7 +249,7 @@ export default function LiveCodeRunner({ initialCode, validationLogic, taskId, x
           <span className="text-text-dim">SYSTEM_STATUS</span>
           <span className={status === "success" ? "text-phosphor" : status === "error" ? "text-accent-red" : "text-text-muted"}>{status === "success" ? "XP_ROUTED // CLEAR" : status === "error" ? "EXECUTION_HALTED" : "AWAITING_INPUT"}</span>
         </div>
-        
+
         <MagneticButton onClick={executeCode} className={`px-8 py-3 rounded-sm font-mono text-[10px] font-bold tracking-widest transition-all uppercase border shadow-plate ${status === "success" ? "bg-accent-green/10 border-accent-green text-phosphor cursor-default" : status === "running" ? "bg-accent-yellow/10 border-accent-yellow text-accent-yellow cursor-wait" : "bg-surface border-border-strong text-text-primary hover:bg-accent-blue/10 hover:border-accent-blue hover:text-accent-blue hover:shadow-glow-blue"}`}>
           {status === "running" ? "[ EXECUTING... ]" : status === "success" ? "[ EXECUTION VERIFIED ]" : "[ INITIATE BUILD ]"}
         </MagneticButton>
