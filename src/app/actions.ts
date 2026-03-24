@@ -15,13 +15,31 @@ const REWARDS = {
 
 export async function saveTaskProgress(taskId: string, type: keyof typeof REWARDS) {
   try {
-    const cookieStore = cookies();
+    // FIX: Await the cookies() Promise required by Next.js 15+
+    const cookieStore = await cookies(); 
+    
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
-          get(name: string) { return cookieStore.get(name)?.value; },
+          get(name: string) { 
+            return cookieStore.get(name)?.value; 
+          },
+          set(name: string, value: string, options: any) {
+            try {
+              cookieStore.set({ name, value, ...options });
+            } catch (error) {
+              // The `set` method can be called from a Server Action.
+              // If called from a Server Component, it throws, which we safely ignore here.
+            }
+          },
+          remove(name: string, options: any) {
+            try {
+              cookieStore.set({ name, value: '', ...options });
+            } catch (error) {
+            }
+          },
         },
       }
     );
@@ -44,13 +62,12 @@ export async function saveTaskProgress(taskId: string, type: keyof typeof REWARD
     if (ledgerError) throw ledgerError;
 
     // 2. Update the Completion State (The Pulse)
-    // This resets the 48-hour decay timer automatically
     const { error: completionError } = await supabase
       .from('lesson_completions')
       .upsert({ 
         user_id: user.id, 
         lesson_id: taskId,
-        last_reviewed_at: new Array().toISOString() 
+        last_reviewed_at: new Date().toISOString() 
       }, { onConflict: 'user_id, lesson_id' });
 
     if (completionError) throw completionError;
