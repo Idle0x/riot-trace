@@ -46,6 +46,7 @@ export default async function TierPage({ params }: { params: Promise<{ tierId: s
             return (
               <div key={moduleId} className="border border-border-base rounded-sm bg-surface shadow-plate overflow-hidden animate-fade-up">
 
+                {/* Module Header */}
                 <div className="bg-surface-sunken border-b border-border-strong p-4 flex items-center gap-3">
                   <div className={`w-2 h-2 rounded-sm ${accentClass} shadow-[0_0_8px_currentColor]`}></div>
                   <h2 className="font-mono text-[11px] text-text-primary tracking-[0.2em] uppercase font-bold">
@@ -53,6 +54,7 @@ export default async function TierPage({ params }: { params: Promise<{ tierId: s
                   </h2>
                 </div>
 
+                {/* Ledger Columns */}
                 <div className="grid grid-cols-12 gap-4 px-4 py-3 border-b border-border-strong bg-base/50 font-mono text-[9px] text-text-muted uppercase tracking-widest select-none">
                   <div className="col-span-3 md:col-span-2">Designation</div>
                   <div className="col-span-6 md:col-span-6">Lesson Title</div>
@@ -60,10 +62,10 @@ export default async function TierPage({ params }: { params: Promise<{ tierId: s
                   <div className="hidden md:block col-span-2 text-right">Status</div>
                 </div>
 
+                {/* Lessons mapping */}
                 {moduleLessons.map((lesson) => (
                   <Link 
                     key={lesson.lessonId}
-                    {/* FIXED URL PATH TO INCLUDE MODULE */}
                     href={`/tier/${tierId}/module/${lesson.moduleId}/lesson/${lesson.lessonId}`}
                     className="grid grid-cols-12 gap-4 p-4 border-b border-border-base last:border-0 items-center hover:bg-surface-hover transition-colors group cursor-pointer relative overflow-hidden"
                   >
@@ -90,6 +92,12 @@ export default async function TierPage({ params }: { params: Promise<{ tierId: s
               </div>
             );
           })}
+
+          {lessons.length === 0 && (
+            <div className="p-8 text-center font-mono text-[10px] text-text-muted tracking-widest uppercase bg-surface-sunken border border-border-base shadow-sunken">
+              [ NO_MODULES_DETECTED_IN_LOCAL_DIRECTORY ]
+            </div>
+          )}
         </div>
       </div>
     </main>
