@@ -5,29 +5,64 @@ import { MDXRemote } from 'next-mdx-remote/rsc';
 import LiveCodeRunner from '@/components/LiveCodeRunner';
 
 export default async function LessonPage({ params }: { params: { tierId: string, moduleId: string, lessonId: string } }) {
-  // 1. Locate and read the MDX file
-  const filePath = path.join(
+  // 1. Force the URL parameters to match the 2-digit folder/file structure (e.g. 1 -> 01)
+  const paddedTier = String(params.tierId).padStart(2, '0');
+  const paddedModule = String(params.moduleId).padStart(2, '0');
+  const paddedLesson = String(params.lessonId).padStart(2, '0');
+
+  // 2. Locate the MDX file
+  let filePath = path.join(
     process.cwd(), 
     'src', 
     'curriculum', 
-    `tier-${params.tierId}`, 
-    `module-${params.moduleId}`, 
-    `lesson-${params.lessonId}.mdx`
+    `tier-${paddedTier}`, 
+    `module-${paddedModule}`, 
+    `lesson-${paddedLesson}.mdx`
   );
+
+  // Fallback: If it's a boss fight and named boss-XX.mdx instead of lesson-XX.mdx
+  if (!fs.existsSync(filePath)) {
+    const bossPath = path.join(
+      process.cwd(), 
+      'src', 
+      'curriculum', 
+      `tier-${paddedTier}`, 
+      `module-${paddedModule}`, 
+      `boss-${paddedLesson}.mdx`
+    );
+    if (fs.existsSync(bossPath)) {
+      filePath = bossPath;
+    }
+  }
 
   let source;
   try {
     source = fs.readFileSync(filePath, 'utf8');
   } catch (err) {
-    return <div className="p-8 text-accent-red font-mono">ERROR: LESSON FILE NOT FOUND.</div>;
+    // If it STILL fails, scan the directory to show exactly what IS in there for easy debugging
+    let folderContents = "Folder does not exist";
+    try {
+      const dirPath = path.join(process.cwd(), 'src', 'curriculum', `tier-${paddedTier}`, `module-${paddedModule}`);
+      folderContents = fs.readdirSync(dirPath).join(", ");
+    } catch(e) {}
+
+    return (
+      <div className="flex items-center justify-center h-screen bg-[#0a0a0c] p-8">
+        <div className="border border-accent-red bg-accent-red/10 p-6 rounded-sm shadow-plate max-w-2xl w-full">
+          <div className="text-accent-red font-mono font-bold tracking-widest text-sm mb-4">CRITICAL ERROR: FILE NOT FOUND</div>
+          <div className="text-text-primary font-mono text-xs mb-2">The engine attempted to load:</div>
+          <div className="text-accent-yellow font-mono text-[10px] bg-[#020203] p-2 border border-border-dim mb-4">{filePath}</div>
+          <div className="text-text-primary font-mono text-xs mb-2">Files currently found in that directory:</div>
+          <div className="text-phosphor font-mono text-[10px] bg-[#020203] p-2 border border-border-dim">{folderContents}</div>
+        </div>
+      </div>
+    );
   }
 
-  // 2. Parse the Frontmatter and Content
+  // 3. Parse the Frontmatter and Content
   const { content, data: frontmatter } = matter(source);
 
-  // 3. The Compatibility Mapper
-  // If it's a new file, it loads all 3 tasks.
-  // If it's an old file (only has startingCode), it creates a 1-task array defaulting to Synthesis (+40 XP).
+  // 4. The Compatibility Mapper (Handles 3-Task vs 1-Task legacy files)
   const tasks = frontmatter.task1Code 
     ? [
         { code: frontmatter.task1Code, logic: frontmatter.task1Logic, type: "task_1" },
