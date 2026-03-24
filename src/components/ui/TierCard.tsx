@@ -1,97 +1,78 @@
-"use client";
-
 import Link from "next/link";
+import { MagneticButton } from "./MagneticButton";
 
-const TIER_ACCENTS: Record<number, { hex: string, bg: string, border: string, text: string, gutter: string }> = {
-  1: { hex: "#00FF66", bg: "bg-accent-green/10", border: "border-accent-green/30", text: "text-accent-green", gutter: "bg-accent-green" },
-  2: { hex: "#4DA6FF", bg: "bg-accent-blue/10", border: "border-accent-blue/30", text: "text-accent-blue", gutter: "bg-accent-blue" },
-  3: { hex: "#FFD166", bg: "bg-accent-yellow/10", border: "border-accent-yellow/30", text: "text-accent-yellow", gutter: "bg-accent-yellow" },
-  4: { hex: "#FF4466", bg: "bg-accent-red/10", border: "border-accent-red/30", text: "text-accent-red", gutter: "bg-accent-red" },
-  5: { hex: "#C77DFF", bg: "bg-accent-purple/10", border: "border-accent-purple/30", text: "text-accent-purple", gutter: "bg-accent-purple" },
-};
+interface TierCardProps {
+  tier: {
+    id: number;
+    title: string;
+    subtitle: string;
+    lessonCount?: number;
+  };
+  isUnlocked: boolean;
+}
 
-export function TierCard({ tier, lessonCount, isUnlocked = true }: { tier: any, lessonCount: number, isUnlocked?: boolean }) {
-  const theme = TIER_ACCENTS[tier.id] || TIER_ACCENTS[2]; 
+export function TierCard({ tier, isUnlocked }: TierCardProps) {
+  const lessonCount = tier.lessonCount || 0;
 
   return (
-    <Link 
-      href={isUnlocked ? `/tier/${tier.id}` : '#'}
-      className={`
-        group flex w-full border-b border-border-base bg-base hover:bg-surface transition-colors cursor-pointer relative overflow-hidden
-        ${!isUnlocked ? 'opacity-40 cursor-not-allowed grayscale' : ''}
-      `}
-    >
-      {/* 1. The Left Rail (Status Gutter) */}
-      <div className={`w-1.5 flex-shrink-0 transition-all duration-300 ${isUnlocked ? theme.gutter : 'bg-border-strong'} group-hover:shadow-[0_0_12px_currentColor]`} />
-
-      {/* 2. The Internal Ambient Leak */}
-      {isUnlocked && (
-        <div 
-          className="absolute top-0 right-0 w-64 h-full opacity-0 group-hover:opacity-10 transition-opacity duration-700 pointer-events-none"
-          style={{ background: `linear-gradient(90deg, transparent, ${theme.hex})` }}
-        />
+    <div className={`relative w-full border border-border-base bg-base overflow-hidden transition-all duration-300 ${isUnlocked ? 'hover:border-accent-green' : 'opacity-60'}`}>
+      
+      {/* Lock Overlay */}
+      {!isUnlocked && (
+        <div className="absolute inset-0 bg-base/80 backdrop-blur-[2px] z-10 flex items-center justify-center">
+          <div className="border border-border-dim px-4 py-2 bg-surface text-text-dim font-mono text-[10px] uppercase tracking-widest flex items-center gap-2">
+            <div className="w-1.5 h-1.5 bg-accent-red rounded-full"></div>
+            ENCRYPTED
+          </div>
+        </div>
       )}
 
-      {/* 3. Content Core */}
-      <div className="flex-1 p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+      {/* Status Bar */}
+      <div className={`h-1 w-full ${isUnlocked ? 'bg-accent-green' : 'bg-border-strong'}`}></div>
+
+      <div className="p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
         
-        {/* Identity Block */}
+        {/* Tier Info */}
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-2">
-            <span className={`font-mono text-[9px] tracking-[0.2em] px-2 py-0.5 rounded-sm border ${isUnlocked ? `${theme.border} ${theme.bg} ${theme.text}` : 'border-border-strong text-text-muted bg-surface'}`}>
+            <span className={`font-mono text-[10px] uppercase tracking-widest ${isUnlocked ? 'text-accent-green' : 'text-text-muted'}`}>
               TIER 0{tier.id}
             </span>
-            {!isUnlocked && (
-              <span className="font-mono text-[9px] tracking-widest text-text-muted">LOCKED</span>
-            )}
+            {!isUnlocked && <span className="text-[9px] font-mono text-text-dim tracking-widest">LOCKED</span>}
           </div>
-          
-          <h2 className="font-sans font-bold text-xl text-text-primary tracking-tight mb-1 group-hover:text-white transition-colors">
+          <h2 className="text-2xl md:text-3xl font-sans font-bold tracking-tight text-text-primary mb-1">
             {tier.title}
           </h2>
-          <p className="font-mono text-xs text-text-muted leading-relaxed line-clamp-1 pr-4">
-            {tier.description}
+          <p className="text-text-secondary font-mono text-xs">
+            {tier.subtitle}
           </p>
         </div>
 
-        {/* Telemetry Right Rail */}
-        <div className="flex items-center justify-between md:justify-end gap-8 shrink-0 border-t border-border-base pt-4 md:border-t-0 md:pt-0">
-          
-          {/* Module Count */}
-          <div className="text-left md:text-right">
-            <div className="font-sans font-bold text-2xl leading-none text-text-primary">
+        {/* Stats & Action */}
+        <div className="flex items-center gap-8 md:border-l md:border-border-dim md:pl-8">
+          <div className="flex flex-col">
+            <span className="text-3xl font-sans font-bold tracking-tighter text-text-primary">
               {lessonCount}
-            </div>
-            <div className="font-mono text-[9px] tracking-[0.2em] text-text-muted mt-1">
-              MODULES
-            </div>
+            </span>
+            <span className="text-[10px] font-mono tracking-widest uppercase text-text-muted mt-1">
+              LESSONS
+            </span>
           </div>
 
-          {/* Execution Readiness Indicator */}
-          <div className="w-32 h-10 bg-surface-sunken border border-border-dim rounded shadow-sunken flex items-center px-3 relative overflow-hidden group-hover:border-border-base transition-colors">
-            {isUnlocked ? (
-              <div className="flex w-full items-center justify-between">
-                <span className={`font-mono text-[9px] font-bold tracking-widest ${theme.text} animate-pulse-slow`}>
-                  READY
-                </span>
-                <span className={`font-mono text-[10px] ${theme.text} opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all`}>
-                  →
-                </span>
-              </div>
-            ) : (
-              <span className="font-mono text-[9px] font-bold tracking-widest text-text-muted w-full text-center opacity-50">
-                OFFLINE
-              </span>
-            )}
-            
-            {/* Hover Scan Line */}
-            {isUnlocked && (
-               <div className={`absolute inset-0 w-full h-[1px] ${theme.gutter} opacity-0 group-hover:opacity-30 group-hover:animate-scan-line shadow-[0_0_8px_currentColor]`} />
-            )}
-          </div>
-
+          {isUnlocked ? (
+            <Link href={`/tier/${tier.id}`}>
+              <MagneticButton className="px-6 py-3 border border-border-strong bg-surface hover:border-accent-green hover:text-accent-green text-text-primary font-mono text-[10px] tracking-widest uppercase transition-colors shadow-plate">
+                ENTER MATRIX
+              </MagneticButton>
+            </Link>
+          ) : (
+            <div className="px-6 py-3 border border-border-dim bg-surface-sunken text-text-muted font-mono text-[10px] tracking-widest uppercase cursor-not-allowed">
+              OFFLINE
+            </div>
+          )}
         </div>
+
       </div>
-    </Link>
+    </div>
   );
 }
