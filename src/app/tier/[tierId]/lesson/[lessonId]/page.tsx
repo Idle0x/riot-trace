@@ -1,93 +1,88 @@
-import Link from "next/link";
-import LiveCodeRunner from "@/components/LiveCodeRunner";
+import { notFound } from "next/navigation";
 import { getLesson } from "@/lib/curriculum";
-import { MDXRemote } from "next-mdx-remote/rsc";
+import LiveCodeRunner from "@/components/LiveCodeRunner";
 
-export default async function LessonPage({ params }: { params: Promise<{ tierId: string, lessonId: string }> }) {
-  const resolvedParams = await params;
-  const tierId = parseInt(resolvedParams.tierId);
-  const lessonId = parseInt(resolvedParams.lessonId);
-  
-  // For the scale of the architecture, you will eventually want to update your Next.js 
-  // routing to include [moduleId]. For now, we default to Module 1 to fit the current route.
-  const moduleId = 1; 
+// Adjust your params interface based on your exact folder names
+interface LessonPageProps {
+  params: {
+    tierId: string;
+    moduleId: string;
+    lessonId: string;
+  };
+}
 
-  const lesson = getLesson(tierId, moduleId, lessonId);
+export default async function LessonPage({ params }: LessonPageProps) {
+  // 1. Fetch the lesson data using the updated curriculum function
+  const lesson = getLesson(params.tierId, params.moduleId, params.lessonId);
 
+  // 2. 404 Fallback if the MDX file doesn't exist
   if (!lesson) {
-    return (
-      <main className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-8">
-        <div className="border border-accent-red/30 bg-accent-red/5 p-6 rounded font-mono text-accent-red text-xs max-w-lg w-full text-center shadow-[0_0_20px_rgba(255,68,102,0.1)] animate-[pulse_2s_infinite]">
-          [FATAL_ERROR] // MODULE ARCHIVE CORRUPTED OR MISSING FROM LOCAL DIRECTORY.
-        </div>
-      </main>
-    );
+    notFound();
   }
 
+  const { frontmatter, content } = lesson;
+
   return (
-    <main className="flex-1 flex flex-col lg:flex-row h-full min-h-[calc(100vh-3.5rem)] bg-base animate-fade-up">
+    <div className="flex h-screen w-full bg-[#020203] text-white overflow-hidden">
       
-      {/* LEFT PANE: The Manual (Theory) */}
-      <div className="w-full lg:w-5/12 xl:w-1/3 border-b lg:border-b-0 lg:border-r border-border-base flex flex-col bg-surface/30 relative">
+      {/* ========================================= */}
+      {/* LEFT PANE: Theory & MDX Content           */}
+      {/* ========================================= */}
+      <div className="w-1/2 h-full overflow-y-auto border-r border-border-base p-8 custom-scrollbar">
+        <div className="max-w-3xl mx-auto">
+          <div className="mb-8">
+            <span className="text-[10px] font-mono tracking-widest text-accent-blue uppercase mb-2 block">
+              Tier {frontmatter.tierId} // Module {frontmatter.moduleId} // Lesson {frontmatter.lessonId}
+            </span>
+            <h1 className="text-3xl font-bold tracking-tight text-text-primary">
+              {frontmatter.title}
+            </h1>
+          </div>
+
+          {/* Note: If you are using next-mdx-remote or next/mdx, 
+            replace this div with your <MDXRemote /> component 
+          */}
+          <div className="prose prose-invert prose-blue max-w-none text-text-secondary">
+            <div dangerouslySetInnerHTML={{ __html: content }} />
+          </div>
+        </div>
+      </div>
+
+      {/* ========================================= */}
+      {/* RIGHT PANE: The Crucible                  */}
+      {/* ========================================= */}
+      <div className="w-1/2 h-full p-6 flex flex-col bg-[#050505]">
         
-        {/* Header Breadcrumbs */}
-        <div className="p-4 md:p-6 border-b border-border-base bg-base/50 sticky top-0 z-10">
-          <Link href={`/tier/${tierId}`} className="font-mono text-[9px] text-text-muted hover:text-white transition-colors flex items-center gap-2 mb-6 group w-max">
-            <span className="text-accent-blue group-hover:-translate-x-1 transition-transform">←</span> 
-            RETURN TO TIER 0{tierId}
-          </Link>
-          
-          <div className="flex items-center gap-3 mb-2">
-            <span className="font-mono text-[9px] tracking-[0.2em] px-2 py-0.5 rounded-sm border border-accent-blue/30 bg-accent-blue/10 text-accent-blue">
-              MODULE 0{lesson.moduleId}
-            </span>
-            <span className="font-mono text-[9px] tracking-[0.2em] text-accent-yellow border border-accent-yellow/20 bg-accent-yellow/5 px-2 py-0.5 rounded-sm shadow-[0_0_8px_rgba(255,209,102,0.1)]">
-              {lesson.xpReward} XP
+        {/* Crucible Header & Scenario */}
+        <div className="mb-4 shrink-0">
+          <div className="flex justify-between items-end mb-2">
+            <h2 className="text-sm font-mono tracking-widest text-text-primary uppercase flex items-center gap-2">
+              <span className="w-2 h-2 bg-accent-blue rounded-full animate-pulse"></span>
+              Execution Environment
+            </h2>
+            <span className="text-[10px] font-mono text-phosphor border border-phosphor/30 bg-phosphor/5 px-2 py-1 rounded-sm">
+              +{frontmatter.xpReward} XP
             </span>
           </div>
-          
-          <h1 className="heading-lg text-text-primary leading-tight">
-            {lesson.title}
-          </h1>
+          <p className="text-xs text-text-muted leading-relaxed font-mono bg-surface-sunken p-3 rounded-sm border border-border-dim">
+            <span className="text-accent-yellow">OBJECTIVE:</span> {frontmatter.scenario}
+          </p>
         </div>
 
-        {/* Content Scroll Area */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar">
-          <div className="font-mono text-[10px] text-text-muted border-b border-border-dim pb-2 mb-6 tracking-widest uppercase">
-            THEORY // MENTAL MODEL
-          </div>
-
-          {/* MDX Compiler Rendering Local Markdown */}
-          <div className="space-y-6 text-sm text-text-secondary leading-relaxed font-mono prose prose-invert prose-p:text-text-primary/90 prose-pre:bg-surface-sunken prose-pre:border prose-pre:border-border-dim prose-pre:shadow-sunken prose-code:text-accent-blue">
-            <MDXRemote source={lesson.content} />
-          </div>
-
-          {lesson.scenario && (
-            <div className="mt-12 p-4 border border-accent-red/20 bg-accent-red/5 rounded-sm relative overflow-hidden group">
-              <div className="absolute left-0 top-0 bottom-0 w-1 bg-accent-red shadow-glow-red"></div>
-              <div className="font-mono text-[10px] text-accent-red mb-2 tracking-widest flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-accent-red rounded-full animate-pulse"></div>
-                CRUCIBLE OBJECTIVE
-              </div>
-              <p className="text-xs font-mono text-text-primary">{lesson.scenario}</p>
-            </div>
-          )}
+        {/* The Upgraded Engine */}
+        <div className="flex-1 min-h-0 relative">
+          <LiveCodeRunner
+            initialCode={frontmatter.startingCode || ""}
+            validationLogic={frontmatter.validationLogic || ""}
+            taskId={frontmatter.lessonId}
+            xpReward={frontmatter.xpReward}
+            syntaxHint={frontmatter.syntaxHint}
+            mode={frontmatter.mode || "terminal"} // <-- The Mode Switch
+            dbSeed={frontmatter.dbSeed || ""}     // <-- The SQL Setup Injector
+          />
         </div>
+        
       </div>
-
-      {/* RIGHT PANE: The Machine (Crucible Execution) */}
-      <div className="w-full lg:w-7/12 xl:w-2/3 p-4 md:p-6 bg-surface-sunken flex flex-col relative z-0">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(77,166,255,0.03),transparent_70%)] pointer-events-none"></div>
-
-        <LiveCodeRunner 
-          initialCode={lesson.startingCode || ""}
-          validationLogic={lesson.validationLogic || ""}
-          taskId={lesson.lessonId}
-          xpReward={lesson.xpReward}
-          syntaxHint={lesson.syntaxHint}
-        />
-      </div>
-
-    </main>
+    </div>
   );
 }
