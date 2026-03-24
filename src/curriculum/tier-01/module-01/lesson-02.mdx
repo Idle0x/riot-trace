@@ -3,52 +3,40 @@ tierId: 1
 moduleId: 1
 lessonId: 2
 title: "The Mathematics of the Machine"
-xpReward: 40
-scenario: "Log the result of 100 * 5. On the next line, log the remainder of 10 divided by 3. On the final line, log the typeof evaluation of the number 100."
-startingCode: "// 1. Log the multiplication\n\n// 2. Log the remainder (modulo)\n\n// 3. Log the typeof 100\n"
-syntaxHint: "10 * 5; // Multiplication\n10 % 3; // Modulo (Remainder)\ntypeof 42; // Returns 'number'"
-validationLogic: "if (logs[0] !== '500') throw new Error('Task 1 Failed: First log must be the exact result of 100 * 5.'); if (logs[1] !== '1') throw new Error('Task 2 Failed: Second log must be the exact remainder of 10 / 3.'); if (!logs[2]?.includes('number')) throw new Error('Task 3 Failed: Third log must evaluate the typeof 100 correctly.');"
+mode: "terminal"
+syntaxHint: "10 + 5; 10 % 3; typeof 42;"
+
+task1Code: "// 1. Replication: Log the exact result of 1024 multiplied by 8\n\n"
+task1Logic: "if (!logs.some(l => l === '8192' || l === 8192)) throw new Error('Task Failed: You must log the exact mathematical result.');"
+
+task2Code: "// 2. Mutation: Use modulo (%) to find the remainder of 429 divided by 7\nconsole.log(429 / 7);"
+task2Logic: "if (!logs.some(l => l === '2' || l === 2) || !code.includes('%')) throw new Error('Task Failed: You must use the modulo operator (%) to find the remainder.');"
+
+task3Code: "// 3. Synthesis: Log the string 'Type is:' followed by the actual typeof evaluation of 100 on the next line\n\n"
+task3Logic: "if (!logs.some(l => l.includes('Type is:')) || !logs.some(l => l === 'number')) throw new Error('Task Failed: You must log the string, then use the typeof operator on the number 100 on the next line.');"
 ---
 
-XP counts, node health scores, storage in terabytes, credit balances in riot-sop — your apps are full of numbers. This lesson makes you fluent in how JavaScript calculates data.
-
-### Number Types
-Unlike strings, numbers do **not** get wrapped in quotes. If you wrap a number in quotes (like `"42"`), the machine treats it as text, not math.
-
-JavaScript has one `number` type for both integers (whole numbers) and floats (decimals). 
+### The Numbers
+XP counts, node health scores, storage in terabytes—your applications are driven by numbers. JavaScript has one `number` type for both integers and floats.
 
 ```javascript
-// Integers
-42
-201         // nodes on the network
-
-// Floats
-429.47      // TB of network capacity
-78.3        // average health score
+// Mathematical operators
+10 + 5      // 15  — addition
+10 - 5      // 5   — subtraction
+10 * 5      // 50  — multiplication
+10 / 5      // 2   — division
+10 % 3      // 1   — modulo (remainder after division)
 ```
 
-### Mathematical Operators
-The machine calculates exactly like a calculator, using specific symbols:
-
-
+### The Anatomy of Types
+You must be able to verify what kind of data you are holding before you manipulate it. The `typeof` operator tells you exactly what the machine sees.
 
 ```javascript
-10 + 5      // 15  — Addition
-10 - 5      // 5   — Subtraction
-10 * 5      // 50  — Multiplication
-10 / 5      // 2   — Division
-10 % 3      // 1   — Modulo (Returns the remainder after division)
-```
-*Note: Modulo (`%`) is incredibly useful in programming. For example, if you want to know if a number is even or odd, you just check if `number % 2` leaves a remainder of `0`.*
-
-### The `typeof` Operator
-Sometimes you receive data from an API and you don't know what it is. The `typeof` operator asks the machine to identify the data. It always returns a string telling you the data type.
-
-```javascript
-typeof 42           // returns "number"
-typeof "hello"      // returns "string"
+typeof 42           // "number"
+typeof "hello"      // "string"
 ```
 
-### Your Assignment
-The training wheels are coming off slightly. Look at the Crucible objective. 
-Write the three required `console.log()` statements to calculate and identify the numbers requested. 
+### The Crucible
+* **Task 1 (Replication):** Calculate and log total bandwidth by multiplying 1024 by 8.
+* **Task 2 (Mutation):** The current code divides instead of finding the remainder. Fix the operator.
+* **Task 3 (Synthesis):** Combine your knowledge of strings and types. Output a label, then output the data type of the number 100.
