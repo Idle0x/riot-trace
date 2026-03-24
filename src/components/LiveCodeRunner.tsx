@@ -234,9 +234,8 @@ export default function LiveCodeRunner({
         </div>
 
         <MagneticButton 
-          onClick={executeCode} 
-          disabled={status === "success" && currentTaskIndex === tasks.length - 1}
-          className={`px-8 py-3 rounded-sm font-mono text-[10px] font-bold tracking-widest transition-all uppercase border shadow-plate ${status === "success" && currentTaskIndex === tasks.length - 1 ? "bg-accent-green/10 border-accent-green text-phosphor cursor-default opacity-50" : status === "running" ? "bg-accent-yellow/10 border-accent-yellow text-accent-yellow cursor-wait" : "bg-surface border-border-strong text-text-primary hover:bg-accent-blue/10 hover:border-accent-blue hover:text-accent-blue"}`}
+          onClick={status === "success" && currentTaskIndex === tasks.length - 1 ? undefined : executeCode} 
+          className={`px-8 py-3 rounded-sm font-mono text-[10px] font-bold tracking-widest transition-all uppercase border shadow-plate ${status === "success" && currentTaskIndex === tasks.length - 1 ? "bg-accent-green/10 border-accent-green text-phosphor cursor-default opacity-50 pointer-events-none" : status === "running" ? "bg-accent-yellow/10 border-accent-yellow text-accent-yellow cursor-wait pointer-events-none" : "bg-surface border-border-strong text-text-primary hover:bg-accent-blue/10 hover:border-accent-blue hover:text-accent-blue"}`}
         >
           {status === "running" ? "[ EXECUTING... ]" : status === "success" && currentTaskIndex === tasks.length - 1 ? "[ CRUCIBLE CLEARED ]" : "[ INITIATE BUILD ]"}
         </MagneticButton>
