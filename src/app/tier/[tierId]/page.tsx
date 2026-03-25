@@ -22,7 +22,7 @@ export default async function TierPage({ params }: { params: Promise<{ tierId: s
     <main className="min-h-screen bg-base p-8 flex justify-center">
       <div className="w-full max-w-4xl pt-6">
         <header className="mb-10 border-b border-border-strong pb-8">
-          <Link href="/" className="font-mono text-[9px] text-text-muted hover:text-white mb-6 block uppercase tracking-widest">
+          <Link href="/" className="font-mono text-[9px] text-text-muted hover:text-white mb-6 block uppercase tracking-widest transition-colors">
             ← RETURN TO GLOBAL MATRIX
           </Link>
           <div className={`font-mono text-[10px] tracking-[0.3em] mb-3 ${accentClass} uppercase`}>
@@ -34,7 +34,7 @@ export default async function TierPage({ params }: { params: Promise<{ tierId: s
         <div className="space-y-8">
           {moduleIds.map(mId => (
             <div key={mId} className="border border-border-base bg-surface shadow-plate rounded-sm overflow-hidden">
-              <div className="bg-surface-sunken border-b border-border-strong p-4 font-mono text-[11px] uppercase font-bold">
+              <div className="bg-surface-sunken border-b border-border-strong p-4 font-mono text-[11px] uppercase font-bold text-text-secondary">
                 MODULE {String(mId).padStart(2, '0')}
               </div>
               
@@ -45,34 +45,34 @@ export default async function TierPage({ params }: { params: Promise<{ tierId: s
                   href={`/tier/${tierId}/lesson/${lesson.lessonId}`}
                   className="grid grid-cols-12 gap-4 p-4 border-b border-border-base hover:bg-surface-hover transition-colors group"
                 >
-                  <div className="col-span-2 font-mono text-[10px] text-text-muted group-hover:text-accent-green">
+                  <div className="col-span-2 font-mono text-[10px] text-text-muted group-hover:text-accent-green transition-colors">
                     L{String(lesson.lessonId).padStart(2, '0')}
                   </div>
-                  <div className="col-span-8 font-bold text-sm text-text-primary group-hover:text-white">
+                  <div className="col-span-8 font-bold text-sm text-text-primary group-hover:text-white transition-colors">
                     {lesson.title}
                   </div>
-                  <div className="col-span-2 text-right font-mono text-[10px] text-accent-yellow">
+                  <div className="col-span-2 text-right font-mono text-[10px] text-accent-yellow/80 group-hover:text-accent-yellow transition-colors">
                     {lesson.xpReward || 0} XP
                   </div>
                 </Link>
               ))}
 
-              {/* Conditional Module Challenge (Formerly "Boss") */}
+              {/* Refined Boss Fight Row */}
               {hasBossFight(tierId, mId) && (
                 <Link 
                   href={`/tier/${tierId}/boss/${mId}`}
-                  className="grid grid-cols-12 gap-4 p-4 bg-surface-sunken hover:bg-surface-hover transition-all group items-center relative overflow-hidden"
+                  className="grid grid-cols-12 gap-4 p-4 bg-surface-sunken hover:bg-surface-hover transition-all duration-300 group relative overflow-hidden"
                 >
-                  {/* Subtle left accent border on hover */}
-                  <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-accent-yellow opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  {/* Subtle left-edge accent replacing the heavy background */}
+                  <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-accent-red/30 group-hover:bg-accent-red transition-colors duration-300"></div>
                   
-                  <div className="col-span-2 font-mono text-[10px] text-accent-yellow tracking-widest font-bold">
-                    CHALLENGE
+                  <div className="col-span-2 font-mono text-[10px] text-accent-red/70 group-hover:text-accent-red tracking-widest pl-2 transition-colors">
+                    BOSS
                   </div>
                   <div className="col-span-8 font-bold text-sm text-text-primary group-hover:text-white transition-colors">
-                    Module Synthesis
+                    Module {String(mId).padStart(2, '0')} Synthesis
                   </div>
-                  <div className="col-span-2 text-right font-mono text-[10px] text-accent-yellow font-bold">
+                  <div className="col-span-2 text-right font-mono text-[10px] text-accent-red/70 group-hover:text-accent-red transition-colors">
                     150 XP
                   </div>
                 </Link>
@@ -80,26 +80,29 @@ export default async function TierPage({ params }: { params: Promise<{ tierId: s
             </div>
           ))}
 
-          {/* Conditional Tier Capstone */}
+          {/* Refined Tier Capstone Block */}
           {hasTierCapstone(tierId) && (
-            <div className="mt-12 border border-border-strong bg-surface shadow-plate rounded-sm overflow-hidden relative group transition-all hover:border-accent-blue/50">
-               {/* Elegant top gradient highlight on hover */}
-               <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-accent-blue to-transparent opacity-30 group-hover:opacity-100 transition-opacity"></div>
+            <div className="mt-12 border border-border-strong bg-surface shadow-plate rounded-sm overflow-hidden relative group transition-all duration-500 hover:border-accent-purple/50 hover:shadow-[0_0_30px_rgba(168,85,247,0.07)]">
+               {/* Elegant, subtle hover gradient */}
+               <div className="absolute inset-0 bg-gradient-to-r from-accent-purple/0 via-accent-purple/[0.03] to-accent-purple/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
                
                <Link
                   href={`/tier/${tierId}/capstone`}
-                  className="flex items-center justify-between p-6 hover:bg-surface-hover transition-colors"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-8 relative z-10 gap-4"
                 >
                   <div>
-                    <div className="font-mono text-[10px] text-accent-blue tracking-widest uppercase mb-2">
-                      TIER MILESTONE
+                    <div className="font-mono text-[10px] text-accent-purple/70 tracking-[0.2em] uppercase mb-2 group-hover:text-accent-purple transition-colors duration-300">
+                      FINAL_GATEWAY // TIER 0{tierId}
                     </div>
-                    <h3 className="font-bold text-xl text-text-primary group-hover:text-white transition-colors">
-                      Architecture Capstone
+                    <h3 className="font-bold text-xl text-text-primary group-hover:text-white transition-colors duration-300">
+                      Tier Capstone Challenge
                     </h3>
+                    <p className="text-sm text-text-muted mt-2 font-mono max-w-xl group-hover:text-text-secondary transition-colors duration-300">
+                      Prove your architectural mastery to unlock the next segment of the matrix.
+                    </p>
                   </div>
-                  <div className="text-right">
-                    <div className="font-mono text-[14px] text-accent-blue font-bold">
+                  <div className="sm:text-right flex-shrink-0">
+                    <div className="font-mono text-[14px] text-accent-purple/80 group-hover:text-accent-purple font-bold tracking-widest transition-colors duration-300">
                       +500 XP
                     </div>
                   </div>
