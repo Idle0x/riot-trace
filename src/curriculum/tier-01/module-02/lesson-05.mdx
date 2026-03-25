@@ -2,42 +2,351 @@
 tierId: 1
 moduleId: 2
 lessonId: 5
-title: "Declaring Variables: The Keywords"
-xpReward: 40
-scenario: "Declare a const called TIER with the value 'Code Literacy'. Declare a let called xp with the value 0. Reassign xp to 100. Log both TIER and xp to the console."
-startingCode: "// 1. Declare a const for TIER\n\n// 2. Declare a let for xp\n\n// 3. Reassign xp to 100\n\n// 4. Log both variables\n"
-syntaxHint: "const myVar = 'value';\nlet myNumber = 0;\nmyNumber = 10;\nconsole.log(myVar, myNumber);"
-validationLogic: "if (!code.includes('const TIER')) throw new Error('Task 1 Failed: You must declare a const named TIER.'); if (!code.includes('let xp')) throw new Error('Task 2 Failed: You must declare a let named xp.'); if (typeof TIER === 'undefined' || TIER !== 'Code Literacy') throw new Error('Task 1 Failed: TIER is incorrect.'); if (typeof xp === 'undefined' || xp !== 100) throw new Error('Task 3 Failed: xp is not reassigned to 100.'); if (!logs.some(l => l.includes('Code Literacy') && l.includes('100'))) throw new Error('Task 4 Failed: Both variables were not logged together.');"
+title: "Declaring Variables — const, let, and the Ghost of var"
+mode: "terminal"
+xpReward: 70
+syntaxHint: "const name = 'value';"
+
+task1Code: |
+  // TASK 1 — REPLICATION
+  // Declare a constant called NETWORK_ID with the value "mainnet-01"
+  // Declare a let variable called activeNodes starting at 0
+  // Then update activeNodes to 201
+  // Log both variables on separate lines
+
+task1Logic: |
+  if (!logs.some(l => l === 'mainnet-01')) throw new Error('Task Failed: Log the NETWORK_ID constant. It should output the string mainnet-01.');
+  if (!logs.some(l => l === 201)) throw new Error('Task Failed: Log activeNodes after reassigning it to 201. The output should be the number 201 — not the string "201".');
+
+task2Code: |
+  // TASK 2 — MUTATION
+  // This code throws: TypeError: Assignment to constant variable
+  // Fix it WITHOUT changing the variable declaration keyword.
+  // The node object's health property should be updated to 87.
+  const node = { id: "7A5rRdb", health: 95, network: "mainnet" };
+  node = { id: "7A5rRdb", health: 87, network: "mainnet" };
+  console.log(node.health);
+
+task2Logic: |
+  if (!logs.some(l => l === 87)) throw new Error('Task Failed: node.health should be 87. Hint: you cannot reassign a const variable, but you CAN modify its properties. Instead of replacing the whole object, update the single property that changed.');
+
+task3Code: |
+  // TASK 3 — SYNTHESIS
+  // Demonstrate that const protects the binding, not the value.
+  //
+  // 1. Declare a const called systemConfig as an object with:
+  //    - version: "1.2.0"
+  //    - activeNodes: 201
+  //    - network: "mainnet"
+  //
+  // 2. Update the version property to "1.2.1" (a new release was deployed)
+  // 3. Update activeNodes to 203 (two nodes came online)
+  //
+  // 4. Log systemConfig.version
+  // 5. Log systemConfig.activeNodes
+  //
+  // The object must remain declared with const throughout.
+
+task3Logic: |
+  if (!logs.some(l => l === '1.2.1')) throw new Error('Task Failed: Log systemConfig.version after updating it to "1.2.1".');
+  if (!logs.some(l => l === 203)) throw new Error('Task Failed: Log systemConfig.activeNodes after updating it to 203.');
 ---
 
-You've used `const`, `let`, and `var` before without fully knowing why you chose each. After this lesson, you will never guess again.
+## Why This Lesson Exists
 
-Variables are not "boxes" that hold things. They are **labels** that point to a location in your computer's memory.
+Every piece of data your code works with needs a name. The node's health score, the active network, the XP total, the list of transactions — without names, you cannot reference values after you create them. Variables are those names.
 
-[attachment_0](attachment)
+But "variable" is a misleading word for something you use almost constantly. In modern JavaScript, most values do not vary. The node ID does not change. The API endpoint does not change. The tier name does not change. You declare them once and use them throughout. Understanding which keyword to use — and more importantly, *why* — is the difference between writing intentional code and writing code that happens to work.
 
-### The Three Keywords
+This lesson also corrects a mental model that causes real bugs: the idea that `const` prevents change. It does not. It prevents something more specific. Understanding exactly what it prevents is the point of Task 2.
 
-**1. `const` (Constant)**
-The label cannot be reassigned to point to something else. Use this by default for almost everything. It makes your code predictable.
+---
+
+## The Three Declaration Keywords
+
+JavaScript has three ways to declare a variable. Only two of them belong in your code.
+
+### const
+
 ```javascript
-const NETWORK = "mainnet";
-// NETWORK = "devnet";  ← TypeError: Assignment to constant variable
+const TIER_COUNT = 7;
+const NODE_ID = "7A5rRdbGp4jUm4TA";
+const network = "mainnet";
 ```
 
-**2. `let` (Mutable)**
-The label CAN be reassigned. Use this for counters or values you expect to change over time (like a user's XP).
+`const` declares a **binding** — a name that points to a value. The binding is permanent. You cannot point that name at a different value later:
+
+```javascript
+const health = 95;
+health = 87;   // TypeError: Assignment to constant variable.
+               // The name 'health' cannot be pointed at a different value.
+```
+
+Use `const` for everything that should not be reassigned. In practice, that is the vast majority of your variables. When you read code and see `const`, you know immediately: this name will always refer to the same value. That certainty makes code easier to reason about.
+
+### let
+
 ```javascript
 let score = 0;
-score = 100;  // ✓ This is perfectly fine. We reassigned the label.
+let currentPage = 1;
+let isLoading = true;
 ```
 
-**3. `var` (Legacy)**
-This is the old way. It is function-scoped, hoists weirdly, and is largely obsolete. **Do not use it.** It causes bugs that `const` and `let` were specifically invented to fix.
+`let` declares a binding that *can* be reassigned. Use it specifically when the value will change:
 
-### Your Assignment
-You are setting up the initial state for a user. In the Crucible:
-1. Use `const` to declare a variable named `TIER` and assign it the string `"Code Literacy"`.
-2. Use `let` to declare `xp` and assign it the number `0`.
-3. The user completed a task. Reassign `xp` to `100`. (Do not use `let` again, just reassign it).
-4. `console.log()` both variables.
+```javascript
+let xp = 0;
+xp = xp + 300;    // Task 3 complete
+xp = xp + 1500;   // Boss fight complete
+console.log(xp);  // 1800
+```
+
+The restriction: `let` is **block-scoped**. It only exists inside the `{ }` block where it was declared. You will understand exactly what that means in the next lesson on scope.
+
+### var — Why You Won't Use It
+
+`var` is the original variable declaration from 1995. It exists in millions of codebases written before 2015, so you need to recognize it. You will not write it.
+
+```javascript
+var oldStyle = "this is from 1995";
+```
+
+`var` has three behaviors that cause bugs:
+
+1. It is **function-scoped** instead of block-scoped — it leaks out of `if` blocks and `for` loops in ways that surprise you
+2. It is **hoisted** in a way that silently gives variables the value `undefined` before they are initialized (covered in Lesson 7)
+3. It allows **redeclaration** — you can accidentally declare the same variable twice with no error
+
+Every place you would use `var`, use `const` or `let` instead. Your existing codebase uses `const` and `let` exclusively. Keep it that way.
+
+---
+
+## The Mental Model That Changes Everything
+
+Here is the most important concept in this lesson, and the one that most tutorials skip:
+
+**Variables are labels. Not boxes.**
+
+The "box" mental model says: a variable is a container, and the value lives inside the container. This model breaks immediately when you work with objects and arrays.
+
+The correct mental model: a variable is a **label attached to a location in memory**. The label points at the location. The value lives at that location.
+
+```javascript
+const a = [1, 2, 3];
+//    ^         ^
+//    label     location in memory where [1,2,3] is stored
+
+const b = a;
+//    ^   ^
+//    another label pointing at THE SAME memory location
+```
+
+When you write `const b = a`, you do not copy the array. You attach a second label to the same memory location. Now both `a` and `b` point at the same array:
+
+```javascript
+const a = [1, 2, 3];
+const b = a;
+b.push(4);
+console.log(a);  // [1, 2, 3, 4] — a changed!
+// Because a and b are both labels for the same location.
+// Pushing to b modified the array at that location.
+// a still points at that same location, so it sees the change.
+```
+
+This is called **reference behavior**, and it applies to all objects and arrays. It does not apply to primitive values (strings, numbers, booleans), which are copied directly:
+
+```javascript
+let x = 5;
+let y = x;   // y gets a COPY of the value 5, not a reference to x
+y = 10;
+console.log(x);  // 5 — x is unchanged, y got its own copy
+```
+
+---
+
+## const Does Not Mean "Immutable"
+
+This is the most common misconception about `const`, and it is the exact thing Task 2 tests.
+
+`const` protects the **label** — it prevents the label from being pointed at a different location. It does not protect the **value** at that location from being changed.
+
+```javascript
+const node = { id: "abc", health: 95 };
+
+// This FAILS — you are trying to point the label 'node' at a different location:
+node = { id: "abc", health: 87 };
+// TypeError: Assignment to constant variable
+
+// This WORKS — you are modifying the object AT the current location:
+node.health = 87;
+console.log(node.health);  // 87
+// The label 'node' still points at the same location.
+// The content at that location has changed.
+```
+
+The distinction matters everywhere in React. You will write hundreds of `const` declarations for objects and arrays and then modify their properties without reassigning the variable itself. This is the correct pattern.
+
+```javascript
+// In xandeum-pulse, you might have:
+const nodeStats = { mainnet: 147, devnet: 54, total: 201 };
+nodeStats.total = 203;  // Valid — modifying the property
+nodeStats.mainnet = 149; // Valid — modifying another property
+// nodeStats = {};      // Invalid — would throw TypeError
+```
+
+---
+
+## Initialization and Declaration
+
+A declaration creates the variable. Initialization gives it its first value:
+
+```javascript
+// Declaration and initialization together (most common):
+const health = 95;
+
+// Declaration without initialization (only with let):
+let status;
+// status is now undefined — JavaScript's automatic "nothing here yet"
+status = "online";  // initialization happens later
+```
+
+You cannot declare a `const` without initializing it. This is enforced:
+
+```javascript
+const health;  // SyntaxError: Missing initializer in const declaration
+```
+
+This makes sense. If `const` prevents reassignment and you never gave it a value, it would be permanently `undefined` with no way to change it. JavaScript prevents this at the syntax level.
+
+---
+
+## Naming Conventions — Professional Habits
+
+The name you give a variable communicates intent. Professional codebases follow consistent conventions:
+
+```javascript
+// camelCase — for regular variables and functions (the standard in JavaScript)
+const nodeHealth = 95;
+const activeNodeCount = 201;
+let isLoading = false;
+let currentPage = 1;
+
+// SCREAMING_SNAKE_CASE — for constants that are configuration values or never change
+const MAX_RETRY_ATTEMPTS = 3;
+const API_ENDPOINT = "https://api.xandeum.network";
+const DEFAULT_TIMEOUT_MS = 15000;
+
+// PascalCase — for classes and React components (you will use this in Tier 3)
+const NodeCard = ...;
+class NetworkOrchestrator { ... }
+```
+
+The distinction between `const nodeHealth` and `const MAX_RETRY_ATTEMPTS` is about communication. Both use `const`. But `MAX_RETRY_ATTEMPTS` in screaming snake case signals to every developer reading the code: this is a configuration constant. Do not touch it casually. `nodeHealth` is a regular variable that happens to be const.
+
+Your existing code uses this convention. `NETWORK_ID`, `API_ENDPOINT`, `SUPABASE_URL` — all screaming snake case. `nodeData`, `currentTier`, `isCompleted` — all camelCase. Follow this pattern consistently.
+
+---
+
+## Common Mistakes
+
+**Mistake 1 — Reassigning a const:**
+```javascript
+const health = 95;
+health = 87;  // TypeError — use let if this value needs to change
+```
+
+**Mistake 2 — Thinking const prevents object mutation:**
+```javascript
+const config = { network: "mainnet" };
+config = { network: "devnet" };   // TypeError — cannot reassign the label
+config.network = "devnet";        // Valid — modifying the property at the location
+```
+
+**Mistake 3 — Using let for everything:**
+```javascript
+// Wrong — using let when the value never changes
+let nodeId = "7A5rRdb";  // this ID never changes in this scope
+let endpoint = "/api/stats";  // this never changes
+
+// Correct — const communicates immutability of binding
+const nodeId = "7A5rRdb";
+const endpoint = "/api/stats";
+```
+
+When you use `const` for something that never changes, you are communicating to every reader of your code: "I verified this does not need to be mutable." That communication has value.
+
+**Mistake 4 — Forgetting that var leaks out of blocks:**
+```javascript
+if (true) {
+  var leaked = "I escaped the if block";
+  let confined = "I stay in the if block";
+}
+console.log(leaked);   // "I escaped the if block" — var leaked out
+console.log(confined); // ReferenceError — let stays inside the block
+```
+
+This is the block scoping behavior that Module 02 covers in the next lesson.
+
+---
+
+## Micro-Drills
+
+Work through these before the Crucible. No running the code yet.
+
+**Drill 1:** For each of these, decide: `const` or `let`? Why?
+- A user's total XP points (they increase over time)
+- The Supabase database URL (never changes)
+- A loading state that starts `false` and becomes `true`
+- A node's public key (it is what it is)
+- A counter that tracks how many retries have happened
+
+**Drill 2:** Predict whether this code throws an error. If so, where and why?
+```javascript
+const stats = { nodes: 201, health: 78.3 };
+stats.nodes = 203;
+stats.network = "mainnet";
+stats = { nodes: 203, health: 78.3, network: "mainnet" };
+console.log(stats);
+```
+
+**Drill 3:** What does this log? Walk through it step by step.
+```javascript
+let a = 10;
+let b = a;
+b = b + 5;
+console.log(a);
+console.log(b);
+```
+
+**Drill 4:** What does this log? This is the reference trap.
+```javascript
+const arr1 = [1, 2, 3];
+const arr2 = arr1;
+arr2.push(4);
+console.log(arr1.length);
+console.log(arr2.length);
+console.log(arr1 === arr2);
+```
+
+---
+
+## Go Deeper
+
+If any part of this lesson is unclear, these resources go into more depth with different explanations and visuals:
+
+- **javascript.info — Variables:** https://javascript.info/variables — short, precise, good examples
+- **javascript.info — The old var:** https://javascript.info/var — explains exactly why `var` is avoided and what hoisting means for it (preview of Lesson 7)
+- **MDN — const:** https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/const — the authoritative reference
+- **Fireship — JavaScript Variables in 100 Seconds:** https://www.youtube.com/watch?v=9emXNzqCKyg — fast visual overview
+
+---
+
+## The Crucible
+
+**Task 1 — Replication.** Two separate declarations. One `const`, one `let`. The `let` gets reassigned after declaration. Both logged separately. The validator checks that `activeNodes` logs as the number `201`, not the string `"201"` — type matters.
+
+**Task 2 — Mutation.** The error is real and the fix requires understanding what `const` actually protects. You cannot reassign the variable. You can modify what is inside it. One line of the existing code is wrong. Replace that line with the correct approach.
+
+**Task 3 — Synthesis.** A `const` object that gets two of its properties updated. The entire exercise is demonstrating that you understand the label-vs-location distinction. If you use `let` instead of `const`, the task will not validate correctly — the system checks that your declaration keyword is appropriate for the situation.
+
+Go.
