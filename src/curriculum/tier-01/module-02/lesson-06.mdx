@@ -2,49 +2,419 @@
 tierId: 1
 moduleId: 2
 lessonId: 6
-title: "Scope: Where Variables Live"
-xpReward: 40
-scenario: "Create a function called getStatus(). Inside it, declare a const called status with the value 'online'. Log status inside the function. Finally, call the function."
-startingCode: "// 1. Create the function\nfunction getStatus() {\n  \n}\n\n// 2. Call the function so it runs\n"
-syntaxHint: "function myFunc() {\n  const inside = 'hidden';\n  console.log(inside);\n}\nmyFunc();"
-validationLogic: "if (typeof getStatus !== 'function') throw new Error('Task Failed: getStatus function not found.'); if (!code.includes('const status')) throw new Error('Task Failed: You must declare status using const inside the function.'); if (!logs.some(l => l === 'online')) throw new Error('Task Failed: The function did not log online.');"
+title: "Scope — Where Variables Live and Where They Die"
+mode: "terminal"
+xpReward: 70
+syntaxHint: "function example() { const inside = 'local'; }"
+
+task1Code: |
+  // TASK 1 — REPLICATION
+  // Demonstrate the scope chain: inner function reading an outer variable.
+  //
+  // 1. Declare a const SYSTEM_VERSION = "1.2.1" at the outer scope
+  // 2. Write a function called getVersion that returns SYSTEM_VERSION
+  // 3. Call getVersion() and log its return value
+  //
+  // The function must READ the variable from the outer scope,
+  // not redeclare it inside itself.
+
+task1Logic: |
+  if (!logs.some(l => l === '1.2.1')) throw new Error('Task Failed: getVersion() should return and you should log "1.2.1". Make sure SYSTEM_VERSION is declared at outer scope and the function reads it from there — not redeclares it inside.');
+
+task2Code: |
+  // TASK 2 — MUTATION
+  // This code throws ReferenceError: result is not defined
+  // Fix it WITHOUT moving the console.log inside the function.
+  // The fix should make result accessible where the log is.
+  function calculate() {
+    const result = 1024 * 8;
+  }
+  calculate();
+  console.log(result);
+
+task2Logic: |
+  if (!logs.some(l => l === 8192)) throw new Error('Task Failed: console.log(result) must log 8192. The fix is to declare result outside the function using let or const, and assign it inside the function — or return the value from the function and log the return.');
+
+task3Code: |
+  // TASK 3 — SYNTHESIS
+  // The xandeum-pulse network summary system.
+  //
+  // Declare at the outer scope:
+  //   - const NETWORK = "mainnet"
+  //   - let totalNodes = 0
+  //
+  // Write a function addNodes(count) that:
+  //   - Adds count to totalNodes (modifying the outer variable)
+  //   - Returns a summary string using NETWORK and the new totalNodes
+  //     Format: "mainnet: 201 nodes active"
+  //
+  // Call addNodes(201) and log its return value.
+  // Then call addNodes(2) and log its return value.
+  //
+  // The second call should show 203 — not 2.
+  // Both calls modify the SAME outer totalNodes variable.
+
+task3Logic: |
+  if (!logs.some(l => l === 'mainnet: 201 nodes active')) throw new Error('Task Failed: First call should log "mainnet: 201 nodes active". Check the format exactly — colon, space, number, " nodes active".');
+  if (!logs.some(l => l === 'mainnet: 203 nodes active')) throw new Error('Task Failed: Second call should log "mainnet: 203 nodes active". The addNodes function must modify the outer totalNodes variable each time it is called, not reset it.');
 ---
 
-Ever seen the mysterious `ReferenceError: x is not defined` in your console? Scope explains exactly why certain variables are visible in some places and invisible in others.
+## Why Scope Is the Most Important Concept in This Module
 
+The `ReferenceError: X is not defined` is the most common error in JavaScript. You have seen it. You have fixed it by trial and error — moving code around until the error went away without fully understanding why. After this lesson, you will never fix a scope error by guessing again. You will read the error, locate the scope boundary that caused it, and know exactly what to change.
 
+Scope also explains React's most confusing behavior: why a variable inside a `useEffect` callback sees an old value even though the state has updated. That concept — called a stale closure — is impossible to understand without first understanding scope. This lesson is the prerequisite.
 
-### The Three Scopes
+---
 
-**1. GLOBAL SCOPE**
-Accessible everywhere. Defined at the absolute top of your file, outside of any functions or blocks.
+## What Scope Means
+
+Scope is the region of code where a variable is accessible. Every variable you declare exists within a scope. Outside that scope, the variable does not exist — attempting to access it produces `ReferenceError`.
+
+JavaScript has three types of scope. You need to understand all three.
+
+---
+
+## Global Scope
+
+Variables declared at the top level of a file, outside of any function or block, are globally scoped. They are accessible from anywhere in that file:
+
 ```javascript
-const globalConfig = "mainnet";
-```
+const NETWORK = "mainnet";          // global scope
+let totalNodeCount = 201;           // global scope
 
-**2. FUNCTION SCOPE**
-Variables declared inside a function *only exist inside that function*. They die the exact millisecond the function finishes running.
-```javascript
-function processNode() {
-  const localHealth = 95;  // lives here, dies here
-  console.log(localHealth);  // ✓ Works perfectly
+function displayStatus() {
+  console.log(NETWORK);             // ✓ accessible — global scope
+  console.log(totalNodeCount);      // ✓ accessible — global scope
 }
 
-// console.log(localHealth);  // ✗ ReferenceError: localHealth is not defined
+displayStatus();
+console.log(NETWORK);               // ✓ accessible here too
 ```
 
-**3. BLOCK SCOPE**
-Variables declared inside `{ curly braces }` (like an `if` statement or a loop) using `let` or `const` only exist inside those braces.
+Global variables sound convenient, but they come with a cost. Every function in every file can read and — if declared with `let` or `var` — modify them. In a codebase with 50 files and 500 functions, a global `let` variable can be modified from anywhere, making it nearly impossible to track down why a value changed. This is why experienced developers minimize global variables and why React's state management system exists — it controls access to shared values.
+
+For this module, you will use global scope only to demonstrate the scope chain. In real application code, use global scope sparingly and make those variables `const` whenever possible.
+
+---
+
+## Function Scope
+
+Variables declared inside a function are **function-scoped** — they exist only for the lifetime of that function call:
+
+```javascript
+function processNode(node) {
+  const healthScore = node.health * 0.35;  // function-scoped
+  const storageScore = node.storage * 0.30; // function-scoped
+  const total = healthScore + storageScore;  // function-scoped
+
+  return total;
+}
+
+processNode({ health: 95, storage: 250 });
+console.log(healthScore);  // ReferenceError: healthScore is not defined
+```
+
+The variable `healthScore` was created when `processNode` started executing. When `processNode` returned, JavaScript cleaned it up. It is gone. The `console.log` outside the function tries to access a variable that no longer exists in any scope it can reach.
+
+This is not a limitation. It is a feature. It means each function call is isolated. The `healthScore` in one call to `processNode` does not interfere with the `healthScore` in another call. You can call the same function 1000 times and each call gets its own fresh set of local variables.
+
+---
+
+## Block Scope
+
+Variables declared with `const` or `let` inside any `{ }` block are **block-scoped** — they exist only inside that block:
+
 ```javascript
 if (true) {
-  const blockVar = "only here";
+  const blockVariable = "I exist inside this if block";
+  let alsoBlock = "me too";
+  console.log(blockVariable);  // ✓ accessible
 }
-// console.log(blockVar);   // ✗ ReferenceError
+
+console.log(blockVariable);  // ReferenceError: blockVariable is not defined
+// The block ended. The variable was cleaned up.
 ```
 
-### The Rule of Visibility
-Looking **outward** (up the chain) always works. Code inside a function can see global variables.
-Looking **inward** (down the chain) never works. Global code cannot see inside a function.
+This applies to `if` blocks, `for` loops, `while` loops, `try/catch` blocks — any `{ }` creates a new scope for `const` and `let` variables declared inside:
 
-### Your Assignment
-You are building a status checker. Define the function, create the scoped variable inside it, log it, and then execute the function.
+```javascript
+for (let i = 0; i < 5; i++) {
+  // i exists here
+}
+console.log(i);  // ReferenceError — i died when the loop ended
+
+for (let index = 0; index < nodes.length; index++) {
+  const currentNode = nodes[index];  // new const per iteration
+  console.log(currentNode.health);   // ✓ accessible here
+}
+// currentNode is gone here
+```
+
+Note: `var` does **not** respect block scope. This is one of the main reasons `var` is avoided:
+
+```javascript
+if (true) {
+  var leaked = "var ignores block scope";
+  let confined = "let respects block scope";
+}
+console.log(leaked);   // "var ignores block scope" — it escaped
+console.log(confined); // ReferenceError — as expected
+```
+
+---
+
+## The Scope Chain — Looking Upward
+
+When JavaScript looks up a variable, it searches the current scope first. If it does not find it there, it searches the parent scope. Then the grandparent. It keeps going upward until it either finds the variable or reaches the global scope and throws `ReferenceError`.
+
+This chain of scopes is called the **scope chain**:
+
+```javascript
+const global = "I'm at the top";
+
+function outer() {
+  const middle = "I'm in outer";
+
+  function inner() {
+    const local = "I'm in inner";
+
+    // inner() can see all three: its own scope, outer's scope, and global scope
+    console.log(local);   // ✓ found in inner's own scope
+    console.log(middle);  // ✓ not in inner, found in outer's scope
+    console.log(global);  // ✓ not in inner or outer, found at global scope
+  }
+
+  inner();
+
+  // outer() cannot see inner's scope — it only looks up, not down
+  // console.log(local);  // ReferenceError
+}
+
+outer();
+```
+
+**The key insight: scope chains only look upward (outward), never downward (inward).**
+
+Inner scopes can see outer scopes. Outer scopes cannot see inner scopes. Think of it as one-way glass: sitting inside a room, you can look out through the glass and see the larger room beyond. But someone standing in the larger room cannot see inside yours.
+
+---
+
+## Variable Shadowing
+
+What happens when an inner scope declares a variable with the same name as an outer scope?
+
+```javascript
+const network = "mainnet";
+
+function checkNetwork() {
+  const network = "devnet";  // different variable — same name
+  console.log(network);      // "devnet" — the inner one shadows the outer one
+}
+
+checkNetwork();
+console.log(network);        // "mainnet" — the outer one is unchanged
+```
+
+This is called **shadowing**. The inner `network` does not modify the outer `network` — it creates an entirely separate variable that happens to have the same name. Inside `checkNetwork`, any reference to `network` resolves to the inner one. The outer one is invisible from inside the function.
+
+Shadowing is a source of bugs when it happens accidentally. If you intended to modify the outer `network` but accidentally declared a new one with `const` or `let`, the outer variable stays unchanged and you spend 20 minutes wondering why nothing updated.
+
+The professional habit: within a function, if you are intentionally reading or modifying an outer variable, do not redeclare it. If you need a new independent variable, give it a different name.
+
+---
+
+## Lexical Scope — Where You Write It, Not Where You Call It
+
+This concept is the foundation of closures, which you will encounter in Lesson 22 and in every React hook you use. Understand it now.
+
+A function's scope chain is determined by **where the function is written in the source code**, not by where or how it is called.
+
+```javascript
+const value = "outer";
+
+function readValue() {
+  console.log(value);  // reads from the scope where readValue was WRITTEN
+}
+
+function wrapper() {
+  const value = "inner";  // local to wrapper — does not affect readValue's scope chain
+  readValue();            // calling readValue from inside wrapper
+}
+
+wrapper();  // logs "outer" — not "inner"
+```
+
+`readValue` was written at the global scope level. Its scope chain goes: own scope → global scope. It has no awareness of `wrapper`'s scope — even when called from inside `wrapper`. The `value` it sees is always the global `"outer"`.
+
+This is called **lexical scope** (or static scope). "Lexical" means "based on the text of the code." Where you write the function determines what it can see.
+
+This will become deeply important in Tier 3 when you work with `useEffect` and React hooks. A callback function passed to `useEffect` closes over the values from the scope where the component function wrote it. Even if that component re-renders and the values change, the callback sees the values from its original scope — unless you tell React to recreate it. That is the stale closure bug explained. Understanding lexical scope now means the stale closure concept will make immediate sense in Tier 3.
+
+---
+
+## Practical: Reading Scope Errors
+
+The `ReferenceError: X is not defined` always means one thing: the variable `X` does not exist in any scope that the current line of code can reach. The solution always involves one of these fixes:
+
+**Fix A — The variable is in the wrong scope.** Move the declaration to a higher scope:
+```javascript
+// Problem: result is declared inside the function
+function calculate() {
+  const result = 1024 * 8;
+}
+console.log(result);  // ReferenceError
+
+// Fix A: declare outside, assign inside
+let result;
+function calculate() {
+  result = 1024 * 8;  // modifies the outer result
+}
+calculate();
+console.log(result);  // 8192
+```
+
+**Fix B — Return the value instead of expecting the outer scope to see it:**
+```javascript
+function calculate() {
+  const result = 1024 * 8;
+  return result;  // send it out to the caller
+}
+const result = calculate();  // catch it at the outer scope
+console.log(result);  // 8192
+```
+
+Fix B is usually the cleaner approach. Functions that compute a value and return it are easier to test, easier to reuse, and do not rely on modifying outer-scope variables.
+
+---
+
+## Common Mistakes
+
+**Mistake 1 — Expecting to see a variable from inside a called function:**
+```javascript
+function setup() {
+  const config = { timeout: 15000 };
+}
+setup();
+console.log(config);  // ReferenceError — config lives in setup's scope
+// Fix: either return config, or declare it outside setup
+```
+
+**Mistake 2 — Accidentally shadowing instead of modifying:**
+```javascript
+let count = 0;
+function increment() {
+  const count = 1;  // shadows the outer count — creates a new one
+  // The outer count is still 0. This function did nothing useful.
+}
+increment();
+console.log(count);  // 0 — the outer count was never changed
+// Fix: remove the 'const' — just write: count = count + 1;
+```
+
+**Mistake 3 — var and block scope:**
+```javascript
+for (var i = 0; i < 3; i++) {
+  // loop body
+}
+console.log(i);  // 3 — var leaked out of the for loop block
+// Use let instead: for (let i = 0; i < 3; i++)
+// Then console.log(i) would throw ReferenceError — as expected
+```
+
+**Mistake 4 — Nested functions reaching down:**
+```javascript
+function outer() {
+  function inner() {
+    const secret = "only inner knows";
+  }
+  inner();
+  console.log(secret);  // ReferenceError — outer cannot see inside inner
+}
+// Scope chains go UP, not DOWN.
+```
+
+---
+
+## Micro-Drills
+
+**Drill 1:** For each variable below, identify its scope (global, function, or block):
+```javascript
+const API_URL = "https://api.xandeum.network";  // scope: ?
+
+function fetchNodes() {
+  const endpoint = "/v1/nodes";  // scope: ?
+
+  if (true) {
+    const params = "?network=mainnet";  // scope: ?
+    let page = 1;  // scope: ?
+  }
+
+  return endpoint;
+}
+```
+
+**Drill 2:** Predict the output. Walk through the scope chain for each `console.log`:
+```javascript
+const x = "global";
+
+function a() {
+  const x = "function a";
+  function b() {
+    console.log(x);  // what does this log?
+  }
+  b();
+}
+
+a();
+console.log(x);  // what does this log?
+```
+
+**Drill 3:** The scope chain in action. Without running it, what does this log and why?
+```javascript
+const tier = "Code Literacy";
+
+function getModule() {
+  const module = "Memory Allocation";
+  function getLesson() {
+    const lesson = "Scope";
+    return `${tier} → ${module} → ${lesson}`;
+  }
+  return getLesson();
+}
+
+console.log(getModule());
+```
+
+**Drill 4:** Why is this a bug? What is the correct fix?
+```javascript
+let totalXP = 0;
+
+function awardXP(amount) {
+  let totalXP = totalXP + amount;  // bug here
+  console.log(totalXP);
+}
+
+awardXP(300);
+```
+
+---
+
+## Go Deeper
+
+- **javascript.info — Variable scope, closure:** https://javascript.info/closure — the best written explanation of scope and the scope chain on the internet
+- **MDN — Closures:** https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures — official reference with examples
+- **JavaScript Visualizer 9000:** https://www.jsv9000.app — paste your code and watch it execute step by step with scope visualization. Use this for any code where you are uncertain what scope each variable is in.
+- **Fireship — JavaScript Scope in 100 Seconds:** https://www.youtube.com/watch?v=iLuhJE88-EE — visual and fast
+
+---
+
+## The Crucible
+
+**Task 1 — Replication.** A function reads a variable from an outer scope. The key: the function must not redeclare `SYSTEM_VERSION` inside itself. It must look up the scope chain and find it. If your function logs `"1.2.1"` by containing `const SYSTEM_VERSION = "1.2.1"` inside it, the test will fail — because you have just created a different variable that shadows the outer one.
+
+**Task 2 — Mutation.** The `console.log(result)` is outside the function and must stay there. The variable `result` is currently only accessible inside the function. Fix the scope so that `result` is accessible where the log is. You have two valid approaches from the "Practical: Reading Scope Errors" section. Choose one.
+
+**Task 3 — Synthesis.** Two outer-scope variables. A function that reads both and modifies one. Two calls to the function, each demonstrating that the modification to `totalNodes` persists between calls. This is the scope chain and outer-scope modification pattern that React's state management is built on top of. Get comfortable with it here.
+
+Go.
