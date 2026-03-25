@@ -4,39 +4,311 @@ moduleId: 1
 lessonId: 2
 title: "The Mathematics of the Machine"
 mode: "terminal"
-syntaxHint: "10 + 5; 10 % 3; typeof 42;"
+xpReward: 70
+syntaxHint: "console.log(1024 * 8);"
 
-task1Code: "// 1. Replication: Log the exact result of 1024 multiplied by 8\n\n"
-task1Logic: "if (!logs.some(l => l === '8192' || l === 8192)) throw new Error('Task Failed: You must log the exact mathematical result.');"
+task1Code: "// TASK 1 — REPLICATION\n// In xandeum-pulse, storage is often in kilobytes.\n// Calculate and log the number of kilobits in 1024 kilobytes.\n// (Multiply 1024 by 8)\n\n"
+task1Logic: "if (!logs.some(l => l == 8192)) throw new Error('Task Failed: Log the result of 1024 * 8. The answer is 8192.');"
 
-task2Code: "// 2. Mutation: Use modulo (%) to find the remainder of 429 divided by 7\nconsole.log(429 / 7);"
-task2Logic: "if (!logs.some(l => l === '2' || l === 2) || !code.includes('%')) throw new Error('Task Failed: You must use the modulo operator (%) to find the remainder.');"
+task2Code: "// TASK 2 — MUTATION\n// This should show the REMAINDER after dividing 429 by 7.\n// But it is using division instead of modulo. Fix the operator.\nconsole.log(429 / 7);\n"
+task2Logic: "if (!logs.some(l => l == 2)) throw new Error('Task Failed: Replace / with %. The modulo operator gives the remainder. 429 % 7 = 2.');"
 
-task3Code: "// 3. Synthesis: Log the string 'Type is:' followed by the actual typeof evaluation of 100 on the next line\n\n"
-task3Logic: "if (!logs.some(l => l.includes('Type is:')) || !logs.some(l => l === 'number')) throw new Error('Task Failed: You must log the string, then use the typeof operator on the number 100 on the next line.');"
+task3Code: "// TASK 3 — SYNTHESIS\n// Line 1: Log the result of 256 multiplied by 8\n// Line 2: Log the typeof that result (it will be a number)\n// Two separate console.log calls.\n\n"
+task3Logic: "if (!logs.some(l => l == 2048)) throw new Error('Task Failed: First line must be the result of 256 * 8 = 2048.'); if (!logs.some(l => l === 'number')) throw new Error('Task Failed: Second line must use typeof on a number. typeof any number returns the string \"number\".');"
 ---
 
-### The Numbers
-XP counts, node health scores, storage in terabytes—your applications are driven by numbers. JavaScript has one `number` type for both integers and floats.
+## Why Numbers Matter Immediately
+
+Look at your xandeum-pulse dashboard. Every number you see — `429.47 TB`, `78.3%`, `201 nodes`, `#167` rank, `45,689` credits — is not decoration. It is data your code reads, calculates, compares, and transforms dozens of times before it reaches the screen.
+
+The health score algorithm you built uses sigmoid curves. The storage calculations convert bytes to terabytes. The XP system adds, subtracts, and thresholds. You used AI to write all of that code. This lesson gives you the vocabulary to read it.
+
+---
+
+## JavaScript's Number Type
+
+Most programming languages have separate types for integers (whole numbers) and floats (decimals). JavaScript does not. It has one type called `number` that handles both:
 
 ```javascript
-// Mathematical operators
-10 + 5      // 15  — addition
-10 - 5      // 5   — subtraction
-10 * 5      // 50  — multiplication
-10 / 5      // 2   — division
-10 % 3      // 1   — modulo (remainder after division)
+42          // integer — no decimal point
+429.47      // float — has decimal point
+-15         // negative number
+0           // zero
+Infinity    // a valid number in JavaScript
+-Infinity   // also valid
+NaN         // "Not a Number" — we will cover this shortly
 ```
 
-### The Anatomy of Types
-You must be able to verify what kind of data you are holding before you manipulate it. The `typeof` operator tells you exactly what the machine sees.
+The single `number` type simplifies things. You do not need to declare "this is an integer, this is a float." You just write the number. The tradeoff is one famous gotcha that you need to know before you hit it in production:
+
+```javascript
+0.1 + 0.2   // 0.30000000000000004
+```
+
+This is not a bug in your code. It is a fundamental limitation of how computers store decimal numbers in binary (IEEE 754 floating-point representation). Every language has this issue. JavaScript does not hide it.
+
+In practice, this matters when you compare decimal results:
+```javascript
+0.1 + 0.2 === 0.3   // false — even though mathematically it should be true
+```
+
+The fix, when precision matters, is to round:
+```javascript
+Math.round((0.1 + 0.2) * 10) / 10   // 0.3
+// Or for display: (0.1 + 0.2).toFixed(1)  → "0.3"
+```
+
+You will not need this fix today. But now you know why your `78.3%` health score sometimes displays as `78.29999999999998` — and you know how to fix it when it does.
+
+---
+
+## The Mathematical Operators
+
+JavaScript gives you seven arithmetic operators. You already know most of them from mathematics. Two will be new.
+
+```javascript
+10 + 5    // 15  — addition
+10 - 5    // 5   — subtraction
+10 * 5    // 50  — multiplication
+10 / 5    // 2   — division
+10 % 3    // 1   — modulo: the REMAINDER after division
+2 ** 10   // 1024 — exponentiation: 2 to the power of 10
+```
+
+### The Modulo Operator — The One People Forget
+
+The `%` operator does not give you a percentage. It gives you the **remainder** after integer division. This trips up almost every beginner.
+
+```javascript
+10 % 3    // 1  — because 10 / 3 = 3 remainder 1
+15 % 4    // 3  — because 15 / 4 = 3 remainder 3
+20 % 5    // 0  — because 20 / 5 = 4 remainder 0 (evenly divisible)
+429 % 7   // 2  — because 429 / 7 = 61 remainder 2
+```
+
+What is modulo actually used for? It appears constantly in real code:
+
+```javascript
+// Is this number even or odd?
+if (number % 2 === 0) { /* even */ }
+if (number % 2 !== 0) { /* odd */ }
+
+// Cycle through a fixed range (0, 1, 2, 0, 1, 2...)
+const index = tick % 3;  // used in carousels, animations, rotation
+
+// Is this divisible by something?
+if (lessonId % 4 === 0) { /* every 4th lesson, show a module boss fight */ }
+```
+
+Task 2 uses this operator. You will use it often.
+
+---
+
+## Order of Operations
+
+JavaScript follows the standard mathematical order of operations — the same rules you learned in school (BODMAS / PEMDAS):
+
+```javascript
+2 + 3 * 4    // 14 — multiplication runs before addition
+(2 + 3) * 4  // 20 — parentheses force the addition to run first
+
+10 / 2 + 3   // 8 — division before addition
+10 / (2 + 3) // 2 — parentheses first
+
+2 ** 3 + 1   // 9 — exponentiation before addition
+```
+
+When in doubt: **use parentheses**. They make your intent explicit. Explicit code is better than code that relies on the reader knowing operator precedence perfectly.
+
+```javascript
+// Ambiguous — what was the intent?
+const score = base + bonus * multiplier - penalty;
+
+// Explicit — intent is unmistakable
+const score = base + (bonus * multiplier) - penalty;
+```
+
+The computer will evaluate both identically (multiplier is applied before addition either way). But the human reading it at 2am will thank you.
+
+---
+
+## The typeof Operator
+
+Every value in JavaScript has a type. The `typeof` operator tells you what type a value is:
 
 ```javascript
 typeof 42           // "number"
+typeof 3.14         // "number"
 typeof "hello"      // "string"
+typeof true         // "boolean"
+typeof undefined    // "undefined"
 ```
 
-### The Crucible
-* **Task 1 (Replication):** Calculate and log total bandwidth by multiplying 1024 by 8.
-* **Task 2 (Mutation):** The current code divides instead of finding the remainder. Fix the operator.
-* **Task 3 (Synthesis):** Combine your knowledge of strings and types. Output a label, then output the data type of the number 100.
+`typeof` returns a **string** — notice the quotes around the results above. When you log `typeof 42`, the output is the text `number`, not the number 42.
+
+```javascript
+console.log(typeof 42);         // number
+console.log(typeof "42");       // string
+console.log(typeof 42 === 42);  // false — "number" is a string, not the number 42
+console.log(typeof 42 === "number"); // true — this is the correct comparison
+```
+
+You will use `typeof` constantly for debugging. When a variable contains something unexpected — when your health score comes back as a string instead of a number — `typeof` tells you what you actually have.
+
+---
+
+## NaN — Not a Number
+
+`NaN` stands for Not a Number. It is a `number` type value (yes, really) that represents the result of an invalid mathematical operation.
+
+```javascript
+0 / 0             // NaN
+parseInt("hello") // NaN — can't convert "hello" to an integer
+Math.sqrt(-1)     // NaN — square root of a negative
+Infinity - Infinity // NaN
+```
+
+`NaN` has one unique property: **it is not equal to itself**:
+```javascript
+NaN === NaN   // false
+NaN == NaN    // false
+```
+
+This is the correct way to check for it:
+```javascript
+isNaN(0 / 0)      // true
+isNaN(42)         // false
+Number.isNaN(NaN) // true — stricter version, won't misfire on strings
+```
+
+Why does this matter? Because if a calculation in your app produces `NaN` and you do not catch it, it propagates. Any arithmetic involving `NaN` produces `NaN`. A single bad value can silently corrupt a chain of calculations until you get a dashboard full of `NaN%` health scores.
+
+In xandeum-pulse, your health score algorithm divides by uptime. If uptime is `0`, the division produces `NaN`. Your sigmoid function receives `NaN`, produces `NaN`, and the UI shows nothing or crashes. You have probably already debugged something like this. Now you know the name of what you were fighting.
+
+---
+
+## The Math Object
+
+JavaScript provides a built-in `Math` object with mathematical utilities you would otherwise have to write yourself:
+
+```javascript
+Math.round(78.6)      // 79  — rounds to nearest integer
+Math.floor(78.9)      // 78  — always rounds down
+Math.ceil(78.1)       // 79  — always rounds up
+Math.abs(-15)         // 15  — absolute value (removes negative sign)
+Math.max(45, 91, 78)  // 91  — largest of the arguments
+Math.min(45, 91, 78)  // 45  — smallest of the arguments
+Math.pow(2, 10)       // 1024 — same as 2 ** 10
+Math.sqrt(144)        // 12  — square root
+Math.PI               // 3.141592653589793 — the constant π
+```
+
+```javascript
+// Real use: your xandeum-pulse health score clamping
+const rawScore = calculateScore(node);
+const clampedScore = Math.min(100, Math.max(0, rawScore));
+// This ensures the score stays within 0-100 regardless of the raw calculation
+```
+
+You do not need to memorize these. But recognize them when you see them. `Math.min()` and `Math.max()` are used in your existing code.
+
+---
+
+## Number to String and Back
+
+You will frequently need to convert between numbers and strings:
+
+```javascript
+// Number to String
+String(42)          // "42"
+(42).toString()     // "42"
+String(78.3)        // "78.3"
+
+// String to Number
+Number("42")        // 42
+parseInt("42px")    // 42 — stops at the first non-numeric character
+parseFloat("3.14")  // 3.14
+parseInt("hello")   // NaN — not a number
+
+// Quick conversions
++"42"               // 42 — unary plus converts to number
+"42" * 1            // 42 — multiplication coerces to number
+```
+
+The most dangerous conversion is implicit. JavaScript sometimes converts types for you automatically (coercion), and the results are not always what you expect:
+
+```javascript
+"5" + 3     // "53" — string + number = string concatenation
+"5" - 3     // 2   — string - number = numeric subtraction
+"5" * 3     // 15  — string * number = numeric multiplication
+"5" == 5    // true — loose equality coerces types
+"5" === 5   // false — strict equality never coerces
+```
+
+This is why `===` is used everywhere instead of `==`. We will cover this properly in Lesson 3.
+
+---
+
+## Common Mistakes
+
+**Mistake 1 — Confusing modulo with division:**
+```javascript
+console.log(10 % 3);   // 1 — the REMAINDER after division
+console.log(10 / 3);   // 3.333... — the QUOTIENT of division
+// These are not the same thing. Know which one you need.
+```
+
+**Mistake 2 — Trusting float arithmetic for exact equality:**
+```javascript
+const total = 0.1 + 0.2;
+if (total === 0.3) { /* this never runs */ }
+// Use rounding or threshold comparison for float equality:
+if (Math.abs(total - 0.3) < 0.0001) { /* this works */ }
+```
+
+**Mistake 3 — Not checking for NaN:**
+```javascript
+const speed = parseInt(userInput);
+const distance = speed * time; // if userInput was text, speed is NaN, distance is NaN
+// Always validate before computing: if (isNaN(speed)) { handle error }
+```
+
+**Mistake 4 — Forgetting operator precedence:**
+```javascript
+const result = 2 + 3 * 4;    // 14, not 20
+const result = (2 + 3) * 4;  // 20 — parentheses make intent clear
+```
+
+---
+
+## Micro-Drills
+
+Work through these before the Crucible. No looking up.
+
+**Drill 1:** What does `429 % 7` produce? Work it out by hand. What does `429 / 7` produce? Why are they different?
+
+**Drill 2:** Without running it, predict the output:
+```javascript
+console.log(2 + 3 * 4);
+console.log((2 + 3) * 4);
+console.log(10 % 3);
+console.log(typeof 42);
+```
+
+**Drill 3:** Your health score calculation produces `NaN`. What are three possible causes? How would you check which one it is?
+
+**Drill 4:** What is the difference between `Math.floor(78.9)`, `Math.ceil(78.1)`, and `Math.round(78.5)`?
+
+---
+
+## The Crucible
+
+Three tasks. Each builds on the last.
+
+**Task 1 — Replication.** In network monitoring, kilobytes and kilobits are used for different purposes. The calculation is simple multiplication. Get the right operator and log the result.
+
+**Task 2 — Mutation.** The code uses division where it should use modulo. Change one character. One. The comment tells you exactly what the output should be.
+
+**Task 3 — Synthesis.** Two lines of output. Line one is a calculation. Line two is the type of that calculation's result. They are independent `console.log` calls. You have seen `typeof` in this lesson. Use it.
+
+Go.
