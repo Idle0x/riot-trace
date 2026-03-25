@@ -1,0 +1,119 @@
+---
+tierId: 1
+moduleId: 2
+type: "boss"
+title: "Module 02 Boss Fight — The Memory Audit"
+mode: "terminal"
+xpReward: 150
+startingCode: |
+  // ═══════════════════════════════════════════════════════
+  // MODULE 02 BOSS FIGHT — THE MEMORY AUDIT
+  // ═══════════════════════════════════════════════════════
+  //
+  // No hints. No scaffold. No theory panel.
+  // This is the complete test of Module 02.
+  //
+  // THE SCENARIO:
+  // You are writing the initialization module for riot-trace's
+  // node registry. This module must work correctly across
+  // three separate systems: configuration, tracking, and reporting.
+  //
+  // YOUR MISSION: Write code that produces EXACTLY this output:
+  //
+  //   1.2.1
+  //   mainnet: 201 nodes
+  //   mainnet: 203 nodes
+  //   AUDIT_COMPLETE
+  //
+  // ─────────────────────────────────────────────────────────
+  //
+  // REQUIREMENT 1 — Configuration (const and scope):
+  //
+  //   At the OUTER scope, declare:
+  //   - const VERSION = "1.2.1"
+  //   - const NETWORK = "mainnet"
+  //   - let registeredNodes = 0
+  //
+  //   Log VERSION (this is Line 1 of your output).
+  //
+  // ─────────────────────────────────────────────────────────
+  //
+  // REQUIREMENT 2 — Node Registration (function + outer scope mutation):
+  //
+  //   Write a function called registerNodes(count) that:
+  //   - Adds count to the outer registeredNodes variable
+  //   - Returns a formatted string using NETWORK and registeredNodes
+  //     Format: "mainnet: 201 nodes"
+  //
+  //   Call registerNodes(201) and log its return value (Line 2).
+  //   Call registerNodes(2) and log its return value (Line 3).
+  //   The second call must show 203, proving the outer variable persisted.
+  //
+  // ─────────────────────────────────────────────────────────
+  //
+  // REQUIREMENT 3 — Audit Report (hoisting):
+  //
+  //   Call a function called runAudit() BEFORE its definition.
+  //   Define runAudit() as a function declaration (not an arrow function).
+  //   It should log: "AUDIT_COMPLETE"
+  //
+  //   Your runAudit() call must appear in the code ABOVE the function
+  //   definition. Hoisting must be the reason it works.
+  //
+  // ─────────────────────────────────────────────────────────
+  //
+  // CONSTRAINTS:
+  // - VERSION and NETWORK must be const. registeredNodes must be let.
+  // - registerNodes must read NETWORK from the outer scope, not redeclare it.
+  // - runAudit() must be called before it is defined in the source.
+  // - Exactly 4 lines of output. No extras.
+  //
+  // SYS.EXEC →
+
+validationLogic: |
+  if (logs.length !== 4) throw new Error('AUDIT_HALT: Expected exactly 4 lines of output. Got ' + logs.length + '. Each requirement produces exactly one log line. Check for accidental extra console.log calls.');
+  if (logs[0] !== '1.2.1') throw new Error('REQ_1_FAIL: Line 1 must be the string "1.2.1" — the value of your VERSION constant. Received: ' + JSON.stringify(logs[0]));
+  if (logs[1] !== 'mainnet: 201 nodes') throw new Error('REQ_2a_FAIL: Line 2 must be "mainnet: 201 nodes". Check the format exactly — colon, space, number, space, "nodes". Received: ' + JSON.stringify(logs[1]));
+  if (logs[2] !== 'mainnet: 203 nodes') throw new Error('REQ_2b_FAIL: Line 3 must be "mainnet: 203 nodes". The second call to registerNodes(2) should add to the existing 201, producing 203. If you see "mainnet: 2 nodes", your function is resetting registeredNodes instead of adding to it. Received: ' + JSON.stringify(logs[2]));
+  if (logs[3] !== 'AUDIT_COMPLETE') throw new Error('REQ_3_FAIL: Line 4 must be "AUDIT_COMPLETE". Your runAudit() call must appear BEFORE the function definition in your code — the validator checks source order. If runAudit() is defined before it is called, move the call above the definition. Received: ' + JSON.stringify(logs[3]));
+---
+
+## The Test
+
+Module 02 covered three interconnected concepts: how to declare variables with the right keyword and mutation behavior, how scope determines what a variable can see, and how hoisting changes the order JavaScript appears to read your code.
+
+This boss fight requires all three at once. Not in sequence — in a single cohesive program where each part depends on the previous.
+
+---
+
+## What This Tests
+
+**Requirement 1** tests that you can make the right declaration choices and understand that constants declared at outer scope are readable from inner functions.
+
+**Requirement 2** tests scope understanding at a deeper level. `registerNodes` must read `NETWORK` from the outer scope (not shadow it with a local redeclaration), and it must *modify* `registeredNodes` across multiple calls. If you declare a new `let registeredNodes` inside the function, the outer variable never changes — the second call logs `2` instead of `203`. The Lesson 6 Drill 4 was training you for exactly this.
+
+**Requirement 3** tests hoisting. The `runAudit()` call must appear above the `function runAudit()` definition in your source code. If the call is below the definition, you are not demonstrating hoisting — you are just calling a function in the normal order. The validator checks the output but the mental discipline of placing the call first is the actual skill being tested.
+
+---
+
+## Approach
+
+Do not write all four requirements at once and then try to debug four things simultaneously. Build and verify each requirement separately:
+
+1. Write the three outer-scope declarations and log `VERSION`. Verify Line 1 is correct.
+2. Write `registerNodes` and the two calls. Verify Lines 2 and 3 are correct. If Line 3 shows `2` instead of `203`, your function has a scope error.
+3. Write the `runAudit()` call (before its definition). Then write the function definition below it. Verify Line 4.
+
+Then run the full sequence and check all four outputs match exactly.
+
+---
+
+## After You Pass
+
+When `[SYS.VERIFIED] // MODULE 02 COMPLETE` appears, you have demonstrated command over JavaScript's memory model.
+
+**Module 03 unlocks: Logic Gates — Conditionals & Booleans.**
+
+That module takes the boolean values from Lesson 3 and builds decision-making on top of them. `if/else`, `switch`, ternary operators, and the logical operators `&&`, `||`, and `!`. This is where code stops evaluating expressions and starts making choices — the foundation of every filter, every validation, and every conditional render in your applications.
+
+Go.
