@@ -1,5 +1,10 @@
 import Link from "next/link";
-import { getAllLessonsForTier } from "@/lib/curriculum";
+import { 
+  getAllLessonsForTier, 
+  getModuleIdsForTier, 
+  hasBossFight, 
+  hasTierCapstone 
+} from "@/lib/curriculum";
 
 const TIER_ACCENTS: Record<number, string> = {
   1: "text-accent-green", 2: "text-accent-blue", 3: "text-accent-yellow",
@@ -8,10 +13,11 @@ const TIER_ACCENTS: Record<number, string> = {
 
 export default async function TierPage({ params }: { params: Promise<{ tierId: string }> }) {
   const { tierId } = await params;
+  
+  // Use our new helpers
   const lessons = getAllLessonsForTier(tierId);
+  const moduleIds = getModuleIdsForTier(tierId); 
   const accentClass = TIER_ACCENTS[parseInt(tierId)] || "text-accent-blue";
-
-  const moduleIds = Array.from(new Set(lessons.map(l => l.moduleId)));
 
   return (
     <main className="min-h-screen bg-base p-8 flex justify-center">
@@ -32,11 +38,13 @@ export default async function TierPage({ params }: { params: Promise<{ tierId: s
               <div className="bg-surface-sunken border-b border-border-strong p-4 font-mono text-[11px] uppercase font-bold">
                 MODULE {String(mId).padStart(2, '0')}
               </div>
+              
+              {/* Standard Lessons */}
               {lessons.filter(l => l.moduleId === mId).map((lesson) => (
                 <Link 
                   key={lesson.lessonId}
                   href={`/tier/${tierId}/lesson/${lesson.lessonId}`}
-                  className="grid grid-cols-12 gap-4 p-4 border-b border-border-base last:border-0 hover:bg-surface-hover transition-colors group"
+                  className="grid grid-cols-12 gap-4 p-4 border-b border-border-base hover:bg-surface-hover transition-colors group"
                 >
                   <div className="col-span-2 font-mono text-[10px] text-text-muted group-hover:text-accent-green">
                     L{String(lesson.lessonId).padStart(2, '0')}
@@ -49,8 +57,51 @@ export default async function TierPage({ params }: { params: Promise<{ tierId: s
                   </div>
                 </Link>
               ))}
+
+              {/* Conditional Boss Fight */}
+              {hasBossFight(tierId, mId) && (
+                <Link 
+                  href={`/tier/${tierId}/boss/${mId}`}
+                  className="grid grid-cols-12 gap-4 p-4 bg-accent-red/5 border-t-2 border-accent-red/20 hover:bg-accent-red/10 transition-colors group"
+                >
+                  <div className="col-span-2 font-mono text-[10px] text-accent-red tracking-widest font-bold">
+                    BOSS
+                  </div>
+                  <div className="col-span-8 font-bold text-sm text-accent-red group-hover:text-white uppercase tracking-widest transition-colors">
+                    Module Crucible
+                  </div>
+                  <div className="col-span-2 text-right font-mono text-[10px] text-accent-red font-bold">
+                    150 XP
+                  </div>
+                </Link>
+              )}
             </div>
           ))}
+
+          {/* Conditional Tier Capstone */}
+          {hasTierCapstone(tierId) && (
+            <div className="mt-12 border-2 border-accent-purple/30 bg-accent-purple/5 shadow-plate rounded-sm overflow-hidden">
+               <Link
+                  href={`/tier/${tierId}/capstone`}
+                  className="flex items-center justify-between p-6 hover:bg-accent-purple/10 transition-colors group"
+                >
+                  <div>
+                    <div className="font-mono text-[10px] text-accent-purple tracking-widest uppercase mb-2">
+                      FINAL_GATEWAY
+                    </div>
+                    <h3 className="font-bold text-xl text-text-primary group-hover:text-white">
+                      Tier Capstone Challenge
+                    </h3>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-mono text-[14px] text-accent-purple font-bold">
+                      +500 XP
+                    </div>
+                  </div>
+                </Link>
+            </div>
+          )}
+
         </div>
       </div>
     </main>
