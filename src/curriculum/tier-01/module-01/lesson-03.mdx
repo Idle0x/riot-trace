@@ -2,44 +2,334 @@
 tierId: 1
 moduleId: 1
 lessonId: 3
-title: "The Logic Gate: Booleans & Conditionals"
+title: "The Logic Gates: Booleans"
 mode: "terminal"
-syntaxHint: "if (10 > 5) { console.log('Passed'); } else { console.log('Failed'); }"
+xpReward: 70
+syntaxHint: "console.log(10 === 10);"
 
-task1Code: "// 1. Replication: Use the strict equality operator (===) to log the evaluation of 100 === 100\n\n"
-task1Logic: "if (!logs.some(l => l === 'true' || l === true) || !code.includes('===')) throw new Error('Task Failed: Must evaluate 100 === 100 and log true.');"
+task1Code: "// TASK 1 — REPLICATION\n// Log the result of the strict equality check: 10 === 10\n\n"
+task1Logic: "if (!logs.some(l => l === true)) throw new Error('Task Failed: Log 10 === 10. The result should be the boolean true.');"
 
-task2Code: "// 2. Mutation: Fix this conditional block so it executes the code inside the 'if' statement\nlet accessLevel = 1;\nif (accessLevel > 5) {\n  console.log('Access Granted');\n} else {\n  console.log('Access Denied');\n}"
-task2Logic: "if (!logs.some(l => l === 'Access Granted')) throw new Error('Task Failed: You must modify the code so the if block executes.');"
+task2Code: "// TASK 2 — MUTATION\n// This evaluates to false because of a type mismatch.\n// Fix ONLY the data type — do not change the operator or structure.\nconsole.log(\"true\" === true);\n"
+task2Logic: "if (!logs.some(l => l === true)) throw new Error('Task Failed: Fix the type mismatch. The string \"true\" is not the boolean true. Remove the quotes from one side.');"
 
-task3Code: "// 3. Synthesis: Write an if/else block. If 50 is less than 100, log 'System Stable'. Otherwise, log 'System Overload'.\n\n"
-task3Logic: "if (!logs.some(l => l === 'System Stable') || !code.includes('if') || !code.includes('else')) throw new Error('Task Failed: Must write a complete if/else block that correctly logs System Stable.');"
+task3Code: "// TASK 3 — SYNTHESIS\n// Three separate console.log calls:\n// 1. Is 50 less than 100?\n// 2. Does the string \"mainnet\" strictly equal \"mainnet\"?\n// 3. What is typeof false?\n\n"
+task3Logic: "const trueCount = logs.filter(l => l === true).length; if (trueCount < 2) throw new Error('Task Failed: The first two logs should both produce true. Check your comparison operators.'); if (!logs.some(l => l === 'boolean')) throw new Error('Task Failed: typeof false returns the string \"boolean\". Log that.');"
 ---
 
-### The Boolean
-The machine only understands binary states: On or Off. True or False. In JavaScript, these are called **Booleans**. We generate them using comparison operators.
+## Why Booleans Are the Foundation of Everything
+
+Software makes decisions. Is the user logged in? Is the node healthy or degraded? Is the XP above the threshold to unlock the next tier? Is this transaction an inflow or an outflow?
+
+Every conditional, every filter, every access check, every `if` statement in every application you have ever built or will ever build reduces, at the lowest level, to one question: **true or false**.
+
+You have been using booleans since your first `if` statement in xandeum-pulse. The question is whether you understand what they are at the type level — not just what they do. This lesson makes that precise.
+
+---
+
+## The Two Boolean Values
+
+There are exactly two boolean values in JavaScript:
 
 ```javascript
-10 > 5    // true
-10 < 5    // false
-10 === 10 // true (Strict Equality - always use 3 equals signs)
-10 !== 5  // true (Strict Inequality)
+true
+false
 ```
 
-### Control Flow (If / Else)
-We use Booleans to route the execution of our program. If a condition is true, open one gate. If it's false, open another.
+That is it. Two. No capitalization variants — `True` and `False` are not booleans (they are undefined variables that will throw a ReferenceError). No quotes — `"true"` and `"false"` are strings, not booleans. The exact lowercase literals `true` and `false`.
 
 ```javascript
-let gasPrice = 45;
+typeof true   // "boolean"
+typeof false  // "boolean"
+typeof "true" // "string"  ← this is a string, not a boolean
+typeof 1      // "number"  ← this is a number, not a boolean (even though it can act like true)
+```
 
-if (gasPrice > 50) {
-  console.log("Delaying transaction.");
-} else {
-  console.log("Executing transaction.");
+This distinction — between the boolean `true` and the string `"true"` — is the bug in Task 2. Read carefully.
+
+---
+
+## Producing Booleans: Comparison Operators
+
+Most booleans in real code are not written literally. They are the result of comparisons. An expression like `health > 80` is evaluated and produces either `true` or `false`. This result is a boolean value like any other — it can be stored in a variable, logged, or used in a condition.
+
+```javascript
+// Greater than, less than
+5 > 3       // true
+5 < 3       // false
+5 > 5       // false — strictly greater, not equal
+
+// Greater than or equal, less than or equal
+5 >= 5      // true — greater than OR equal to
+5 <= 4      // false
+
+// Equality — THIS IS THE MOST IMPORTANT PART OF THIS LESSON
+5 === 5     // true  — strict equality
+5 !== 5     // false — strict NOT equal
+```
+
+---
+
+## The Most Important Distinction in JavaScript: === vs ==
+
+This is the concept that separates developers who understand JavaScript from developers who have memorized some patterns. Read this section carefully. Read it again after you finish the lesson.
+
+### The == Operator (Loose Equality)
+
+The `==` operator compares values **after converting them to the same type**. This conversion is called type coercion, and its rules are not obvious:
+
+```javascript
+0 == false       // true  — JavaScript converts false to 0 before comparing
+"" == false      // true  — JavaScript converts both to 0
+0 == ""          // true  — JavaScript converts both to 0
+null == undefined // true — JavaScript treats these as equal loosely
+"5" == 5         // true  — JavaScript converts "5" to 5 before comparing
+1 == true        // true  — JavaScript converts true to 1
+0 == "0"         // true
+```
+
+These comparisons return `true`. All of them. Look at that list. Would you have predicted every single one? The rules behind == are so inconsistent that the JavaScript specification requires a table with more than a dozen rows to describe them fully.
+
+### The === Operator (Strict Equality)
+
+The `===` operator compares values **without any type conversion**. If the types are different, the result is always `false`:
+
+```javascript
+"5" === 5        // false — string is not equal to number, full stop
+0 === false      // false — number is not equal to boolean, full stop
+null === undefined // false — they are different types
+1 === true       // false — number is not equal to boolean
+"true" === true  // false — this is the bug in Task 2
+```
+
+```javascript
+// Only true when BOTH the value AND the type match:
+5 === 5          // true
+"mainnet" === "mainnet"  // true
+true === true    // true
+null === null    // true
+```
+
+### The Rule You Follow From This Point Forward
+
+**Always use `===`. Never use `==`.**
+
+There is one exception: checking if something is `null` or `undefined` at once — `value == null` catches both. But that is the only case. Everything else: `===`.
+
+The reason is simple. `===` behaves predictably. `==` does not. Predictable code is professional code. Unpredictable code creates bugs that take hours to find because everything looks correct when you read it.
+
+The `!=` and `!==` operators follow the same rule: use `!==` (strict not-equal) and never use `!=`.
+
+---
+
+## Comparing Different Types
+
+Now that you know `===` never converts types, you can reason about what it will return for any comparison:
+
+```javascript
+// Same type, same value → true
+10 === 10           // true
+"riot" === "riot"   // true
+false === false     // true
+
+// Same type, different value → false
+10 === 11           // false
+"riot" === "trace"  // false
+
+// Different types → always false with ===
+10 === "10"         // false
+true === 1          // false
+null === undefined  // false
+```
+
+If you use `===` consistently, you never have to ask "what will JavaScript convert this to?" You always know the answer: if the types differ, it's `false`. No surprises.
+
+---
+
+## The Logical Operators
+
+You will combine boolean values using three logical operators. These are previewed here and used deeply in Lesson 8 (conditionals). Understand the shapes now.
+
+### AND — &&
+
+Both sides must be `true` for the result to be `true`:
+```javascript
+true && true    // true
+true && false   // false
+false && true   // false
+false && false  // false
+
+// Real use:
+health > 80 && network === "mainnet"  // true only if BOTH are true
+```
+
+### OR — ||
+
+At least one side must be `true` for the result to be `true`:
+```javascript
+true || false   // true
+false || true   // true
+false || false  // false
+true || true    // true
+
+// Real use:
+isAdmin || isOwner  // true if EITHER is true
+```
+
+### NOT — !
+
+Inverts a boolean:
+```javascript
+!true    // false
+!false   // true
+
+// Real use:
+!isOffline  // true when the node is online (double-negative: not offline = online)
+```
+
+You do not need to use these in today's Crucible. But recognize them. They are everywhere.
+
+---
+
+## Short-Circuit Evaluation
+
+`&&` and `||` have a behavior called short-circuit evaluation that you will encounter in React immediately:
+
+```javascript
+// &&: If the LEFT side is false, the RIGHT side is never evaluated
+false && console.log("this never runs")  // short-circuits at false
+
+// ||: If the LEFT side is true, the RIGHT side is never evaluated
+true || console.log("this never runs")   // short-circuits at true
+
+// Practical use — conditional rendering in React:
+{isLoading && <Spinner />}
+// If isLoading is false, <Spinner /> is never evaluated (never renders)
+
+// Default values:
+const port = userConfig.port || 3000;
+// If userConfig.port is falsy (undefined, null, 0), use 3000
+```
+
+This pattern — `value || defaultValue` — is all over your existing code. Now you know exactly why it works.
+
+---
+
+## Booleans in Context: Truthy and Falsy
+
+Every value in JavaScript, when used in a boolean context (an `if` condition, a `&&` expression), behaves as either `true` or `false`. The values that behave as `false` are called **falsy**. There are exactly six:
+
+```javascript
+false        // the boolean false
+0            // the number zero
+-0           // negative zero (yes, this exists)
+""           // empty string
+null         // intentional absence of value
+undefined    // uninitialized variable
+NaN          // Not a Number
+```
+
+Everything else is **truthy**. Including things that surprise people:
+
+```javascript
+"0"          // truthy — non-empty string
+"false"      // truthy — non-empty string
+[]           // truthy — empty array
+{}           // truthy — empty object
+-1           // truthy — non-zero number
+function(){}  // truthy — functions are always truthy
+```
+
+This is why code like this works:
+
+```javascript
+const nodes = [];  // empty array
+
+if (nodes) {
+  console.log("nodes exists");  // this runs — [] is truthy
+}
+
+if (nodes.length) {
+  console.log("nodes has items");  // this does NOT run — 0 is falsy
 }
 ```
 
-### The Crucible
-* **Task 1 (Replication):** Log a strictly equal boolean expression.
-* **Task 2 (Mutation):** A security clearance check is failing. Modify the code so the `if` block executes successfully.
-* **Task 3 (Synthesis):** Write an entirely new control flow block from scratch using `if` and `else`.
+Both checks are logically different. `nodes` checks if the variable exists. `nodes.length` checks if the array has items. The empty array is truthy, but its length `0` is falsy. This is a common confusion that causes real bugs.
+
+---
+
+## Common Mistakes
+
+**Mistake 1 — Using == instead of ===:**
+```javascript
+if (health == "80") { /* might run unexpectedly */ }
+if (health === 80)  { /* only runs when health is exactly the number 80 */ }
+```
+
+**Mistake 2 — Confusing the boolean `true` with the string `"true"`:**
+```javascript
+const flag = "true";      // this is a string
+if (flag === true) { }    // false — never runs
+if (flag === "true") { }  // true — but this is fragile
+if (flag) { }             // true — because "true" is truthy (non-empty string)
+// Best practice: use actual booleans, not strings, for flags
+```
+
+**Mistake 3 — Not understanding the empty array gotcha:**
+```javascript
+if ([]) { console.log("truthy"); }   // runs — empty array is truthy
+if ([].length) { console.log("has items"); }  // does not run — length 0 is falsy
+```
+
+**Mistake 4 — Thinking ! is logical XOR:**
+```javascript
+!true === false   // correct — NOT flips the boolean
+// ! is NOT XOR — it simply inverts
+// XOR (exclusive or) does not exist as a single operator in JavaScript
+```
+
+---
+
+## Micro-Drills
+
+Work through these in your head first. Then verify in the terminal if you are unsure.
+
+**Drill 1:** Predict the output of each:
+```javascript
+console.log(10 > 5);
+console.log(10 === "10");
+console.log(10 == "10");
+console.log(!false);
+console.log(typeof true);
+```
+
+**Drill 2:** Without running it, answer: does this `if` block run?
+```javascript
+const status = "online";
+if (status) {
+  console.log("executing");
+}
+```
+
+**Drill 3:** Using only `===`, write three expressions that produce `true` and three that produce `false`, using values from the numbers and strings you know so far.
+
+**Drill 4:** What is the difference between these two checks?
+```javascript
+if (nodes) { }
+if (nodes.length) { }
+```
+When would one run but not the other?
+
+---
+
+## The Crucible
+
+**Task 1 — Replication.** Log the strict equality comparison. Not the number. Not the string. The result of the comparison. Pay attention to what type `10 === 10` produces.
+
+**Task 2 — Mutation.** The comparison is correct (`===`). The types are the problem. `"true"` is a string. `true` is a boolean. They are not equal with strict comparison. Fix the type without changing the operator or the structure of the line.
+
+**Task 3 — Synthesis.** Three separate `console.log` calls. Each produces a different output. Read each comment carefully. The system checks all three.
+
+A note on Task 3, line 3: `typeof false` produces a string. Log that string. Not the boolean itself. The type of the boolean. It will be the word `boolean` without quotes — the string.
+
+Go.
