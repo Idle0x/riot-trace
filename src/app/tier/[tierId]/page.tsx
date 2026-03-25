@@ -14,7 +14,6 @@ const TIER_ACCENTS: Record<number, string> = {
 export default async function TierPage({ params }: { params: Promise<{ tierId: string }> }) {
   const { tierId } = await params;
   
-  // Use our new helpers
   const lessons = getAllLessonsForTier(tierId);
   const moduleIds = getModuleIdsForTier(tierId); 
   const accentClass = TIER_ACCENTS[parseInt(tierId)] || "text-accent-blue";
@@ -58,19 +57,22 @@ export default async function TierPage({ params }: { params: Promise<{ tierId: s
                 </Link>
               ))}
 
-              {/* Conditional Boss Fight */}
+              {/* Conditional Module Challenge (Formerly "Boss") */}
               {hasBossFight(tierId, mId) && (
                 <Link 
                   href={`/tier/${tierId}/boss/${mId}`}
-                  className="grid grid-cols-12 gap-4 p-4 bg-accent-red/5 border-t-2 border-accent-red/20 hover:bg-accent-red/10 transition-colors group"
+                  className="grid grid-cols-12 gap-4 p-4 bg-surface-sunken hover:bg-surface-hover transition-all group items-center relative overflow-hidden"
                 >
-                  <div className="col-span-2 font-mono text-[10px] text-accent-red tracking-widest font-bold">
-                    BOSS
+                  {/* Subtle left accent border on hover */}
+                  <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-accent-yellow opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  
+                  <div className="col-span-2 font-mono text-[10px] text-accent-yellow tracking-widest font-bold">
+                    CHALLENGE
                   </div>
-                  <div className="col-span-8 font-bold text-sm text-accent-red group-hover:text-white uppercase tracking-widest transition-colors">
-                    Module Crucible
+                  <div className="col-span-8 font-bold text-sm text-text-primary group-hover:text-white transition-colors">
+                    Module Synthesis
                   </div>
-                  <div className="col-span-2 text-right font-mono text-[10px] text-accent-red font-bold">
+                  <div className="col-span-2 text-right font-mono text-[10px] text-accent-yellow font-bold">
                     150 XP
                   </div>
                 </Link>
@@ -80,21 +82,24 @@ export default async function TierPage({ params }: { params: Promise<{ tierId: s
 
           {/* Conditional Tier Capstone */}
           {hasTierCapstone(tierId) && (
-            <div className="mt-12 border-2 border-accent-purple/30 bg-accent-purple/5 shadow-plate rounded-sm overflow-hidden">
+            <div className="mt-12 border border-border-strong bg-surface shadow-plate rounded-sm overflow-hidden relative group transition-all hover:border-accent-blue/50">
+               {/* Elegant top gradient highlight on hover */}
+               <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-accent-blue to-transparent opacity-30 group-hover:opacity-100 transition-opacity"></div>
+               
                <Link
                   href={`/tier/${tierId}/capstone`}
-                  className="flex items-center justify-between p-6 hover:bg-accent-purple/10 transition-colors group"
+                  className="flex items-center justify-between p-6 hover:bg-surface-hover transition-colors"
                 >
                   <div>
-                    <div className="font-mono text-[10px] text-accent-purple tracking-widest uppercase mb-2">
-                      FINAL_GATEWAY
+                    <div className="font-mono text-[10px] text-accent-blue tracking-widest uppercase mb-2">
+                      TIER MILESTONE
                     </div>
-                    <h3 className="font-bold text-xl text-text-primary group-hover:text-white">
-                      Tier Capstone Challenge
+                    <h3 className="font-bold text-xl text-text-primary group-hover:text-white transition-colors">
+                      Architecture Capstone
                     </h3>
                   </div>
                   <div className="text-right">
-                    <div className="font-mono text-[14px] text-accent-purple font-bold">
+                    <div className="font-mono text-[14px] text-accent-blue font-bold">
                       +500 XP
                     </div>
                   </div>
