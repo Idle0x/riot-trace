@@ -1,335 +1,393 @@
 ---
 tierId: 1
 moduleId: 1
-lessonId: 3
-title: "The Logic Gates: Booleans"
+lessonId: 4
+title: "Null, Undefined, and the Void"
 mode: "terminal"
 xpReward: 70
-syntaxHint: "console.log(10 === 10);"
+syntaxHint: "let x; console.log(x);"
 
-task1Code: "// TASK 1 — REPLICATION\n// Log the result of the strict equality check: 10 === 10\n\n"
-task1Logic: "if (!logs.some(l => l === true)) throw new Error('Task Failed: Log 10 === 10. The result should be the boolean true.');"
+task1Code: "// TASK 1 — REPLICATION\n// Declare a variable without assigning a value.\n// Then log it. Observe what JavaScript gives it automatically.\nlet nodeStatus;\n// Add your console.log on the next line:\n\n"
+task1Logic: "if (!logs.some(l => l === undefined)) throw new Error('Task Failed: Log the uninitialized variable nodeStatus. It should be undefined.');"
 
-task2Code: "// TASK 2 — MUTATION\n// This evaluates to false because of a type mismatch.\n// Fix ONLY the data type — do not change the operator or structure.\nconsole.log(\"true\" === true);\n"
-task2Logic: "if (!logs.some(l => l === true)) throw new Error('Task Failed: Fix the type mismatch. The string \"true\" is not the boolean true. Remove the quotes from one side.');"
+task2Code: "// TASK 2 — MUTATION\n// This crashes with: Cannot read properties of null\n// Fix it so it logs 'No node selected' when selectedNode is null.\n// Do not change the value of selectedNode.\nlet selectedNode = null;\nconsole.log(selectedNode.id);\n"
+task2Logic: "if (!logs.some(l => l === 'No node selected')) throw new Error('Task Failed: Add a null check. When selectedNode is null, log the string \"No node selected\".');"
 
-task3Code: "// TASK 3 — SYNTHESIS\n// Three separate console.log calls:\n// 1. Is 50 less than 100?\n// 2. Does the string \"mainnet\" strictly equal \"mainnet\"?\n// 3. What is typeof false?\n\n"
-task3Logic: "const trueCount = logs.filter(l => l === true).length; if (trueCount < 2) throw new Error('Task Failed: The first two logs should both produce true. Check your comparison operators.'); if (!logs.some(l => l === 'boolean')) throw new Error('Task Failed: typeof false returns the string \"boolean\". Log that.');"
+task3Code: "// TASK 3 — SYNTHESIS\n// Log three different kinds of emptiness on separate lines:\n// 1. An uninitialized variable (undefined)\n// 2. An intentionally empty value (null)\n// 3. The result of an invalid mathematical operation (NaN)\n\n"
+task3Logic: "if (!logs.some(l => l === undefined)) throw new Error('Task Failed: Log an undefined value. Declare a variable without assigning it.'); if (!logs.some(l => l === null)) throw new Error('Task Failed: Log a null value. Assign null to a variable and log it.'); if (!logs.some(l => typeof l === 'number' && isNaN(l))) throw new Error('Task Failed: Log a NaN value. Try console.log(0/0) or console.log(parseInt(\"not-a-number\")).');"
 ---
 
-## Why Booleans Are the Foundation of Everything
+## Why This Lesson Matters More Than It Appears
 
-Software makes decisions. Is the user logged in? Is the node healthy or degraded? Is the XP above the threshold to unlock the next tier? Is this transaction an inflow or an outflow?
+The most common error message in JavaScript is:
 
-Every conditional, every filter, every access check, every `if` statement in every application you have ever built or will ever build reduces, at the lowest level, to one question: **true or false**.
+```
+TypeError: Cannot read properties of null (reading 'health')
+TypeError: Cannot read properties of undefined (reading 'id')
+```
 
-You have been using booleans since your first `if` statement in xandeum-pulse. The question is whether you understand what they are at the type level — not just what they do. This lesson makes that precise.
+If you have used JavaScript for more than a week, you have seen this crash. It means you tried to access a property (`.health`, `.id`, `.name`) on a value that does not exist. That value is either `null` or `undefined`.
+
+You have seen this in xandeum-pulse. The API call fires, the component renders before the data arrives, and the code tries to read `node.health` before `node` exists. The page crashes or goes blank. Understanding `null` and `undefined` precisely is understanding how to prevent, catch, and reason about this entire category of runtime error.
 
 ---
 
-## The Two Boolean Values
+## undefined — The Automatic Absence
 
-There are exactly two boolean values in JavaScript:
+`undefined` is what JavaScript gives to a variable that has been declared but never assigned a value. You did not set it to `undefined`. JavaScript did. Automatically.
 
 ```javascript
-true
+let nodeStatus;
+console.log(nodeStatus);   // undefined — no assignment was ever made
+```
+
+`undefined` means: **this variable exists, but nothing has been put into it.**
+
+```javascript
+// Anywhere JavaScript needs a value and has nothing to give you, it returns undefined:
+
+let x;
+console.log(x);           // undefined — declared, not assigned
+
+function greet(name) {
+  console.log(name);      // undefined — function called without that argument
+}
+greet();                  // no argument passed — name is undefined
+
+const obj = { health: 95 };
+console.log(obj.version); // undefined — property doesn't exist on the object
+
+// typeof undefined:
+typeof undefined          // "undefined"
+```
+
+The important thing: `undefined` is not an error. It is a value. It is the specific value JavaScript uses to represent "nothing was given here." The error comes when you try to do something with `undefined` that requires a different type — like accessing a property on it.
+
+---
+
+## null — The Intentional Absence
+
+`null` is a value that **you assign** when you want to explicitly say "this intentionally has no value right now."
+
+```javascript
+let selectedNode = null;
+// A developer wrote this.
+// It means: "I know about selectedNode. It exists as a concept.
+//            Right now, nothing is selected."
+
+let currentUser = null;
+// "The current user slot exists. Nobody is logged in yet."
+```
+
+The difference from `undefined`:
+
+```javascript
+let selectedNode;           // undefined — someone forgot to initialize this? Maybe.
+let selectedNode = null;    // null — someone intentionally said "nothing selected yet."
+```
+
+`undefined` is what you get when JavaScript fills a gap. `null` is what you put when you are making a deliberate statement about the absence of a value.
+
+In practice, you will use `null` at the beginning of component state when a value will eventually exist but does not yet:
+
+```javascript
+// In React (you will understand this fully in Tier 3):
+const [selectedNode, setSelectedNode] = useState(null);
+// "No node is selected yet. When the user clicks one, this will update."
+```
+
+---
+
+## typeof null — The Famous JavaScript Bug
+
+```javascript
+typeof null     // "object"
+```
+
+This is wrong. `null` is not an object. It is a primitive value representing absence. But this has been in JavaScript since 1995, and changing it would break every website that relies on the (wrong) behavior. So it stays.
+
+The practical consequence: **you cannot use `typeof` to check for null.**
+
+```javascript
+// WRONG — this check does not catch null
+if (typeof selectedNode === "object") {
+  console.log("it's null or an object — can't tell");
+}
+
+// CORRECT — use === for null checks
+if (selectedNode === null) {
+  console.log("it is definitively null");
+}
+```
+
+There is one shortcut. Because `==` (loose equality) treats `null` and `undefined` as equal, you can check for both at once:
+
+```javascript
+if (selectedNode == null) {
+  // This catches BOTH null AND undefined
+  console.log("either null or undefined — not yet assigned");
+}
+```
+
+This is one of the only legitimate uses of `==` instead of `===`. Use it when you genuinely do not care whether the value is `null` or `undefined` — only that it is one of those two.
+
+---
+
+## NaN — Revisited in Context
+
+You were introduced to `NaN` in Lesson 2. Now it belongs in the same conversation as `null` and `undefined` because all three represent a kind of "emptiness" or "invalidity."
+
+```javascript
+0 / 0             // NaN
+parseInt("error") // NaN
+Math.sqrt(-9)     // NaN
+undefined + 1     // NaN — arithmetic with undefined produces NaN
+null + 1          // 1   — arithmetic with null coerces null to 0 (confusing!)
+```
+
+`NaN` is unique: it is the only value in JavaScript that is **not equal to itself**:
+
+```javascript
+NaN === NaN   // false
+NaN == NaN    // false
+```
+
+The correct way to test for it:
+
+```javascript
+isNaN(value)           // true if value is NaN or can be coerced to NaN ("hello" → true)
+Number.isNaN(value)    // true ONLY if value is exactly NaN (stricter, preferred)
+
+Number.isNaN(NaN)      // true
+Number.isNaN("hello")  // false — "hello" is a string, not NaN
+Number.isNaN(0/0)      // true
+```
+
+---
+
+## The Six Falsy Values — Complete Picture
+
+Lesson 3 introduced truthy and falsy values. Now that you know `null`, `undefined`, and `NaN`, you can see the complete list of falsy values:
+
+```javascript
 false
+0
+-0
+""          // empty string
+null        // intentional absence
+undefined   // uninitialized
+NaN         // invalid number
 ```
 
-That is it. Two. No capitalization variants — `True` and `False` are not booleans (they are undefined variables that will throw a ReferenceError). No quotes — `"true"` and `"false"` are strings, not booleans. The exact lowercase literals `true` and `false`.
+Everything else is truthy. This list is exact and complete. There are no other falsy values in JavaScript.
+
+Why does this matter? Because these values are what you check for in conditions:
 
 ```javascript
-typeof true   // "boolean"
-typeof false  // "boolean"
-typeof "true" // "string"  ← this is a string, not a boolean
-typeof 1      // "number"  ← this is a number, not a boolean (even though it can act like true)
-```
+// All of these if blocks do NOT execute:
+if (false) { }
+if (0) { }
+if ("") { }
+if (null) { }
+if (undefined) { }
+if (NaN) { }
 
-This distinction — between the boolean `true` and the string `"true"` — is the bug in Task 2. Read carefully.
-
----
-
-## Producing Booleans: Comparison Operators
-
-Most booleans in real code are not written literally. They are the result of comparisons. An expression like `health > 80` is evaluated and produces either `true` or `false`. This result is a boolean value like any other — it can be stored in a variable, logged, or used in a condition.
-
-```javascript
-// Greater than, less than
-5 > 3       // true
-5 < 3       // false
-5 > 5       // false — strictly greater, not equal
-
-// Greater than or equal, less than or equal
-5 >= 5      // true — greater than OR equal to
-5 <= 4      // false
-
-// Equality — THIS IS THE MOST IMPORTANT PART OF THIS LESSON
-5 === 5     // true  — strict equality
-5 !== 5     // false — strict NOT equal
-```
-
----
-
-## The Most Important Distinction in JavaScript: === vs ==
-
-This is the concept that separates developers who understand JavaScript from developers who have memorized some patterns. Read this section carefully. Read it again after you finish the lesson.
-
-### The == Operator (Loose Equality)
-
-The `==` operator compares values **after converting them to the same type**. This conversion is called type coercion, and its rules are not obvious:
-
-```javascript
-0 == false       // true  — JavaScript converts false to 0 before comparing
-"" == false      // true  — JavaScript converts both to 0
-0 == ""          // true  — JavaScript converts both to 0
-null == undefined // true — JavaScript treats these as equal loosely
-"5" == 5         // true  — JavaScript converts "5" to 5 before comparing
-1 == true        // true  — JavaScript converts true to 1
-0 == "0"         // true
-```
-
-These comparisons return `true`. All of them. Look at that list. Would you have predicted every single one? The rules behind == are so inconsistent that the JavaScript specification requires a table with more than a dozen rows to describe them fully.
-
-### The === Operator (Strict Equality)
-
-The `===` operator compares values **without any type conversion**. If the types are different, the result is always `false`:
-
-```javascript
-"5" === 5        // false — string is not equal to number, full stop
-0 === false      // false — number is not equal to boolean, full stop
-null === undefined // false — they are different types
-1 === true       // false — number is not equal to boolean
-"true" === true  // false — this is the bug in Task 2
-```
-
-```javascript
-// Only true when BOTH the value AND the type match:
-5 === 5          // true
-"mainnet" === "mainnet"  // true
-true === true    // true
-null === null    // true
-```
-
-### The Rule You Follow From This Point Forward
-
-**Always use `===`. Never use `==`.**
-
-There is one exception: checking if something is `null` or `undefined` at once — `value == null` catches both. But that is the only case. Everything else: `===`.
-
-The reason is simple. `===` behaves predictably. `==` does not. Predictable code is professional code. Unpredictable code creates bugs that take hours to find because everything looks correct when you read it.
-
-The `!=` and `!==` operators follow the same rule: use `!==` (strict not-equal) and never use `!=`.
-
----
-
-## Comparing Different Types
-
-Now that you know `===` never converts types, you can reason about what it will return for any comparison:
-
-```javascript
-// Same type, same value → true
-10 === 10           // true
-"riot" === "riot"   // true
-false === false     // true
-
-// Same type, different value → false
-10 === 11           // false
-"riot" === "trace"  // false
-
-// Different types → always false with ===
-10 === "10"         // false
-true === 1          // false
-null === undefined  // false
-```
-
-If you use `===` consistently, you never have to ask "what will JavaScript convert this to?" You always know the answer: if the types differ, it's `false`. No surprises.
-
----
-
-## The Logical Operators
-
-You will combine boolean values using three logical operators. These are previewed here and used deeply in Lesson 8 (conditionals). Understand the shapes now.
-
-### AND — &&
-
-Both sides must be `true` for the result to be `true`:
-```javascript
-true && true    // true
-true && false   // false
-false && true   // false
-false && false  // false
-
-// Real use:
-health > 80 && network === "mainnet"  // true only if BOTH are true
-```
-
-### OR — ||
-
-At least one side must be `true` for the result to be `true`:
-```javascript
-true || false   // true
-false || true   // true
-false || false  // false
-true || true    // true
-
-// Real use:
-isAdmin || isOwner  // true if EITHER is true
-```
-
-### NOT — !
-
-Inverts a boolean:
-```javascript
-!true    // false
-!false   // true
-
-// Real use:
-!isOffline  // true when the node is online (double-negative: not offline = online)
-```
-
-You do not need to use these in today's Crucible. But recognize them. They are everywhere.
-
----
-
-## Short-Circuit Evaluation
-
-`&&` and `||` have a behavior called short-circuit evaluation that you will encounter in React immediately:
-
-```javascript
-// &&: If the LEFT side is false, the RIGHT side is never evaluated
-false && console.log("this never runs")  // short-circuits at false
-
-// ||: If the LEFT side is true, the RIGHT side is never evaluated
-true || console.log("this never runs")   // short-circuits at true
-
-// Practical use — conditional rendering in React:
-{isLoading && <Spinner />}
-// If isLoading is false, <Spinner /> is never evaluated (never renders)
-
-// Default values:
-const port = userConfig.port || 3000;
-// If userConfig.port is falsy (undefined, null, 0), use 3000
-```
-
-This pattern — `value || defaultValue` — is all over your existing code. Now you know exactly why it works.
-
----
-
-## Booleans in Context: Truthy and Falsy
-
-Every value in JavaScript, when used in a boolean context (an `if` condition, a `&&` expression), behaves as either `true` or `false`. The values that behave as `false` are called **falsy**. There are exactly six:
-
-```javascript
-false        // the boolean false
-0            // the number zero
--0           // negative zero (yes, this exists)
-""           // empty string
-null         // intentional absence of value
-undefined    // uninitialized variable
-NaN          // Not a Number
-```
-
-Everything else is **truthy**. Including things that surprise people:
-
-```javascript
-"0"          // truthy — non-empty string
-"false"      // truthy — non-empty string
-[]           // truthy — empty array
-{}           // truthy — empty object
--1           // truthy — non-zero number
-function(){}  // truthy — functions are always truthy
-```
-
-This is why code like this works:
-
-```javascript
-const nodes = [];  // empty array
-
-if (nodes) {
-  console.log("nodes exists");  // this runs — [] is truthy
-}
-
-if (nodes.length) {
-  console.log("nodes has items");  // this does NOT run — 0 is falsy
+// This is why the guard pattern works:
+if (selectedNode) {
+  // This only runs if selectedNode is not null, not undefined, not 0, not ""
+  console.log(selectedNode.health);  // safe — selectedNode exists
 }
 ```
 
-Both checks are logically different. `nodes` checks if the variable exists. `nodes.length` checks if the array has items. The empty array is truthy, but its length `0` is falsy. This is a common confusion that causes real bugs.
+---
+
+## The Crash and How to Prevent It
+
+The error from the introduction of this lesson:
+
+```
+TypeError: Cannot read properties of null (reading 'health')
+```
+
+This happens when you write:
+
+```javascript
+let node = null;
+console.log(node.health);
+// JavaScript tries to access .health on null
+// null has no properties
+// Runtime error, page crashes
+```
+
+There are three standard patterns for preventing this:
+
+### Pattern 1 — Guard Clause (if check)
+```javascript
+if (node !== null && node !== undefined) {
+  console.log(node.health);
+}
+
+// Shorter version using truthiness:
+if (node) {
+  console.log(node.health);
+}
+```
+
+### Pattern 2 — Optional Chaining (modern JavaScript)
+```javascript
+console.log(node?.health);
+// The ?. is called optional chaining
+// If node is null or undefined, this returns undefined instead of crashing
+// If node exists, it accesses .health normally
+```
+
+```javascript
+// Chaining deeper:
+console.log(node?.location?.city);
+// Returns undefined if node is null OR if node.location is null
+// No crash either way
+```
+
+### Pattern 3 — Nullish Coalescing
+```javascript
+const health = node?.health ?? 0;
+// ?? is the nullish coalescing operator
+// If the left side is null or undefined, use the right side as the default
+// If node?.health is undefined (node is null), health becomes 0
+```
+
+Optional chaining (`?.`) and nullish coalescing (`??`) are the two operators you will use the most when working with API data in React. Data from APIs is always potentially null or undefined — the data has not loaded yet, the field is optional, the record does not exist. These operators let you access nested values safely.
+
+---
+
+## Understanding the Bug in Your Own Code
+
+Look at what happens in React when you fetch data:
+
+```javascript
+// Component renders BEFORE data arrives:
+const [nodeData, setNodeData] = useState(null);  // starts as null
+
+// Render runs with nodeData = null:
+return <div>{nodeData.health}</div>;
+// CRASH: Cannot read properties of null (reading 'health')
+```
+
+The fix:
+```javascript
+return <div>{nodeData?.health ?? 'Loading...'}</div>;
+// If nodeData is null: shows 'Loading...'
+// If nodeData exists: shows the health value
+```
+
+You have written code that handles this. Now you understand the exact mechanism behind why it was needed.
+
+---
+
+## typeof — The Complete Cheat Sheet
+
+Now that you know all four primitive types from this module, here is `typeof` for all of them:
+
+```javascript
+typeof "hello"     // "string"
+typeof 42          // "number"
+typeof true        // "boolean"
+typeof undefined   // "undefined"
+typeof null        // "object"    ← the bug. null is not an object
+typeof NaN         // "number"    ← NaN is of type number. Yes.
+typeof []          // "object"    ← arrays are objects
+typeof {}          // "object"    ← plain objects
+typeof function(){} // "function" ← functions have their own typeof result
+```
+
+Notice: `typeof` is reliable for `string`, `number`, `boolean`, and `undefined`. For `null` it lies. For arrays and plain objects it gives the same result (`"object"`) and cannot distinguish them. You will need other checks (`Array.isArray()`, `=== null`) for those cases.
 
 ---
 
 ## Common Mistakes
 
-**Mistake 1 — Using == instead of ===:**
+**Mistake 1 — Treating undefined as an error:**
 ```javascript
-if (health == "80") { /* might run unexpectedly */ }
-if (health === 80)  { /* only runs when health is exactly the number 80 */ }
+let health;
+console.log(health);  // undefined — this is valid, not a crash
+// The crash comes from USING undefined, not from it existing
+health + 10  // NaN — arithmetic with undefined
 ```
 
-**Mistake 2 — Confusing the boolean `true` with the string `"true"`:**
+**Mistake 2 — Using typeof to check for null:**
 ```javascript
-const flag = "true";      // this is a string
-if (flag === true) { }    // false — never runs
-if (flag === "true") { }  // true — but this is fragile
-if (flag) { }             // true — because "true" is truthy (non-empty string)
-// Best practice: use actual booleans, not strings, for flags
+typeof null === "null"   // false — typeof null is "object", not "null"
+typeof null === "object" // true — but this matches real objects too, unhelpful
+null === null            // true — use strict equality for null checks
 ```
 
-**Mistake 3 — Not understanding the empty array gotcha:**
+**Mistake 3 — Forgetting optional chaining when data is loading:**
 ```javascript
-if ([]) { console.log("truthy"); }   // runs — empty array is truthy
-if ([].length) { console.log("has items"); }  // does not run — length 0 is falsy
+// This crashes if data is null:
+return <div>{user.name}</div>
+
+// This is safe:
+return <div>{user?.name ?? 'Loading...'}</div>
 ```
 
-**Mistake 4 — Thinking ! is logical XOR:**
+**Mistake 4 — Confusing null coalescing ?? with OR ||:**
 ```javascript
-!true === false   // correct — NOT flips the boolean
-// ! is NOT XOR — it simply inverts
-// XOR (exclusive or) does not exist as a single operator in JavaScript
+const health = nodeHealth ?? 0;
+// ?? only triggers for null and undefined
+// If nodeHealth is 0 (a valid health score!), it stays 0
+
+const health = nodeHealth || 0;
+// || triggers for ANY falsy value
+// If nodeHealth is 0, it becomes 0... wait, same result
+// But if nodeHealth is "" (empty string), || replaces it, ?? does not
+// ?? is stricter and safer for default values
 ```
 
 ---
 
 ## Micro-Drills
 
-Work through these in your head first. Then verify in the terminal if you are unsure.
+**Drill 1:** What is the difference between `undefined` and `null`? Write a sentence for each that describes what it means in human terms, then write one line of code that demonstrates each.
 
-**Drill 1:** Predict the output of each:
+**Drill 2:** Without running it, what does this log?
 ```javascript
-console.log(10 > 5);
-console.log(10 === "10");
-console.log(10 == "10");
-console.log(!false);
-console.log(typeof true);
+let x;
+let y = null;
+console.log(typeof x);
+console.log(typeof y);
+console.log(x === y);
+console.log(x == y);
 ```
 
-**Drill 2:** Without running it, answer: does this `if` block run?
+**Drill 3:** What does `node?.health` return if `node` is `null`? What if `node` is `{ health: 95 }`? Write both cases.
+
+**Drill 4:** Which of these causes a crash? Which does not?
 ```javascript
-const status = "online";
-if (status) {
-  console.log("executing");
-}
+// Case A:
+let a;
+console.log(a);
+
+// Case B:
+let b = null;
+console.log(b.name);
+
+// Case C:
+let c = null;
+console.log(c?.name);
 ```
 
-**Drill 3:** Using only `===`, write three expressions that produce `true` and three that produce `false`, using values from the numbers and strings you know so far.
-
-**Drill 4:** What is the difference between these two checks?
-```javascript
-if (nodes) { }
-if (nodes.length) { }
-```
-When would one run but not the other?
+If you know the answers to all four drills without uncertainty, you are ready.
 
 ---
 
 ## The Crucible
 
-**Task 1 — Replication.** Log the strict equality comparison. Not the number. Not the string. The result of the comparison. Pay attention to what type `10 === 10` produces.
+**Task 1 — Replication.** The variable `nodeStatus` is already declared. Log it. That is the entire task. The point is to see that JavaScript has already given it a value — even though you never assigned one.
 
-**Task 2 — Mutation.** The comparison is correct (`===`). The types are the problem. `"true"` is a string. `true` is a boolean. They are not equal with strict comparison. Fix the type without changing the operator or the structure of the line.
+**Task 2 — Mutation.** The crash is the exact error from the beginning of this lesson. `selectedNode` is `null`. The code tries to access `.id` on it. Add a check. If `selectedNode` is null, log the string `"No node selected"` instead. Do not change the value of `selectedNode`.
 
-**Task 3 — Synthesis.** Three separate `console.log` calls. Each produces a different output. Read each comment carefully. The system checks all three.
+**Task 3 — Synthesis.** Three separate logs. Three separate kinds of "nothing." `undefined` (declare a variable without assigning it). `null` (assign `null` and log it). `NaN` (produce an invalid number — dividing zero by zero works, or passing a non-numeric string to `parseInt`). Three lines. Three concepts from this lesson. All distinct.
 
-A note on Task 3, line 3: `typeof false` produces a string. Log that string. Not the boolean itself. The type of the boolean. It will be the word `boolean` without quotes — the string.
+This task validates your understanding of the difference between three values that all represent "nothing" but mean entirely different things.
 
 Go.
