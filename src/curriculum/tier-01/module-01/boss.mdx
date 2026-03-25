@@ -1,0 +1,92 @@
+---
+tierId: 1
+moduleId: 1
+type: "boss"
+title: "Module 01 Boss Fight — The System Initialization Sequence"
+mode: "terminal"
+xpReward: 150
+startingCode: |
+  // ═══════════════════════════════════════════════════════
+  // MODULE 01 BOSS FIGHT — THE SYSTEM INITIALIZATION SEQUENCE
+  // ═══════════════════════════════════════════════════════
+  //
+  // No theory panel. No hints. No scaffold.
+  // This is the real test of Module 01.
+  //
+  // YOUR MISSION:
+  // The riot-trace node monitoring system requires a boot
+  // sequence before it can accept connections.
+  // Your code must produce EXACTLY this output, in order:
+  //
+  //   [INITIALIZING_NODE...]
+  //   8192
+  //   false
+  //   boolean
+  //
+  // THE REQUIREMENTS:
+  //
+  // Line 1 — Log the exact boot string: [INITIALIZING_NODE...]
+  //           Character-perfect. Every bracket. The ellipsis
+  //           is three separate period characters.
+  //
+  // Line 2 — A node's bandwidth is 1024 kilobytes.
+  //           Calculate and log how many kilobits that is.
+  //           (There are 8 bits in a byte.)
+  //
+  // Line 3 — The system checks if the active network string
+  //           "MAINNET" is strictly equal to "DEVNET".
+  //           Log the result of that comparison.
+  //
+  // Line 4 — Log the data type of the result from Line 3.
+  //           Not the value. The TYPE of the value.
+  //
+  // Four lines. No extras. No missing lines.
+  // The validator checks position, value, and type.
+  //
+  // SYS.EXEC → 
+
+validationLogic: |
+  if (logs.length < 4) throw new Error('SYSTEM_HALT: Expected 4 lines of output. Got ' + logs.length + '. Check that you have exactly four console.log calls — no more, no less.');
+  if (logs[0] !== '[INITIALIZING_NODE...]') throw new Error('LINE_1_FAIL: Expected exact string [INITIALIZING_NODE...] — received: ' + JSON.stringify(logs[0]) + '. Check every character: opening bracket, text, three periods, closing bracket.');
+  if (logs[1] !== 8192) throw new Error('LINE_2_FAIL: Expected the number 8192. Received: ' + JSON.stringify(logs[1]) + '. Calculate 1024 multiplied by 8. Log the expression, not the hardcoded answer.');
+  if (logs[2] !== false) throw new Error('LINE_3_FAIL: Expected the boolean false. Received: ' + JSON.stringify(logs[2]) + '. Use strict equality (===) to compare the strings "MAINNET" and "DEVNET".');
+  if (logs[3] !== 'boolean') throw new Error('LINE_4_FAIL: Expected the string "boolean". Received: ' + JSON.stringify(logs[3]) + '. Use the typeof operator on the result of your Line 3 comparison.');
+---
+
+## The Test
+
+You have completed four lessons. You have learned what strings, numbers, booleans, and empty values are at the type level. You understand `console.log`, the mathematical operators, strict equality, and `typeof`.
+
+Now you prove it without assistance.
+
+The panel on the right contains a blank terminal with only comments explaining the mission. There is no code to modify. There is no scaffold to lean on. You write all four lines from scratch.
+
+Read the requirements carefully. The validator is strict — it checks the type, the value, and the position of every output line. A string where a number is expected fails. A boolean where a string is expected fails. An extra empty line fails.
+
+---
+
+## What the Validator Is Checking
+
+Four outputs. Four checks. Here is what each line must be, in plain terms:
+
+**Line 1** — A string. It starts with a bracket, contains text, and ends with three period characters followed by a closing bracket. This is the exact format used in professional monitoring system logs. One wrong character and it fails.
+
+**Line 2** — A number. The result of a multiplication operation. Not the hardcoded result — the actual expression. `console.log(8192)` is wrong even if it produces the right number. The validator checks that your code computes it, not that you computed it for your code.
+
+**Line 3** — A boolean. The result of a strict equality comparison between two strings. Do not log the strings themselves. Log the comparison.
+
+**Line 4** — A string. The type name of the result from Line 3. You learned in Lesson 3 that `typeof` returns a string. That string is what belongs on Line 4.
+
+---
+
+## After You Pass
+
+When the system outputs `[SYS.VERIFIED] // MODULE 01 COMPLETE`, you have demonstrated command of the four primitive types covered in this module: strings, numbers, booleans, and the `typeof` operator.
+
+**Module 02 unlocks: Memory Allocation — Variables & Scope.**
+
+That module is where code stops being individual expressions and starts being programs. You will learn how to name values, how JavaScript stores them in memory, and why a variable that exists in one part of your code is completely invisible in another.
+
+The concepts in Module 02 explain every `ReferenceError` and `TypeError` you have ever seen without understanding why.
+
+Go.
