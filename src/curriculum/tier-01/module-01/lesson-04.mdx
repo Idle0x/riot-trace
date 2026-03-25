@@ -2,36 +2,392 @@
 tierId: 1
 moduleId: 1
 lessonId: 4
-title: "The Function: Packaging Logic"
+title: "Null, Undefined, and the Void"
 mode: "terminal"
-syntaxHint: "function calculate(x) { return x * 2; } \ncalculate(5);"
+xpReward: 70
+syntaxHint: "let x; console.log(x);"
 
-task1Code: "// 1. Replication: Call the existing systemBoot() function.\nfunction systemBoot() {\n  console.log('Engine Started');\n}\n\n// Call it below this line:\n"
-task1Logic: "if (!logs.some(l => l === 'Engine Started')) throw new Error('Task Failed: You must call the systemBoot function.');"
+task1Code: "// TASK 1 — REPLICATION\n// Declare a variable without assigning a value.\n// Then log it. Observe what JavaScript gives it automatically.\nlet nodeStatus;\n// Add your console.log on the next line:\n\n"
+task1Logic: "if (!logs.some(l => l === undefined)) throw new Error('Task Failed: Log the uninitialized variable nodeStatus. It should be undefined.');"
 
-task2Code: "// 2. Mutation: This function calculates ROI but doesn't hand the data back. Add the 'return' keyword.\nfunction getProfit(revenue, cost) {\n  let profit = revenue - cost;\n  // Fix the line below\n  profit;\n}\n\nconsole.log(getProfit(1000, 200));"
-task2Logic: "if (!logs.some(l => l === '800' || l === 800) || !code.includes('return')) throw new Error('Task Failed: The function must use the return keyword to pass data back out.');"
+task2Code: "// TASK 2 — MUTATION\n// This crashes with: Cannot read properties of null\n// Fix it so it logs 'No node selected' when selectedNode is null.\n// Do not change the value of selectedNode.\nlet selectedNode = null;\nconsole.log(selectedNode.id);\n"
+task2Logic: "if (!logs.some(l => l === 'No node selected')) throw new Error('Task Failed: Add a null check. When selectedNode is null, log the string \"No node selected\".');"
 
-task3Code: "// 3. Synthesis: Write a function named multiply that takes two parameters (a, b) and returns their product. Then call it and log the result.\n\n"
-task3Logic: "if (!code.includes('function multiply') || !code.includes('return') || !logs.length) throw new Error('Task Failed: Must define multiply(a,b), return the math, and log the output.');"
+task3Code: "// TASK 3 — SYNTHESIS\n// Log three different kinds of emptiness on separate lines:\n// 1. An uninitialized variable (undefined)\n// 2. An intentionally empty value (null)\n// 3. The result of an invalid mathematical operation (NaN)\n\n"
+task3Logic: "if (!logs.some(l => l === undefined)) throw new Error('Task Failed: Log an undefined value. Declare a variable without assigning it.'); if (!logs.some(l => l === null)) throw new Error('Task Failed: Log a null value. Assign null to a variable and log it.'); if (!logs.some(l => typeof l === 'number' && isNaN(l))) throw new Error('Task Failed: Log a NaN value. Try console.log(0/0) or console.log(parseInt(\"not-a-number\")).');"
 ---
 
-### Encapsulation
-Writing code line-by-line is fine for scripts, but software is built with reusable blocks. A **Function** is a machine. You pass raw materials in (parameters), the machine processes them, and it spits a finished product out (return).
+## Why This Lesson Matters More Than It Appears
 
-```javascript
-// 1. Defining the Function
-function calculateTax(amount) {
-  let tax = amount * 0.20;
-  return tax; // <--- The 'return' keyword is critical. It hands data back.
-}
+The most common error message in JavaScript is:
 
-// 2. Calling the Function
-let finalTax = calculateTax(500); 
-console.log(finalTax); // Logs 100
+```
+TypeError: Cannot read properties of null (reading 'health')
+TypeError: Cannot read properties of undefined (reading 'id')
 ```
 
-### The Crucible
-* **Task 1 (Replication):** The system function is defined, but it hasn't been executed. Call it.
-* **Task 2 (Mutation):** A financial calculation is running, but the data is trapped inside the function. Use `return` to extract it.
-* **Task 3 (Synthesis):** Build a mathematical function from scratch. Define it, pass parameters into it, and log the returned data.
+If you have used JavaScript for more than a week, you have seen this crash. It means you tried to access a property (`.health`, `.id`, `.name`) on a value that does not exist. That value is either `null` or `undefined`.
+
+You have seen this in xandeum-pulse. The API call fires, the component renders before the data arrives, and the code tries to read `node.health` before `node` exists. The page crashes or goes blank. Understanding `null` and `undefined` precisely is understanding how to prevent, catch, and reason about this entire category of runtime error.
+
+---
+
+## undefined — The Automatic Absence
+
+`undefined` is what JavaScript gives to a variable that has been declared but never assigned a value. You did not set it to `undefined`. JavaScript did. Automatically.
+
+```javascript
+let nodeStatus;
+console.log(nodeStatus);   // undefined — no assignment was ever made
+```
+
+`undefined` means: **this variable exists, but nothing has been put into it.**
+
+```javascript
+// Anywhere JavaScript needs a value and has nothing to give you, it returns undefined:
+
+let x;
+console.log(x);           // undefined — declared, not assigned
+
+function greet(name) {
+  console.log(name);      // undefined — function called without that argument
+}
+greet();                  // no argument passed — name is undefined
+
+const obj = { health: 95 };
+console.log(obj.version); // undefined — property doesn't exist on the object
+
+// typeof undefined:
+typeof undefined          // "undefined"
+```
+
+The important thing: `undefined` is not an error. It is a value. It is the specific value JavaScript uses to represent "nothing was given here." The error comes when you try to do something with `undefined` that requires a different type — like accessing a property on it.
+
+---
+
+## null — The Intentional Absence
+
+`null` is a value that **you assign** when you want to explicitly say "this intentionally has no value right now."
+
+```javascript
+let selectedNode = null;
+// A developer wrote this.
+// It means: "I know about selectedNode. It exists as a concept.
+//            Right now, nothing is selected."
+
+let currentUser = null;
+// "The current user slot exists. Nobody is logged in yet."
+```
+
+The difference from `undefined`:
+
+```javascript
+let selectedNode;           // undefined — someone forgot to initialize this? Maybe.
+let selectedNode = null;    // null — someone intentionally said "nothing selected yet."
+```
+
+`undefined` is what you get when JavaScript fills a gap. `null` is what you put when you are making a deliberate statement about the absence of a value.
+
+In practice, you will use `null` at the beginning of component state when a value will eventually exist but does not yet:
+
+```javascript
+// In React (you will understand this fully in Tier 3):
+const [selectedNode, setSelectedNode] = useState(null);
+// "No node is selected yet. When the user clicks one, this will update."
+```
+
+---
+
+## typeof null — The Famous JavaScript Bug
+
+```javascript
+typeof null     // "object"
+```
+
+This is wrong. `null` is not an object. It is a primitive value representing absence. But this has been in JavaScript since 1995, and changing it would break every website that relies on the (wrong) behavior. So it stays.
+
+The practical consequence: **you cannot use `typeof` to check for null.**
+
+```javascript
+// WRONG — this check does not catch null
+if (typeof selectedNode === "object") {
+  console.log("it's null or an object — can't tell");
+}
+
+// CORRECT — use === for null checks
+if (selectedNode === null) {
+  console.log("it is definitively null");
+}
+```
+
+There is one shortcut. Because `==` (loose equality) treats `null` and `undefined` as equal, you can check for both at once:
+
+```javascript
+if (selectedNode == null) {
+  // This catches BOTH null AND undefined
+  console.log("either null or undefined — not yet assigned");
+}
+```
+
+This is one of the only legitimate uses of `==` instead of `===`. Use it when you genuinely do not care whether the value is `null` or `undefined` — only that it is one of those two.
+
+---
+
+## NaN — Revisited in Context
+
+You were introduced to `NaN` in Lesson 2. Now it belongs in the same conversation as `null` and `undefined` because all three represent a kind of "emptiness" or "invalidity."
+
+```javascript
+0 / 0             // NaN
+parseInt("error") // NaN
+Math.sqrt(-9)     // NaN
+undefined + 1     // NaN — arithmetic with undefined produces NaN
+null + 1          // 1   — arithmetic with null coerces null to 0 (confusing!)
+```
+
+`NaN` is unique: it is the only value in JavaScript that is **not equal to itself**:
+
+```javascript
+NaN === NaN   // false
+NaN == NaN    // false
+```
+
+The correct way to test for it:
+
+```javascript
+isNaN(value)           // true if value is NaN or can be coerced to NaN ("hello" → true)
+Number.isNaN(value)    // true ONLY if value is exactly NaN (stricter, preferred)
+
+Number.isNaN(NaN)      // true
+Number.isNaN("hello")  // false — "hello" is a string, not NaN
+Number.isNaN(0/0)      // true
+```
+
+---
+
+## The Six Falsy Values — Complete Picture
+
+Lesson 3 introduced truthy and falsy values. Now that you know `null`, `undefined`, and `NaN`, you can see the complete list of falsy values:
+
+```javascript
+false
+0
+-0
+""          // empty string
+null        // intentional absence
+undefined   // uninitialized
+NaN         // invalid number
+```
+
+Everything else is truthy. This list is exact and complete. There are no other falsy values in JavaScript.
+
+Why does this matter? Because these values are what you check for in conditions:
+
+```javascript
+// All of these if blocks do NOT execute:
+if (false) { }
+if (0) { }
+if ("") { }
+if (null) { }
+if (undefined) { }
+if (NaN) { }
+
+// This is why the guard pattern works:
+if (selectedNode) {
+  // This only runs if selectedNode is not null, not undefined, not 0, not ""
+  console.log(selectedNode.health);  // safe — selectedNode exists
+}
+```
+
+---
+
+## The Crash and How to Prevent It
+
+The error from the introduction of this lesson:
+
+```
+TypeError: Cannot read properties of null (reading 'health')
+```
+
+This happens when you write:
+
+```javascript
+let node = null;
+console.log(node.health);
+// JavaScript tries to access .health on null
+// null has no properties
+// Runtime error, page crashes
+```
+
+There are three standard patterns for preventing this:
+
+### Pattern 1 — Guard Clause (if check)
+```javascript
+if (node !== null && node !== undefined) {
+  console.log(node.health);
+}
+
+// Shorter version using truthiness:
+if (node) {
+  console.log(node.health);
+}
+```
+
+### Pattern 2 — Optional Chaining (modern JavaScript)
+```javascript
+console.log(node?.health);
+// The ?. is called optional chaining
+// If node is null or undefined, this returns undefined instead of crashing
+// If node exists, it accesses .health normally
+```
+
+```javascript
+// Chaining deeper:
+console.log(node?.location?.city);
+// Returns undefined if node is null OR if node.location is null
+// No crash either way
+```
+
+### Pattern 3 — Nullish Coalescing
+```javascript
+const health = node?.health ?? 0;
+// ?? is the nullish coalescing operator
+// If the left side is null or undefined, use the right side as the default
+// If node?.health is undefined (node is null), health becomes 0
+```
+
+Optional chaining (`?.`) and nullish coalescing (`??`) are the two operators you will use the most when working with API data in React. Data from APIs is always potentially null or undefined — the data has not loaded yet, the field is optional, the record does not exist. These operators let you access nested values safely.
+
+---
+
+## Understanding the Bug in Your Own Code
+
+Look at what happens in React when you fetch data:
+
+```javascript
+// Component renders BEFORE data arrives:
+const [nodeData, setNodeData] = useState(null);  // starts as null
+
+// Render runs with nodeData = null:
+return <div>{nodeData.health}</div>;
+// CRASH: Cannot read properties of null (reading 'health')
+```
+
+The fix:
+```javascript
+return <div>{nodeData?.health ?? 'Loading...'}</div>;
+// If nodeData is null: shows 'Loading...'
+// If nodeData exists: shows the health value
+```
+
+You have written code that handles this. Now you understand the exact mechanism behind why it was needed.
+
+---
+
+## typeof — The Complete Cheat Sheet
+
+Now that you know all four primitive types from this module, here is `typeof` for all of them:
+
+```javascript
+typeof "hello"     // "string"
+typeof 42          // "number"
+typeof true        // "boolean"
+typeof undefined   // "undefined"
+typeof null        // "object"    ← the bug. null is not an object
+typeof NaN         // "number"    ← NaN is of type number. Yes.
+typeof []          // "object"    ← arrays are objects
+typeof {}          // "object"    ← plain objects
+typeof function(){} // "function" ← functions have their own typeof result
+```
+
+Notice: `typeof` is reliable for `string`, `number`, `boolean`, and `undefined`. For `null` it lies. For arrays and plain objects it gives the same result (`"object"`) and cannot distinguish them. You will need other checks (`Array.isArray()`, `=== null`) for those cases.
+
+---
+
+## Common Mistakes
+
+**Mistake 1 — Treating undefined as an error:**
+```javascript
+let health;
+console.log(health);  // undefined — this is valid, not a crash
+// The crash comes from USING undefined, not from it existing
+health + 10  // NaN — arithmetic with undefined
+```
+
+**Mistake 2 — Using typeof to check for null:**
+```javascript
+typeof null === "null"   // false — typeof null is "object", not "null"
+typeof null === "object" // true — but this matches real objects too, unhelpful
+null === null            // true — use strict equality for null checks
+```
+
+**Mistake 3 — Forgetting optional chaining when data is loading:**
+```javascript
+// This crashes if data is null:
+return <div>{user.name}</div>
+
+// This is safe:
+return <div>{user?.name ?? 'Loading...'}</div>
+```
+
+**Mistake 4 — Confusing null coalescing ?? with OR ||:**
+```javascript
+const health = nodeHealth ?? 0;
+// ?? only triggers for null and undefined
+// If nodeHealth is 0 (a valid health score!), it stays 0
+
+const health = nodeHealth || 0;
+// || triggers for ANY falsy value
+// If nodeHealth is 0, it becomes 0... wait, same result
+// But if nodeHealth is "" (empty string), || replaces it, ?? does not
+// ?? is stricter and safer for default values
+```
+
+---
+
+## Micro-Drills
+
+**Drill 1:** What is the difference between `undefined` and `null`? Write a sentence for each that describes what it means in human terms, then write one line of code that demonstrates each.
+
+**Drill 2:** Without running it, what does this log?
+```javascript
+let x;
+let y = null;
+console.log(typeof x);
+console.log(typeof y);
+console.log(x === y);
+console.log(x == y);
+```
+
+**Drill 3:** What does `node?.health` return if `node` is `null`? What if `node` is `{ health: 95 }`? Write both cases.
+
+**Drill 4:** Which of these causes a crash? Which does not?
+```javascript
+// Case A:
+let a;
+console.log(a);
+
+// Case B:
+let b = null;
+console.log(b.name);
+
+// Case C:
+let c = null;
+console.log(c?.name);
+```
+
+If you know the answers to all four drills without uncertainty, you are ready.
+
+---
+
+## The Crucible
+
+**Task 1 — Replication.** The variable `nodeStatus` is already declared. Log it. That is the entire task. The point is to see that JavaScript has already given it a value — even though you never assigned one.
+
+**Task 2 — Mutation.** The crash is the exact error from the beginning of this lesson. `selectedNode` is `null`. The code tries to access `.id` on it. Add a check. If `selectedNode` is null, log the string `"No node selected"` instead. Do not change the value of `selectedNode`.
+
+**Task 3 — Synthesis.** Three separate logs. Three separate kinds of "nothing." `undefined` (declare a variable without assigning it). `null` (assign `null` and log it). `NaN` (produce an invalid number — dividing zero by zero works, or passing a non-numeric string to `parseInt`). Three lines. Three concepts from this lesson. All distinct.
+
+This task validates your understanding of the difference between three values that all represent "nothing" but mean entirely different things.
+
+Go.
