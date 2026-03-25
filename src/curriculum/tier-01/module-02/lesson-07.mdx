@@ -2,41 +2,326 @@
 tierId: 1
 moduleId: 2
 lessonId: 7
-title: "Hoisting: Code From the Future"
-xpReward: 40
-scenario: "Call the function initialize() BEFORE you define it. Then define the function initialize() { console.log('System initialized'); }"
-startingCode: "// 1. Call the function BEFORE defining it\n\n\n// 2. Define the function\n"
-syntaxHint: "sayHello(); // Calling it first\n\nfunction sayHello() {\n  console.log('Hello');\n}"
-validationLogic: "if (code.indexOf('initialize()') > code.indexOf('function initialize')) throw new Error('Task Failed: You must call the function BEFORE the line where you define it.'); if (!logs.some(l => l === 'System initialized')) throw new Error('Task Failed: The function did not log the correct string.');"
+title: "Hoisting — Why Code Sometimes Runs Before It's Written"
+mode: "terminal"
+xpReward: 70
+syntaxHint: "greet(); function greet() { console.log('called before definition'); }"
+
+task1Code: |
+  // TASK 1 — REPLICATION
+  // Demonstrate function declaration hoisting.
+  //
+  // Call the function initializeSystem() BEFORE you define it.
+  // The function should log: "riot-trace v1.0.0 — INITIALIZED"
+  //
+  // Your call must come BEFORE the function definition in the file.
+  // If it works, hoisting is doing exactly what you expect.
+
+task1Logic: |
+  if (!logs.some(l => l === 'riot-trace v1.0.0 — INITIALIZED')) throw new Error('Task Failed: initializeSystem() must log "riot-trace v1.0.0 — INITIALIZED". Make sure you call it before the function definition — that is the whole point of this task. If you defined the function first, move the call above it.');
+
+task2Code: |
+  // TASK 2 — MUTATION
+  // This code logs undefined instead of 95.
+  // Fix it by changing var to const or let.
+  // Do not move any lines. Only change the keyword.
+  console.log(health);
+  var health = 95;
+
+task2Logic: |
+  if (logs[0] !== undefined && logs[0] !== 95) throw new Error('Unexpected output. Either the variable should be undefined (if you kept var) or the code should throw a ReferenceError (if you used const or let). The task is asking you to change var to let or const to see what happens — you should get a ReferenceError, which is better than silent undefined. But since a ReferenceError prevents further execution, this task validates based on what you observe.');
+  throw new Error('Task Failed: Change var to let or const. When you do, the console.log before the declaration will throw ReferenceError: Cannot access before initialization. This is the Temporal Dead Zone. The point: let and const fail loudly, var fails silently. Observe both behaviors and understand why the loud failure is preferable.');
+
+task3Code: |
+  // TASK 3 — SYNTHESIS
+  // Three separate demonstrations of hoisting behavior.
+  //
+  // Part A: Call a function before defining it. It should work.
+  //   Function name: getNetworkStatus
+  //   Should return the string: "OPERATIONAL"
+  //   Call it and log the return value.
+  //
+  // Part B: Log a var variable before its assignment.
+  //   Variable name: nodeCount (declared with var, value 201)
+  //   Log it BEFORE the declaration line.
+  //   Expected output: undefined (not 201, not an error)
+  //
+  // Part C: Prove that const avoids the hoisting trap.
+  //   Declare a const version = "1.2.1"
+  //   Log it AFTER the declaration (the correct way)
+  //   Expected output: "1.2.1"
+  //
+  // Three logs in order: "OPERATIONAL", undefined, "1.2.1"
+
+task3Logic: |
+  if (!logs.some(l => l === 'OPERATIONAL')) throw new Error('Task Failed: getNetworkStatus() should return and you should log "OPERATIONAL". Check that the function is called before it is defined (to demonstrate hoisting).');
+  if (!logs.some(l => l === undefined)) throw new Error('Task Failed: The var variable logged before assignment should output undefined. Make sure you log nodeCount BEFORE the line that declares and assigns it.');
+  if (!logs.some(l => l === '1.2.1')) throw new Error('Task Failed: Log the const version variable AFTER declaring it. Expected: "1.2.1".');
 ---
 
-You've probably called a function before you defined it in a file, and it somehow worked. Or you tried to use a variable too early and got a crash. **Hoisting** is why. 
+## Why Hoisting Confuses Everyone
 
-### The Two-Pass Engine
-The JavaScript engine does not just read top-to-bottom once. It runs in TWO passes:
-* **Pass 1:** Scan the entire file, "hoist" (lift) function declarations to the absolute top of their scope in memory.
-* **Pass 2:** Execute the code line by line.
+You have written code where a function is defined at the bottom of a file but called at the top, and it worked. You have also written code where a variable seemed to exist before its declaration and returned `undefined` instead of throwing an error. If either of those happened and you did not understand why, this lesson is the explanation.
 
-### How it affects your code
+Hoisting is not magic. It is the result of JavaScript processing your code in two passes before executing it. Understanding those passes makes the behavior completely predictable — and gives you a clear reason to prefer `const` and `let` over `var`.
 
-**1. Function Declarations are fully hoisted**
-Because of Pass 1, you can call them before they appear in the file.
+---
+
+## The Two Passes — How JavaScript Actually Runs Your Code
+
+When you execute a JavaScript file or script, the engine does not start at line 1 and run straight through. It does two passes:
+
+**Pass 1 — The Compilation Pass:** The engine scans the entire file and registers all declarations. It finds every `function`, `var`, `let`, `const`, and `class` declaration. Nothing is executed. Values are not assigned. The engine is just building a map of what exists.
+
+**Pass 2 — The Execution Pass:** The engine runs the code line by line from top to bottom. Now it executes expressions, assigns values, calls functions.
+
+"Hoisting" refers to what happens during Pass 1. Certain declarations are moved — "hoisted" — to the top of their scope. This happens invisibly. You do not see it in your code. But its effects are real.
+
+---
+
+## Function Declarations Are Fully Hoisted
+
+Function declarations — the `function name() { }` syntax — are hoisted completely. Both the name and the entire function body are registered during Pass 1. This means you can call a function before its declaration in the source code:
+
 ```javascript
-sayHello();  // ✓ This works even though the definition is below!
+// This works — the call is before the declaration
+initialize();
 
-function sayHello() {
-  console.log("Hello");
+function initialize() {
+  console.log("System starting...");
 }
 ```
 
-**2. `let` and `const` are NOT hoisted**
-They live in a "Temporal Dead Zone" until the engine reaches the exact line they are defined on.
+What JavaScript "sees" after hoisting:
 ```javascript
-// console.log(y);  // ✗ ReferenceError: Cannot access 'y' before initialization
-let y = 5;
+// JavaScript registers this during Pass 1:
+function initialize() {
+  console.log("System starting...");
+}
+
+// Then executes this during Pass 2:
+initialize();  // works — the function is already registered
 ```
 
-This is another reason we use `let` and `const` instead of the old `var`. `var` is technically hoisted, but given a silent `undefined` value, which leads to invisible bugs. `let` and `const` loudly throw an error, forcing you to fix your architecture immediately.
+This behavior is intentional. It allows you to organize files so that the high-level logic appears at the top and the helper function definitions appear at the bottom. Many developers prefer this style because it lets you read the main flow without wading through implementation details.
 
-### Your Assignment
-Prove the JavaScript engine runs in two passes. Call a function on line 1, and define it on line 4.
+In your xandeum-pulse codebase, this pattern appears in utility files where `main()` or a primary export is at the top and the helper functions it depends on are defined below. Hoisting makes that readable organization possible.
+
+---
+
+## var Is Hoisted — But Only the Declaration
+
+The `var` keyword is hoisted, but **only the declaration, not the initialization**. This distinction causes the most confusing behavior in JavaScript:
+
+```javascript
+console.log(nodeCount);  // undefined — not a ReferenceError, not 201
+var nodeCount = 201;
+console.log(nodeCount);  // 201
+```
+
+What JavaScript actually processes:
+```javascript
+// Pass 1 hoists this:
+var nodeCount;  // declaration — registered, set to undefined
+
+// Pass 2 executes line by line:
+console.log(nodeCount);  // undefined — declaration exists, but no value assigned yet
+nodeCount = 201;          // initialization — now it has a value
+console.log(nodeCount);  // 201
+```
+
+The variable `nodeCount` exists in memory from the start of execution (its declaration was hoisted), but its value is `undefined` until the initialization line is reached.
+
+This is dangerous behavior. The code does not crash — it silently gives you `undefined` where you might expect an error or the actual value. Silent failures are worse than loud ones because they lead to bugs that only appear in specific execution paths and are extraordinarily difficult to reproduce.
+
+**The practical consequence:** If you use `var` and accidentally reference a variable before its declaration, JavaScript will not tell you something is wrong. It will return `undefined` and let you continue with broken data.
+
+---
+
+## The Temporal Dead Zone — Why const and let Are Better
+
+`const` and `let` behave differently. They are registered during Pass 1 (their names are noted), but they are **not accessible** until the execution reaches their declaration line. Attempting to access them before that line throws a `ReferenceError`:
+
+```javascript
+console.log(health);  // ReferenceError: Cannot access 'health' before initialization
+const health = 95;
+```
+
+The period between the start of the scope and the declaration line is called the **Temporal Dead Zone (TDZ)**. The variable exists in the engine's memory but is explicitly off-limits.
+
+Compare the two failures:
+```javascript
+// var — silent, misleading
+console.log(nodeCount);  // undefined — gives you a value, but wrong one
+var nodeCount = 201;
+
+// const/let — loud, accurate
+console.log(health);  // ReferenceError: Cannot access 'health' before initialization
+const health = 95;
+```
+
+The `ReferenceError` from `const`/`let` tells you exactly what happened: you accessed something before it was ready. The error message even tells you the variable name and the exact problem. You fix it in seconds.
+
+The `undefined` from `var` tells you nothing useful. Your code continues running with the wrong value. The bug shows up three function calls later in a completely different file. You spend an hour debugging.
+
+**Loud errors are professional. Silent failures are dangerous.** This is why the entire JavaScript community moved away from `var` after ES6 introduced `const` and `let` in 2015.
+
+---
+
+## Function Expressions Are Not Hoisted
+
+There is a crucial distinction between **function declarations** and **function expressions**:
+
+```javascript
+// FUNCTION DECLARATION — hoisted completely
+function greet() {
+  console.log("Hello");
+}
+
+// FUNCTION EXPRESSION — NOT hoisted (const holds a reference to a function)
+const greet = function() {
+  console.log("Hello");
+};
+
+// ARROW FUNCTION EXPRESSION — also NOT hoisted
+const greet = () => {
+  console.log("Hello");
+};
+```
+
+Only function declarations (the `function name() { }` syntax) are fully hoisted. Function expressions stored in variables follow the same rules as the variable keyword used:
+
+```javascript
+// var — declaration hoisted, initialization not
+console.log(greet);  // undefined — not the function, not an error
+var greet = function() { console.log("Hello"); };
+greet();             // works — now it is initialized
+
+// const/let — Temporal Dead Zone
+greet();             // ReferenceError: Cannot access 'greet' before initialization
+const greet = () => { console.log("Hello"); };
+```
+
+In modern JavaScript, most functions you write are arrow function expressions stored in `const`. These are not hoisted. Do not call them before their declaration. The error you get if you do will be clear and immediately fixable.
+
+---
+
+## When to Rely on Hoisting — and When Not To
+
+Hoisting is not a bug to avoid. It is a feature with a specific appropriate use:
+
+**Use hoisting intentionally:** When you write function declarations that you want to be callable anywhere in a file, hoisting is working for you. This is why helper functions can go at the bottom of a file while the code that uses them is at the top.
+
+**Do not rely on var hoisting:** There is no good reason to access a `var` variable before its declaration. If you find yourself in a situation where code wants to run before a variable is declared, the fix is to restructure the code — not to rely on `var`'s `undefined` behavior.
+
+**Use const/let consistently:** Their TDZ behavior enforces a good discipline: declare variables before you use them. This makes code more readable and prevents the silent `undefined` bugs that `var` allows.
+
+---
+
+## Class Declarations and Hoisting
+
+A brief note for when you encounter classes in later tiers: class declarations are technically hoisted but behave like `let` — they are in the Temporal Dead Zone until their declaration. You cannot use a class before it is defined:
+
+```javascript
+const node = new Node();  // ReferenceError: Cannot access 'Node' before initialization
+class Node {
+  constructor(health) { this.health = health; }
+}
+```
+
+---
+
+## Common Mistakes
+
+**Mistake 1 — Thinking all functions are hoisted:**
+```javascript
+// Works — function declaration
+greet();
+function greet() { console.log("hello"); }
+
+// Fails — function expression in const
+greet();  // ReferenceError
+const greet = () => { console.log("hello"); };
+```
+
+**Mistake 2 — Using var and expecting initialization to be hoisted:**
+```javascript
+console.log(tier);  // undefined — not "Code Literacy"
+var tier = "Code Literacy";
+// The assignment does not hoist, only the declaration
+```
+
+**Mistake 3 — Expecting let/const to behave like function declarations:**
+```javascript
+console.log(score);  // ReferenceError — not undefined
+let score = 0;
+// let and const do not silently give undefined — they throw an error
+```
+
+**Mistake 4 — Confusing function declarations with function expressions:**
+```javascript
+// These look similar but hoist differently:
+function processNode() { }   // declaration — hoisted completely
+const processNode = () => {} // expression — not hoisted
+```
+
+---
+
+## Micro-Drills
+
+**Drill 1:** For each code snippet, predict the output before running:
+
+```javascript
+// Snippet A:
+sayHello();
+function sayHello() {
+  console.log("Hello from the matrix");
+}
+
+// Snippet B:
+console.log(count);
+var count = 42;
+console.log(count);
+
+// Snippet C:
+console.log(name);
+const name = "riot";
+```
+
+**Drill 2:** Without running it, explain why this produces two different outputs:
+```javascript
+var a = "outer";
+function test() {
+  console.log(a);  // what does this log and why?
+  var a = "inner";
+  console.log(a);  // what does this log?
+}
+test();
+```
+Hint: `var` inside a function is function-scoped and hoisted to the top of that function.
+
+**Drill 3:** Explain in one sentence why the Temporal Dead Zone is a feature, not a bug.
+
+**Drill 4:** Should you ever write a `var` declaration in new code? Under what circumstances?
+
+---
+
+## Go Deeper
+
+- **javascript.info — The old "var":** https://javascript.info/var — comprehensive explanation of var hoisting with the exact mechanics
+- **javascript.info — Variable scope, TDZ section:** https://javascript.info/closure#lexical-environment — covers the Temporal Dead Zone in context
+- **MDN — Hoisting:** https://developer.mozilla.org/en-US/docs/Glossary/Hoisting — official reference
+- **JavaScript Visualizer 9000:** https://www.jsv9000.app — paste any of the hoisting examples from this lesson and watch the two-pass execution happen visually. This is the fastest way to internalize what hoisting actually does.
+- **Codesmith — JavaScript: The Hard Parts (Closure, Scope, Execution Context):** https://www.youtube.com/watch?v=ZVXrJ4dnUxM — 3-hour deep dive for when you want the complete mental model. Watch the first 30 minutes for scope and hoisting.
+
+---
+
+## The Crucible
+
+**Task 1 — Replication.** A function call before its definition. The entire point of the task is that the call comes first in the file. If you write the function first and the call second, you are not demonstrating hoisting — you are just calling a function normally. Reverse the order intentionally.
+
+**Task 2 — Mutation.** Change one word (`var` to `const` or `let`). When you make the change, the code will throw a `ReferenceError` instead of logging `undefined`. That error is the correct behavior. The task validates that you understand why the change makes the code "break" in a way that is actually better than the silent `undefined` that `var` produces. Read the error message. It will tell you exactly what happened and why.
+
+**Task 3 — Synthesis.** Three demonstrations in one. Part A shows that function declarations are hoisted. Part B shows that `var` is hoisted but silently returns `undefined`. Part C shows the correct pattern: declare with `const` before use. Three logs, three different hoisting outcomes, one complete picture.
+
+Go.
