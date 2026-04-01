@@ -1,0 +1,182 @@
+---
+tierId: 1
+type: "capstone"
+title: "Tier 01 Capstone — The Syntax Audit"
+mode: "terminal"
+xpReward: 500
+startingCode: |
+  // ═══════════════════════════════════════════════════════
+  // TIER 01 CAPSTONE — THE SYNTAX AUDIT
+  // ═══════════════════════════════════════════════════════
+  //
+  // This is the final gate of Tier 01: Code Literacy.
+  // No hints. No theory panel. No scaffold beyond what
+  // you see here.
+  //
+  // THE SCENARIO:
+  // A junior developer on the riot-trace team submitted this
+  // initialization script. It has 8 deliberate bugs spanning
+  // everything you have learned in Tier 01.
+  //
+  // The script must produce EXACTLY this output when fixed:
+  //
+  //   [SYS.BOOT] riot-trace v1.2.1
+  //   Network: mainnet | Nodes: 201
+  //   OPERATIONAL
+  //   true
+  //   7A5r: 95% — ELITE
+  //   TRIAGE COMPLETE
+  //
+  // ─────────────────────────────────────────────────────────
+  // FIND AND FIX ALL 8 BUGS. DO NOT ADD NEW LOGIC.
+  // ONLY FIX WHAT IS BROKEN.
+  // ─────────────────────────────────────────────────────────
+  //
+  // THE BROKEN SCRIPT:
+
+  // ── SECTION 1: System Boot ────────────────────────────
+  const VERSION = "1.2.1";
+  const BOOT_MSG = '[SYS.BOOT] riot-trace v' + version;  // BUG 1
+  console.log(BOOT_MSG);
+
+  // ── SECTION 2: Network Summary ───────────────────────
+  const network = "mainnet";
+  let nodeCount = "201";                                   // BUG 2
+  console.log(`Network: ${network} | Nodes: ${nodeCount}`);
+
+  // ── SECTION 3: Health Classification ─────────────────
+  const avgHealth = 78;
+
+  if (avgHealth >= 90) {
+    console.log("ELITE");
+  } else if (avgHealth >= 60) {
+    console.log("OPERATIONAL");
+  } else if (avgHealth >= 40) {                           // BUG 3
+    console.log("DEGRADED");
+  } else {
+    console.log("CRITICAL");
+  }
+
+  // ── SECTION 4: Version Check ─────────────────────────
+  const nodeVersion = "1.2.1";
+  const latestVersion = "1.2.1";
+  console.log(nodeVersion == latestVersion);              // BUG 4
+
+  // ── SECTION 5: Node Summary ───────────────────────────
+  const nodes = [
+    { id: "7A5r", health: 95 },
+    { id: "8BJT", health: 47 },
+    { id: "Xk91", health: 91 }
+  ];
+
+  const firstNode = nodes[1];                             // BUG 5
+  const { id, health } = firstNode;
+  const badge = health >= 90 ? "ELITE" : "STANDARD";
+  console.log(`${id}: ${health}% — ${badge}`);
+
+  // ── SECTION 6: Triage Report ──────────────────────────
+  const report = {
+    network: network,
+    totalNodes: nodeCount,
+    status: "complete"
+  };
+
+  if ("status" in report && report.status = "complete") { // BUG 6 + BUG 7
+    console.log("TRIAGE COMPLETE");
+  }
+
+  // ── BONUS CHECK ───────────────────────────────────────
+  const scores = [95, 47, 91];
+  const topScore = Math.max(scores);                      // BUG 8
+  // (topScore is not logged — this bug prevents the script
+  //  from running cleanly. Fix it even though it has no log.)
+
+validationLogic: |
+  if (logs.length !== 6) throw new Error('AUDIT_HALT: Expected exactly 6 lines of output. Got ' + logs.length + '. Not all bugs are fixed yet, or you have added extra console.log calls. There are exactly 8 bugs — find them all.');
+  if (logs[0] !== '[SYS.BOOT] riot-trace v1.2.1') throw new Error('BUG_1_REMAINING: Line 1 should be "[SYS.BOOT] riot-trace v1.2.1". The template uses a variable called "version" but the constant is named "VERSION". JavaScript variable names are case-sensitive. Received: ' + JSON.stringify(logs[0]));
+  if (logs[1] !== 'Network: mainnet | Nodes: 201') throw new Error('BUG_2_REMAINING: Line 2 should be "Network: mainnet | Nodes: 201". The nodeCount is stored as the string "201" — it should be the number 201. Check what typeof nodeCount returns. Received: ' + JSON.stringify(logs[1]));
+  if (logs[2] !== 'OPERATIONAL') throw new Error('BUG_3_REMAINING: Line 3 should be "OPERATIONAL". avgHealth is 78, which is >= 60 but the condition that should match it is in the wrong position or has the wrong threshold. Check that the else-if chain is ordered from highest to lowest and that the 60 threshold is in the right place. Received: ' + JSON.stringify(logs[2]));
+  if (logs[3] !== true) throw new Error('BUG_4_REMAINING: Line 4 should be the boolean true. The version check uses == (loose equality) instead of === (strict equality). Both sides are strings so the result is the same here, but the professional standard is ===. Change == to ===. Received: ' + JSON.stringify(logs[3]));
+  if (logs[4] !== '7A5r: 95% — ELITE') throw new Error('BUG_5_REMAINING: Line 5 should be "7A5r: 95% — ELITE". The code uses nodes[1] which is the second node (id: "8BJT", health: 47). The first node is at index 0. Change nodes[1] to nodes[0]. Received: ' + JSON.stringify(logs[4]));
+  if (logs[5] !== 'TRIAGE COMPLETE') throw new Error('BUG_6_or_7_REMAINING: Line 6 should be "TRIAGE COMPLETE". There are two bugs in that if statement. Bug 6: the condition uses = (assignment) instead of === (comparison) for report.status. Bug 7: without proper parentheses, the assignment inside && may cause unexpected behavior. Fix: use === not =. Received: ' + JSON.stringify(logs[5]));
+---
+
+## The Final Gate of Tier 01
+
+You have completed four modules. You have learned what every data type is, how variables and scope work, how JavaScript makes decisions, and how arrays and objects store and expose data.
+
+This capstone does not teach you anything new. It proves that you own what you learned.
+
+The script above is intentionally broken. A junior developer wrote it quickly and introduced 8 bugs — some obvious, some subtle, some that crash the program, some that produce wrong output silently. Your job is to find every single one and fix it without changing the structure of the program.
+
+---
+
+## The Rules
+
+**You may only fix bugs. Do not add new logic, restructure the code, or change how the program works.**
+
+The output must match exactly:
+
+```
+[SYS.BOOT] riot-trace v1.2.1
+Network: mainnet | Nodes: 201
+OPERATIONAL
+true
+7A5r: 95% — ELITE
+TRIAGE COMPLETE
+```
+
+Six lines. Exact strings. Correct types.
+
+---
+
+## How to Approach This
+
+Do not try to fix all 8 bugs at once. Work section by section, in order.
+
+**Section 1** — Read the variable name used in the template literal. Is it the same as the constant declared above it?
+
+**Section 2** — The output looks right but the validator will reject it. Check the *type* of `nodeCount`. Run `typeof nodeCount` if you are unsure.
+
+**Section 3** — The `if/else if` chain has a condition at the wrong threshold or in the wrong position. `avgHealth` is 78. Which branch should it match? Trace through the chain top-to-bottom and find where 78 falls.
+
+**Section 4** — There is a right and wrong equality operator in JavaScript. This section uses the wrong one. It produces `true` for this specific case but the habit is incorrect and the validator checks for it.
+
+**Section 5** — Arrays are zero-indexed. The first element is at index 0. The code accesses a specific index — is it the right one for the intended output?
+
+**Section 6** — Two bugs on the same line. One is an operator used for comparison that is actually performing an assignment. One is structural — look at what the compound condition actually evaluates to.
+
+**Section 7 (Bonus)** — `Math.max()` accepts individual numbers as arguments, not an array. The call is passing an array directly. This does not produce a console.log but it does produce `NaN` which can cause downstream issues. Fix it.
+
+---
+
+## The 8 Bug Types
+
+The bugs in this script cover one concept from each major topic in Tier 01:
+
+| # | Section | Module | Concept |
+|---|---------|--------|---------|
+| 1 | Boot message | Primitives | Case-sensitive variable names |
+| 2 | Node count | Variables | String vs number type |
+| 3 | Health check | Conditionals | Wrong if/else if ordering |
+| 4 | Version check | Booleans | == vs === |
+| 5 | Node access | Arrays | Zero-based indexing |
+| 6 | Triage check | Objects | = vs === in condition |
+| 7 | Triage check | Logic | Assignment inside && |
+| 8 | Score calc | Arrays | Spread required for Math.max |
+
+Finding all eight proves you understand the code you are reading — not just that you can write patterns from memory.
+
+---
+
+## After You Pass
+
+When the system outputs `[SYS.VERIFIED] // TIER 01 COMPLETE`, Tier 02 unlocks.
+
+**Tier 02: JavaScript Deeply — The Logic Engine.**
+
+Tier 01 was about reading code. Tier 02 is about writing code that does things. Loops that iterate over every node. Functions that transform data. Closures that remember state. Async operations that wait for network responses without freezing the UI.
+
+The concepts in Tier 02 explain everything that happens inside your xandeum-pulse data processing pipeline — the `.filter()`, `.map()`, `.reduce()` chains, the `async/await` fetch calls, the custom hooks. You have been using these patterns. In Tier 02 you will own them.
+
+Go.
