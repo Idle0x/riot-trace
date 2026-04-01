@@ -2,48 +2,502 @@
 tierId: 1
 moduleId: 4
 lessonId: 13
-title: "Arrays: Ordered Collections"
-xpReward: 40
-scenario: "Create an array called networks with 'mainnet' and 'devnet'. Use .push() to add 'testnet' to the end. Log the entire array, then log the length of the array."
-startingCode: "// 1. Create the array\n\n// 2. Push a new item\n\n// 3. Log the array and its length\n"
-syntaxHint: "const list = ['a', 'b'];\nlist.push('c');\nconsole.log(list.length);"
-validationLogic: "if (!code.includes('push')) throw new Error('Task Failed: You must use the .push() method.'); if (!logs.some(l => l.includes('testnet') && l.includes('mainnet'))) throw new Error('Task Failed: The array does not contain the required networks.'); if (!logs.some(l => l === '3' || l === 3)) throw new Error('Task Failed: Did not log the correct array length (3).');"
+title: "Destructuring & Spread — Unpacking the Machine"
+mode: "terminal"
+xpReward: 70
+syntaxHint: "const { health, network } = node;"
+
+task1Code: |
+  // TASK 1 — REPLICATION
+  // Unpack this node object using destructuring.
+  //
+  const node = {
+    id: "7A5rRdbGp4jUm4TA",
+    health: 95,
+    network: "mainnet",
+    version: "1.2.1",
+    storage: 250
+  };
+  //
+  // 1. Destructure id, health, and network from node in ONE line
+  // 2. Destructure version but rename it to nodeVersion
+  // 3. Destructure a property called "uptime" that doesn't exist,
+  //    with a default value of 0
+  //
+  // Log each extracted variable on its own line:
+  // Expected output (5 lines):
+  // 7A5rRdbGp4jUm4TA
+  // 95
+  // mainnet
+  // 1.2.1
+  // 0
+
+task1Logic: |
+  if (!logs.some(l => l === '7A5rRdbGp4jUm4TA')) throw new Error('Task Failed: Log the destructured id. Expected "7A5rRdbGp4jUm4TA".');
+  if (!logs.some(l => l === 95)) throw new Error('Task Failed: Log the destructured health. Expected the number 95.');
+  if (!logs.some(l => l === 'mainnet')) throw new Error('Task Failed: Log the destructured network. Expected "mainnet".');
+  if (!logs.some(l => l === '1.2.1')) throw new Error('Task Failed: Log nodeVersion (renamed from version). Expected "1.2.1".');
+  if (!logs.some(l => l === 0)) throw new Error('Task Failed: Log the uptime variable with default value 0. Since node has no "uptime" property, the default of 0 should be used.');
+
+task2Code: |
+  // TASK 2 — MUTATION
+  // This code uses destructuring and spread but has three bugs.
+  // Fix all of them.
+  //
+  const nodes = ["node-A", "node-B", "node-C", "node-D", "node-E"];
+  //
+  // Bug 1: Should destructure first and second items AND collect
+  //        the rest into a 'remaining' array — but the syntax is wrong
+  const [first, second] = nodes;    // Bug 1: missing rest collection
+  //
+  // Bug 2: Should create a merged object but the spread is on the wrong side
+  //        (newData properties should OVERRIDE baseNode properties)
+  const baseNode = { health: 95, network: "mainnet", version: "1.2.0" };
+  const newData = { health: 87, version: "1.2.1" };
+  const updated = { ...newData, ...baseNode };    // Bug 2: wrong order
+  //
+  // Bug 3: Should copy the nodes array without mutating original
+  //        but this creates a reference, not a copy
+  const copy = nodes;              // Bug 3: not a copy
+  copy.push("node-F");
+  //
+  console.log(remaining.length);   // should log: 3
+  console.log(updated.health);     // should log: 87
+  console.log(nodes.length);       // should log: 5 (original unchanged)
+
+task2Logic: |
+  if (!logs.some(l => l === 3)) throw new Error('Task Failed: remaining should have 3 items (node-C, node-D, node-E). Use rest syntax: const [first, second, ...remaining] = nodes.');
+  if (!logs.some(l => l === 87)) throw new Error('Task Failed: updated.health should be 87 (from newData, overriding baseNode). When spreading, later properties override earlier ones. Put baseNode first, then newData: { ...baseNode, ...newData }.');
+  if (!logs.some(l => l === 5)) throw new Error('Task Failed: Original nodes array should still have 5 items. Use spread to copy: const copy = [...nodes]. Then push to copy without affecting original.');
+
+task3Code: |
+  // TASK 3 — SYNTHESIS
+  // The riot-trace network snapshot system.
+  //
+  // You receive this raw API response:
+  const apiResponse = {
+    status: "ok",
+    timestamp: "2026-03-17T01:12:00Z",
+    data: {
+      network: "mainnet",
+      nodes: [
+        { id: "7A5r", health: 95, storage: 250 },
+        { id: "8BJT", health: 47, storage: 23  },
+        { id: "8PjP", health: 78, storage: 180 }
+      ],
+      stats: { totalNodes: 3, avgHealth: 73.3 }
+    }
+  };
+  //
+  // 1. Destructure status and data from apiResponse in one line
+  //
+  // 2. Destructure network and nodes from data in one line
+  //
+  // 3. Destructure the first node from the nodes array
+  //    (call it firstNode) in one line using array destructuring
+  //
+  // 4. Destructure id and health from firstNode in one line
+  //
+  // 5. Create a new const called enrichedNode by spreading firstNode
+  //    and adding two new properties:
+  //    - rank: 1
+  //    - healthBadge: "ELITE" (because health >= 90)
+  //    Use a ternary for healthBadge.
+  //
+  // 6. Log id (should be: 7A5r)
+  // 7. Log health (should be: 95)
+  // 8. Log network (should be: mainnet)
+  // 9. Log enrichedNode.rank (should be: 1)
+  // 10. Log enrichedNode.healthBadge (should be: ELITE)
+
+task3Logic: |
+  if (!logs.some(l => l === '7A5r')) throw new Error('Task Failed: Log the destructured id from firstNode. Expected "7A5r".');
+  if (!logs.some(l => l === 95)) throw new Error('Task Failed: Log the destructured health from firstNode. Expected 95.');
+  if (!logs.some(l => l === 'mainnet')) throw new Error('Task Failed: Log the destructured network from data. Expected "mainnet".');
+  if (!logs.some(l => l === 1)) throw new Error('Task Failed: Log enrichedNode.rank. Expected 1.');
+  if (!logs.some(l => l === 'ELITE')) throw new Error('Task Failed: Log enrichedNode.healthBadge. health is 95 which is >= 90, so the badge should be "ELITE".');
 ---
 
-Your xandeum-pulse app has a `nodes` array — a list of every node on the network. Understanding arrays means you can work with any list of data.
+## The Syntax That Unlocks Modern JavaScript
 
-[attachment_0](attachment)
-
-### Ordered Lists
-An array is a list of values held in a specific order. 
-* **ZERO-INDEXED:** The first item in an array is at index `0`, not `1`.
+Every time you use `useState` in React, you write this:
 
 ```javascript
-const nodes = ["nodeA", "nodeB", "nodeC"];
-//             index 0   index 1   index 2
-
-// Accessing elements via Bracket Notation
-nodes[0]                 // "nodeA"
-nodes[1]                 // "nodeB"
-nodes[nodes.length - 1]  // "nodeC" (This is how you always get the last item)
+const [count, setCount] = useState(0);
 ```
 
-### Mutating the Array
-You can change the contents of an array even if it was declared with `const`. (Remember: `const` locks the *label*, not the internal data inside the collection).
+Every time you fetch data from Supabase, you write this:
 
 ```javascript
-nodes.push("nodeD");      // Adds to the END
-nodes.unshift("nodeZ");   // Adds to the BEGINNING
-
-nodes.pop();              // Removes the LAST item
-nodes.shift();            // Removes the FIRST item
+const { data, error } = await supabase.from("nodes").select("*");
 ```
 
-### Checking Contents
+Every time you write a React component, you use this:
+
 ```javascript
-nodes.indexOf("nodeB")    // Returns 1 (the index)
-nodes.includes("nodeB")   // Returns true (boolean)
+function NodeCard({ id, health, network }) { }
 ```
 
-### Your Assignment
-You need to build a list of active networks. Create the array, add an item to it dynamically using a built-in method, and log the results.
+All three of these are **destructuring**. If you have been using React, you have been writing destructuring every single day. After this lesson, you will understand exactly what it does and why — which means you will stop being confused when it behaves unexpectedly.
+
+Spread (`...`) appears alongside destructuring constantly. Together they are arguably the two most important syntax features introduced in modern JavaScript.
+
+---
+
+## Object Destructuring — The Full Picture
+
+Destructuring extracts values from an object into named variables. The long way:
+
+```javascript
+const node = { id: "7A5r", health: 95, network: "mainnet" };
+
+const id = node.id;
+const health = node.health;
+const network = node.network;
+```
+
+The destructuring shorthand:
+
+```javascript
+const { id, health, network } = node;
+// Identical result. One line instead of three.
+```
+
+The `{ }` on the left side of `=` is the destructuring pattern. Each name inside must match a property name on the object on the right side.
+
+---
+
+## Renaming While Destructuring
+
+When you need the variable to have a different name than the property:
+
+```javascript
+const node = { id: "7A5r", health: 95, version: "1.2.1" };
+
+const { version: nodeVersion } = node;
+// Extracts node.version into a variable called nodeVersion
+// No variable called 'version' is created
+
+console.log(nodeVersion);   // "1.2.1"
+// console.log(version);   // ReferenceError — 'version' doesn't exist
+```
+
+The syntax reads: "from the object, take the property called `version` and store it in a variable called `nodeVersion`."
+
+This pattern is common when:
+- A property name conflicts with an existing variable
+- You want a more descriptive local name
+- You are destructuring two objects that have the same property names
+
+---
+
+## Default Values in Destructuring
+
+When a property doesn't exist on the object, it returns `undefined`. You can provide a fallback:
+
+```javascript
+const node = { id: "7A5r", health: 95 };
+
+const { health, uptime = 0, version = "unknown" } = node;
+// health: 95 (exists in node)
+// uptime: 0 (doesn't exist in node, uses default)
+// version: "unknown" (doesn't exist in node, uses default)
+```
+
+Defaults only apply when the value is `undefined`. An explicit `null` does not trigger the default:
+
+```javascript
+const { version = "unknown" } = { version: null };
+// version: null — null is not undefined, so default doesn't apply
+```
+
+---
+
+## Combining Rename and Default
+
+Both features work together:
+
+```javascript
+const { version: nodeVersion = "1.0.0" } = node;
+// Take the 'version' property, call it 'nodeVersion',
+// and use "1.0.0" if version doesn't exist
+```
+
+---
+
+## Nested Object Destructuring
+
+You can destructure inside nested objects:
+
+```javascript
+const node = {
+  id: "7A5r",
+  location: {
+    city: "Tokyo",
+    country: "Japan"
+  }
+};
+
+// Without nested destructuring:
+const city = node.location.city;
+
+// With nested destructuring:
+const { location: { city, country } } = node;
+console.log(city);     // "Tokyo"
+console.log(country);  // "Japan"
+// Note: 'location' itself is NOT extracted as a variable here
+// Only city and country are
+```
+
+Use nested destructuring when you need multiple properties from a nested object. If you only need one, a simple property access chain (`node.location.city`) is cleaner.
+
+---
+
+## Array Destructuring
+
+The same concept applied to arrays — instead of property names, you use position:
+
+```javascript
+const tiers = ["Code Literacy", "JavaScript Deeply", "React Mental Model"];
+
+const [first, second, third] = tiers;
+// first:  "Code Literacy"
+// second: "JavaScript Deeply"
+// third:  "React Mental Model"
+```
+
+Array destructuring uses `[]` instead of `{}`. The order of variables matches the order of items in the array.
+
+**Skipping elements:**
+
+```javascript
+const scores = [95, 47, 88, 71, 55];
+const [, second,, fourth] = scores;  // empty commas skip positions
+// second: 47
+// fourth: 71
+```
+
+**The `useState` pattern explained:**
+
+```javascript
+const [count, setCount] = useState(0);
+// useState(0) returns an array: [currentValue, setterFunction]
+// Array destructuring unpacks them into count and setCount
+// This is exactly: const result = useState(0); const count = result[0]; const setCount = result[1];
+```
+
+---
+
+## The Rest Operator in Destructuring
+
+The `...rest` syntax collects everything not explicitly destructured:
+
+```javascript
+// In objects:
+const node = { id: "7A5r", health: 95, network: "mainnet", version: "1.2.1" };
+const { id, health, ...rest } = node;
+// id: "7A5r"
+// health: 95
+// rest: { network: "mainnet", version: "1.2.1" }
+
+// In arrays:
+const scores = [95, 47, 88, 71, 55];
+const [first, second, ...remaining] = scores;
+// first: 95
+// second: 47
+// remaining: [88, 71, 55]
+```
+
+The rest variable must always be **last** in the pattern. Putting it anywhere else is a syntax error.
+
+```javascript
+const { ...rest, id } = node;  // SyntaxError — rest must come last
+const { id, ...rest } = node;  // Valid
+```
+
+---
+
+## The Spread Operator — Expanding Collections
+
+The same `...` syntax used in a different position **expands** a collection into individual items:
+
+```javascript
+// Expanding an array into function arguments:
+const scores = [95, 47, 88];
+Math.max(...scores)     // same as Math.max(95, 47, 88) → 95
+
+// Expanding into a new array:
+const a = [1, 2, 3];
+const b = [4, 5, 6];
+const combined = [...a, ...b];  // [1, 2, 3, 4, 5, 6]
+const withExtra = [0, ...a, 99]; // [0, 1, 2, 3, 99]
+
+// Copying an array:
+const copy = [...a];  // [1, 2, 3] — new array, independent from a
+
+// Expanding into an object:
+const node = { id: "7A5r", health: 95 };
+const updated = { ...node, health: 87, version: "1.2.1" };
+// { id: "7A5r", health: 87, version: "1.2.1" }
+// health from node (95) is overridden by health in the literal (87)
+// version is added as a new property
+```
+
+**The override rule for object spread:** Later properties win. The rightmost value for any key is what survives:
+
+```javascript
+const base = { a: 1, b: 2, c: 3 };
+const override = { b: 99, d: 4 };
+
+{ ...base, ...override }   // { a: 1, b: 99, c: 3, d: 4 }
+// b from override (99) wins over b from base (2)
+
+{ ...override, ...base }   // { a: 1, b: 2, c: 3, d: 4 }
+// b from base (2) wins — base spread came last
+```
+
+This is why in React state updates, you spread the existing state first and put the new value after:
+
+```javascript
+// Correct — new value overrides the old:
+setConfig({ ...currentConfig, timeout: 10000 });
+
+// Wrong — currentConfig overrides your new value:
+setConfig({ timeout: 10000, ...currentConfig });
+```
+
+---
+
+## Destructuring in Function Parameters
+
+You can destructure directly in a function's parameter list:
+
+```javascript
+// Without destructuring:
+function displayNode(node) {
+  console.log(node.id, node.health, node.network);
+}
+
+// With destructuring in parameters:
+function displayNode({ id, health, network }) {
+  console.log(id, health, network);
+}
+
+// Both are called identically:
+displayNode({ id: "7A5r", health: 95, network: "mainnet" });
+```
+
+React components use this pattern for props:
+
+```javascript
+// Every React component prop you have ever seen is object destructuring:
+function NodeCard({ id, health, network, onSelect }) {
+  return (
+    <div onClick={() => onSelect(id)}>
+      {id}: {health}% on {network}
+    </div>
+  );
+}
+```
+
+The component receives a single `props` object. The destructuring in the parameter list unpacks it immediately into named variables.
+
+---
+
+## Common Mistakes
+
+**Mistake 1 — Wrong side of assignment for destructuring:**
+```javascript
+const { id, health } = node;   // correct — destructuring on LEFT of =
+{ id, health } = const node;   // SyntaxError — backwards
+```
+
+**Mistake 2 — Forgetting that order matters in object spread:**
+```javascript
+const merged = { ...base, ...updates };  // updates override base
+const merged = { ...updates, ...base };  // base overrides updates
+// Which do you want? The one that comes LAST wins.
+```
+
+**Mistake 3 — Using rest before the last position:**
+```javascript
+const { ...rest, id } = node;    // SyntaxError
+const { id, ...rest } = node;    // Valid
+```
+
+**Mistake 4 — Destructuring a null or undefined value:**
+```javascript
+const response = null;
+const { data } = response;  // TypeError — can't destructure null
+// Fix: check first, or use default:
+const { data } = response || {};  // safe — if response is null, use {}
+const { data } = response ?? {};  // better — only triggers for null/undefined
+```
+
+**Mistake 5 — Thinking spread creates a deep copy:**
+```javascript
+const node = { id: "7A5r", location: { city: "Tokyo" } };
+const copy = { ...node };
+copy.location.city = "Osaka";   // modifies the shared nested object
+console.log(node.location.city); // "Osaka" — original affected
+// { ...node } only copies top-level properties — nested objects are still shared
+```
+
+---
+
+## Micro-Drills
+
+**Drill 1:** Destructure all the variables you need from this response:
+```javascript
+const response = {
+  status: 200,
+  data: {
+    nodes: [{ id: "7A5r", health: 95 }],
+    count: 1,
+    network: "mainnet"
+  },
+  error: null
+};
+// Get: status, data, nodes, count, network, error
+// (in as few lines as possible using nested destructuring)
+```
+
+**Drill 2:** What is the value of each variable after this?
+```javascript
+const [a, , b, ...rest] = [10, 20, 30, 40, 50];
+```
+
+**Drill 3:** Build a merged node object. Start with `baseNode`, apply `patch` on top:
+```javascript
+const baseNode = { id: "7A5r", health: 95, network: "mainnet", version: "1.2.0" };
+const patch = { health: 72, version: "1.2.1", lastSeen: "2026-03-17" };
+// Expected result: { id: "7A5r", health: 72, network: "mainnet", version: "1.2.1", lastSeen: "2026-03-17" }
+```
+
+**Drill 4:** Fix this destructuring — it should extract `city` from the nested location:
+```javascript
+const node = { id: "7A5r", location: { city: "Tokyo", country: "Japan" } };
+const { location.city } = node;  // SyntaxError — wrong syntax
+```
+
+---
+
+## Go Deeper
+
+- **javascript.info — Destructuring assignment:** https://javascript.info/destructuring-assignment — the most comprehensive written guide on destructuring with every edge case covered
+- **MDN — Destructuring assignment:** https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment
+- **javascript.info — Rest parameters and spread syntax:** https://javascript.info/rest-parameters-spread
+- **Web Dev Simplified — Destructuring in 100 Seconds:** https://www.youtube.com/watch?v=NIq3qLahanE — fast visual intro
+- **Fireship — JavaScript Spread and Destructuring:** https://www.youtube.com/watch?v=gRMOkqYRKFM — 8 minutes, practical React-focused examples
+
+---
+
+## The Crucible
+
+**Task 1 — Replication.** Three destructuring patterns in sequence. First destructure three properties in one line. Then rename one. Then provide a default for a missing property. Five logs. Each variable on its own line.
+
+**Task 2 — Mutation.** Three bugs across three different spread/destructuring operations. Bug 1 is missing the `...rest` collection in array destructuring. Bug 2 is the wrong order for object spread — later properties override earlier ones, so `newData` must come after `baseNode`. Bug 3 is a reference instead of a copy — use `[...nodes]` to spread into a new array.
+
+**Task 3 — Synthesis.** Nested destructuring in a chain. Each step unpacks one layer deeper. The final step creates a new enriched object using spread plus new properties including a ternary. Five logs, in order. This mirrors exactly how you would process a real API response in a React component.
+
+Go.
