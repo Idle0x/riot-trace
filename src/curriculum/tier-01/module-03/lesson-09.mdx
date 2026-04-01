@@ -2,53 +2,420 @@
 tierId: 1
 moduleId: 3
 lessonId: 9
-title: "The If Statement"
-xpReward: 40
-scenario: "Write an if/else block. If health is strictly greater than 80, log 'Node is healthy'. Otherwise, log 'Node needs attention'."
-startingCode: "const health = 65;\n\n// Write your if/else statement below\n"
-syntaxHint: "if (condition) {\n  // runs if true\n} else {\n  // runs if false\n}"
-validationLogic: "if (!code.includes('if') || !code.includes('else')) throw new Error('Task Failed: You must use an if/else block.'); if (health > 80 && !logs.includes('Node is healthy')) throw new Error('Task Failed: Incorrect logic for healthy node.'); if (health <= 80 && !logs.includes('Node needs attention')) throw new Error('Task Failed: Incorrect logic for unhealthy node.');"
+title: "Logical Operators — Combining Conditions"
+mode: "terminal"
+xpReward: 70
+syntaxHint: "if (a && b) { } // both must be true"
+
+task1Code: |
+  // TASK 1 — REPLICATION
+  // A node is flagged as "CRITICAL" if it meets ALL THREE conditions:
+  // - health is below 50
+  // - network is "mainnet" (production issues matter more)
+  // - version is not "1.2.1" (outdated software)
+  //
+  // Use these values:
+  const health = 47;
+  const network = "mainnet";
+  const version = "1.2.0";
+  //
+  // Log "CRITICAL ALERT" if all three conditions are true.
+  // Log "STANDARD ALERT" if not.
+  //
+  // Expected output: CRITICAL ALERT
+
+task1Logic: |
+  if (!logs.some(l => l === 'CRITICAL ALERT')) throw new Error('Task Failed: All three conditions are true (health 47 < 50, network is mainnet, version is not 1.2.1). Use && to combine them. Expected "CRITICAL ALERT".');
+
+task2Code: |
+  // TASK 2 — MUTATION
+  // This should grant access if the user is EITHER an admin OR
+  // has sufficient XP (5000 or above). But it uses && instead of ||
+  // so it requires BOTH conditions, which is too restrictive.
+  // Fix the single operator.
+  //
+  const isAdmin = false;
+  const userXP = 6200;
+  //
+  if (isAdmin && userXP >= 5000) {
+    console.log("ACCESS GRANTED");
+  } else {
+    console.log("ACCESS DENIED");
+  }
+
+task2Logic: |
+  if (!logs.some(l => l === 'ACCESS GRANTED')) throw new Error('Task Failed: isAdmin is false but userXP is 6200 (above 5000). Either condition alone should grant access. Change && to || so that meeting ONE condition is enough.');
+
+task3Code: |
+  // TASK 3 — SYNTHESIS
+  // The riot-trace network health summary uses three separate checks.
+  // Write all three using &&, ||, and ! respectively.
+  //
+  // Use these values:
+  const nodeHealth = 82;
+  const nodeNetwork = "mainnet";
+  const nodeVersion = "1.2.1";
+  const latestVersion = "1.2.1";
+  const isUnderMaintenance = false;
+  //
+  // Check 1 (&&): Log "PRIME NODE" if health > 80 AND network is "mainnet"
+  // Check 2 (||): Log "NEEDS REVIEW" if health < 50 OR version !== latestVersion
+  //               (If neither condition is true, log "PASSING")
+  // Check 3 (!):  Log "REACHABLE" if the node is NOT under maintenance
+  //
+  // Three separate if statements. Three separate logs.
+  // Expected output (in order): PRIME NODE, PASSING, REACHABLE
+
+task3Logic: |
+  if (!logs.some(l => l === 'PRIME NODE')) throw new Error('Task Failed: health 82 > 80 AND network is "mainnet". Both are true. Use && to combine them and log "PRIME NODE".');
+  if (!logs.some(l => l === 'PASSING')) throw new Error('Task Failed: health 82 is not below 50, and version equals latestVersion. Neither OR condition is true. The else/default case should log "PASSING".');
+  if (!logs.some(l => l === 'REACHABLE')) throw new Error('Task Failed: isUnderMaintenance is false. !false is true. Log "REACHABLE" when the node is NOT under maintenance.');
 ---
 
-Is the node healthy or offline? Should we show the warning banner? Do we have permission? Every piece of dynamic behavior in your apps runs through an `if` statement at some level. 
+## Why Single Conditions Are Rarely Enough
 
-[attachment_0](attachment)
+In your xandeum-pulse health scoring system, a node is not simply "healthy" or "unhealthy" based on one metric. A node is considered critical when its health score is below 50 **and** it is on mainnet **and** its version is outdated. Any one of those conditions alone might be acceptable. All three together triggers an alert.
 
-### The Syntax
+Real conditions in production code almost never check a single thing. They combine multiple checks. This lesson gives you the three operators for doing that precisely.
 
-**1. Basic `if`**
-Executes the block of code inside the `{}` *only* if the condition inside the `()` evaluates to `true`.
+---
+
+## The AND Operator — &&
+
+`&&` returns `true` only when **both** sides are truthy. If either side is falsy, the result is `false`.
+
 ```javascript
-const health = 95;
-
-if (health > 80) {
-  console.log("Node is healthy");
-}
+true && true    // true
+true && false   // false
+false && true   // false
+false && false  // false
 ```
 
-**2. `if-else`**
-Provides a fallback path. One of the two blocks will *always* execute.
+In practice:
+
 ```javascript
-if (health > 80) {
-  console.log("Node is healthy");
-} else {
-  console.log("Node needs attention");
+const health = 47;
+const network = "mainnet";
+
+if (health < 50 && network === "mainnet") {
+  console.log("Critical mainnet node");
 }
+// Both must be true for this to log
+// health < 50 → true
+// network === "mainnet" → true
+// true && true → true → the block runs
 ```
 
-**3. `if-else if-else`**
-Handles multiple conditions. **Important:** Conditions are evaluated top-to-bottom. The *first* true condition wins, and the rest are entirely skipped.
 ```javascript
-if (health >= 90) {
-  console.log("Excellent");
-} else if (health >= 70) {
-  console.log("Good");
-} else {
-  console.log("Critical");
+const health = 90;
+const network = "mainnet";
+
+if (health < 50 && network === "mainnet") {
+  console.log("Critical mainnet node");
 }
+// health < 50 → false
+// false && anything → false → the block does not run
+// JavaScript does not even evaluate the right side — this is short-circuit
 ```
 
-### Your Assignment
-You have a variable `health` set to `65`. Write an `if/else` block that checks if `health` is strictly greater than `80`. 
-* If it is, print `'Node is healthy'`. 
-* If it is not, print `'Node needs attention'`.
+---
+
+## The OR Operator — ||
+
+`||` returns `true` when **at least one** side is truthy. Both can be true. Only one needs to be.
+
+```javascript
+true || false   // true
+false || true   // true
+true || true    // true
+false || false  // false
+```
+
+In practice:
+
+```javascript
+const isAdmin = false;
+const userXP = 6200;
+
+if (isAdmin || userXP >= 5000) {
+  console.log("ACCESS GRANTED");
+}
+// isAdmin → false
+// userXP >= 5000 → true
+// false || true → true → access granted
+```
+
+---
+
+## The NOT Operator — !
+
+`!` inverts a boolean. `true` becomes `false`. `false` becomes `true`.
+
+```javascript
+!true    // false
+!false   // true
+```
+
+In practice:
+
+```javascript
+const isOffline = false;
+
+if (!isOffline) {
+  console.log("Node is reachable");
+}
+// !false → true → the block runs
+
+const isOnline = true;
+if (!isOnline) {
+  console.log("Node is down");
+}
+// !true → false → the block does not run
+```
+
+`!` is most useful for improving readability. Compare:
+
+```javascript
+// Without !:
+if (isLoading === false) { }
+
+// With !:
+if (!isLoading) { }
+// Reads as "if not loading" — more natural English
+```
+
+---
+
+## Short-Circuit Evaluation — How && and || Actually Work
+
+`&&` and `||` do not simply return `true` or `false`. They return one of their **operands** — and they stop evaluating as soon as the result is determined.
+
+### && returns the first falsy value, or the last value if all are truthy:
+
+```javascript
+"mainnet" && 201      // 201 — both truthy, returns last
+0 && "mainnet"        // 0 — 0 is falsy, stops and returns it
+null && "anything"    // null — null is falsy, stops immediately
+"yes" && "also yes"   // "also yes" — both truthy, returns last
+```
+
+### || returns the first truthy value, or the last value if all are falsy:
+
+```javascript
+null || "mainnet"     // "mainnet" — null is falsy, tries right side, returns it
+"mainnet" || "devnet" // "mainnet" — first one is truthy, stops immediately
+0 || false            // false — both falsy, returns last
+```
+
+This behavior enables two patterns you will use constantly:
+
+**Pattern 1 — Default values with ||:**
+```javascript
+const config = userConfig.port || 3000;
+// If userConfig.port is undefined (falsy), use 3000
+// If userConfig.port is 8080 (truthy), use 8080
+
+const network = selectedNetwork || "mainnet";
+// "If no network selected, default to mainnet"
+```
+
+**Pattern 2 — Conditional execution with &&:**
+```javascript
+// In React (you will write this hundreds of times in Tier 3):
+{isLoading && <Spinner />}
+// If isLoading is true, render <Spinner />
+// If isLoading is false, && short-circuits and nothing renders
+
+// In regular JavaScript:
+nodes.length > 0 && console.log("nodes found");
+// Only logs if there are nodes
+```
+
+---
+
+## Operator Precedence — Which Evaluates First
+
+When `&&` and `||` appear in the same expression, `&&` evaluates first (higher precedence), then `||`:
+
+```javascript
+// What does this mean?
+a || b && c
+
+// It means:
+a || (b && c)
+// NOT: (a || b) && c
+```
+
+In practice:
+
+```javascript
+const isAdmin = false;
+const isOwner = true;
+const hasValidToken = true;
+
+if (isAdmin || isOwner && hasValidToken) {
+  console.log("authorized");
+}
+// Evaluates as: isAdmin || (isOwner && hasValidToken)
+// isOwner && hasValidToken → true && true → true
+// isAdmin || true → false || true → true
+// Block runs
+
+// If you meant (isAdmin || isOwner) && hasValidToken:
+if ((isAdmin || isOwner) && hasValidToken) { }
+// Use parentheses to make your intent explicit
+```
+
+**Rule: when mixing && and ||, always use parentheses.** Relying on precedence rules makes conditions hard to read and easy to get wrong. Parentheses are free.
+
+---
+
+## The Double Negation !! — Converting to Boolean
+
+A useful trick: `!!` converts any value to its explicit boolean equivalent:
+
+```javascript
+!!0            // false — 0 is falsy
+!!""           // false — empty string is falsy
+!!null         // false — null is falsy
+!!undefined    // false — undefined is falsy
+!!"mainnet"    // true — non-empty string is truthy
+!!201          // true — non-zero number is truthy
+!!{}           // true — empty object is truthy
+```
+
+Used when you want to store whether something exists rather than the value itself:
+
+```javascript
+const hasNodes = !!nodes.length;  // true or false, not a number
+const isAuthenticated = !!user;   // true or false, not the user object
+```
+
+---
+
+## Nullish Coalescing — ?? (The Smarter Default)
+
+The `||` default pattern has a flaw:
+
+```javascript
+const nodeCount = 0;
+const displayCount = nodeCount || "unknown";
+// displayCount is "unknown" — but 0 is a valid count!
+// || treats 0 as falsy and replaces it
+```
+
+The `??` operator (nullish coalescing) only triggers for `null` and `undefined` — not for `0`, `""`, or `false`:
+
+```javascript
+const nodeCount = 0;
+const displayCount = nodeCount ?? "unknown";
+// displayCount is 0 — ?? respects the value 0
+
+const health = null;
+const displayHealth = health ?? "N/A";
+// displayHealth is "N/A" — null triggers ??
+```
+
+**When to use `||` vs `??`:**
+- `||` — when `0`, `""`, and `false` are also invalid/empty values you want to replace
+- `??` — when only `null` and `undefined` should trigger the default (0 and "" are valid)
+
+In most cases involving optional data from an API, `??` is the right choice.
+
+---
+
+## Common Mistakes
+
+**Mistake 1 — && when || is needed (or vice versa):**
+```javascript
+// This requires BOTH to be true — probably too strict:
+if (isAdmin && hasPermission) { }
+
+// This allows EITHER — might be too permissive:
+if (isAdmin || hasPermission) { }
+
+// Read your condition out loud. "If admin AND has permission" vs
+// "If admin OR has permission" — which did you mean?
+```
+
+**Mistake 2 — Not using parentheses with mixed && and ||:**
+```javascript
+// Ambiguous and error-prone:
+if (a || b && c || d) { }
+
+// Explicit and readable:
+if (a || (b && c) || d) { }
+```
+
+**Mistake 3 — Using || for defaults when 0 is a valid value:**
+```javascript
+const timeout = userSetting || 5000;
+// If userSetting is 0 (a valid setting!), this returns 5000
+// Fix:
+const timeout = userSetting ?? 5000;
+```
+
+**Mistake 4 — Forgetting that ! converts to boolean:**
+```javascript
+const nodes = [];
+if (!nodes) { console.log("no nodes"); }
+// This never logs — [] is truthy, ![] is false
+// To check for empty array: if (!nodes.length) { }
+```
+
+---
+
+## Micro-Drills
+
+**Drill 1:** Predict the output of each:
+
+```javascript
+// A:
+console.log(true && false);
+console.log(true || false);
+console.log(!true);
+
+// B:
+console.log(0 || "mainnet");
+console.log("mainnet" || "devnet");
+console.log(null && "anything");
+
+// C:
+const port = 0;
+console.log(port || 3000);
+console.log(port ?? 3000);
+```
+
+**Drill 2:** Write a single `if` condition that logs `"FLAGGED"` when a node has health below 60 AND is on mainnet OR when its version is more than one version behind. Use parentheses to make your intent clear.
+
+**Drill 3:** The `||` default pattern vs `??`. Given `const retries = 0`, write both versions and explain which one keeps the value `0` and which one replaces it with a default.
+
+**Drill 4:** Without running it, trace through this step by step:
+```javascript
+const a = null;
+const b = 0;
+const c = "mainnet";
+console.log(a || b || c);
+```
+
+---
+
+## Go Deeper
+
+- **javascript.info — Logical operators:** https://javascript.info/logical-operators — the best explanation of short-circuit evaluation with clear examples
+- **javascript.info — Nullish coalescing ??:** https://javascript.info/nullish-coalescing-operator — covers ?? vs || with practical examples
+- **MDN — Logical AND (&&):** https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Logical_AND
+- **MDN — Logical OR (||):** https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Logical_OR
+- **Web Dev Simplified — Nullish Coalescing in JavaScript:** https://www.youtube.com/watch?v=v2tJ3nzXh8I — 8 minutes, covers ??, ?. and why they matter
+
+---
+
+## The Crucible
+
+**Task 1 — Replication.** All three conditions must be true for `"CRITICAL ALERT"`. Use `&&` to combine them. Read each condition out loud before writing it. `health < 50` — yes. `network === "mainnet"` — yes. `version !== "1.2.1"` — yes. All three true. The block runs.
+
+**Task 2 — Mutation.** One character change. `&&` becomes `||`. The entire access control logic shifts from "requires both" to "requires either." The user has 6200 XP which meets the XP threshold — that alone should be enough. One operator. One change.
+
+**Task 3 — Synthesis.** Three separate `if` statements. Three separate operators. `&&` for the first check — both conditions must be true. `||` for the second check — either condition triggers `"NEEDS REVIEW"`, otherwise log `"PASSING"`. `!` for the third check — invert the maintenance flag. Three logs, in order.
+
+Go.
