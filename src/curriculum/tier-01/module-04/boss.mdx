@@ -1,0 +1,177 @@
+---
+tierId: 1
+moduleId: 4
+type: "boss"
+title: "Module 04 Boss Fight — The Network Registry"
+mode: "terminal"
+xpReward: 150
+startingCode: |
+  // ═══════════════════════════════════════════════════════
+  // MODULE 04 BOSS FIGHT — THE NETWORK REGISTRY
+  // ═══════════════════════════════════════════════════════
+  //
+  // No hints. No scaffold. No theory panel.
+  // This is the complete test of Module 04.
+  //
+  // THE SCENARIO:
+  // You are building the core data layer for riot-trace's
+  // node registry. This system receives raw data, processes it,
+  // and produces a clean structured output.
+  //
+  // You are given this raw API response:
+  //
+  const rawResponse = {
+    meta: {
+      timestamp: "2026-03-17T01:12:00Z",
+      source: "rpc-primary"
+    },
+    payload: {
+      network: "mainnet",
+      nodes: [
+        { id: "7A5r", health: 95, storage: 250, version: "1.2.1", online: true  },
+        { id: "8BJT", health: 47, storage: 23,  version: "1.2.0", online: true  },
+        { id: "8PjP", health: 78, storage: 180, version: "1.2.1", online: false },
+        { id: "Bfn2", health: 55, storage: 95,  version: "1.2.0", online: true  },
+        { id: "Xk91", health: 91, storage: 310, version: "1.2.1", online: true  }
+      ]
+    }
+  };
+  //
+  const latestVersion = "1.2.1";
+  //
+  // ─────────────────────────────────────────────────────────
+  //
+  // YOUR MISSION: Produce EXACTLY this output:
+  //
+  //   5
+  //   7A5r
+  //   NEEDS UPDATE
+  //   mainnet
+  //   250
+  //   2026-03-17T01:12:00Z
+  //
+  // ─────────────────────────────────────────────────────────
+  //
+  // REQUIREMENT 1 — Nested destructuring:
+  //
+  //   From rawResponse, destructure in ONE or TWO lines:
+  //   - timestamp (from meta)
+  //   - network (from payload)
+  //   - nodes array (from payload)
+  //
+  //   Log nodes.length (Line 1: should be 5)
+  //
+  // ─────────────────────────────────────────────────────────
+  //
+  // REQUIREMENT 2 — Array and object destructuring together:
+  //
+  //   Destructure the FIRST node from the nodes array.
+  //   Then destructure id and health from that node.
+  //
+  //   Log id (Line 2: should be "7A5r")
+  //
+  // ─────────────────────────────────────────────────────────
+  //
+  // REQUIREMENT 3 — Array manipulation + object access:
+  //
+  //   Find the node with id "8BJT" using array methods.
+  //   (Hint: nodes has an indexOf-like counterpart for objects:
+  //   use nodes.find(n => n.id === "8BJT") to get the object)
+  //
+  //   Check if that node's version matches latestVersion.
+  //   Using a ternary, log:
+  //   "UP TO DATE" if it matches
+  //   "NEEDS UPDATE" if it does not
+  //   (Line 3: should be "NEEDS UPDATE")
+  //
+  // ─────────────────────────────────────────────────────────
+  //
+  // REQUIREMENT 4 — Spread to create enriched node:
+  //
+  //   Take the first node (id: "7A5r") and create a new const
+  //   called enrichedNode by spreading it and adding:
+  //   - network: the network variable from Requirement 1
+  //   - rank: 1
+  //
+  //   Log enrichedNode.network (Line 4: should be "mainnet")
+  //   Log enrichedNode.storage (Line 5: should be 250)
+  //
+  // ─────────────────────────────────────────────────────────
+  //
+  // REQUIREMENT 5 — Object key check and value access:
+  //
+  //   Check whether the rawResponse object has a property called "meta"
+  //   using the 'in' operator.
+  //   If it does, log the timestamp value you extracted in Requirement 1.
+  //   (Line 6: should be "2026-03-17T01:12:00Z")
+  //
+  // ─────────────────────────────────────────────────────────
+  //
+  // CONSTRAINTS:
+  // - Requirement 1 must use destructuring (not dot notation to access)
+  // - Requirement 2 must use array destructuring for the first node
+  //   and object destructuring for id and health
+  // - Requirement 3 must use nodes.find() — not nodes[1] or nodes.indexOf()
+  // - Requirement 4 must use spread — not manual property assignment
+  // - Requirement 5 must use the 'in' operator for the check
+  // - Exactly 6 lines of output. No extras.
+  //
+  // SYS.EXEC →
+
+validationLogic: |
+  if (logs.length !== 6) throw new Error('REGISTRY_HALT: Expected exactly 6 lines of output. Got ' + logs.length + '. Each requirement produces one log line. Check for missing or extra console.log calls.');
+  if (logs[0] !== 5) throw new Error('REQ_1_FAIL: Line 1 must be the number 5 (nodes.length). After destructuring nodes from rawResponse.payload, log nodes.length. Received: ' + JSON.stringify(logs[0]));
+  if (logs[1] !== '7A5r') throw new Error('REQ_2_FAIL: Line 2 must be "7A5r" (the id of the first node). Destructure the first node from the array using [firstNode] = nodes or similar, then destructure id from it. Received: ' + JSON.stringify(logs[1]));
+  if (logs[2] !== 'NEEDS UPDATE') throw new Error('REQ_3_FAIL: Line 3 must be "NEEDS UPDATE". Node "8BJT" has version "1.2.0" which does not match latestVersion "1.2.1". Use nodes.find(n => n.id === "8BJT") to get the node, then check its version with a ternary. Received: ' + JSON.stringify(logs[2]));
+  if (logs[3] !== 'mainnet') throw new Error('REQ_4_FAIL: Line 4 must be "mainnet" (enrichedNode.network). Spread the first node and add network from your destructured variable. Received: ' + JSON.stringify(logs[3]));
+  if (logs[4] !== 250) throw new Error('REQ_4b_FAIL: Line 5 must be 250 (enrichedNode.storage). Storage comes from the original first node via spread — it should be preserved. Received: ' + JSON.stringify(logs[4]));
+  if (logs[5] !== '2026-03-17T01:12:00Z') throw new Error('REQ_5_FAIL: Line 6 must be the timestamp string "2026-03-17T01:12:00Z". Check that "meta" is in rawResponse using the in operator, then log the timestamp variable you extracted in Requirement 1. Received: ' + JSON.stringify(logs[5]));
+---
+
+## The Test
+
+Module 04 covered the two most important data structures in JavaScript. Arrays for ordered lists. Objects for structured descriptions. Destructuring and spread for extracting and composing data cleanly.
+
+This boss fight combines all of them in a single realistic scenario: processing a raw API response the same way your actual code does in xandeum-pulse.
+
+---
+
+## What This Tests
+
+**Requirement 1** tests nested destructuring — going two levels deep in one or two lines to extract `timestamp`, `network`, and `nodes` without using dot-chained assignment.
+
+**Requirement 2** tests combining array and object destructuring in sequence. You destructure the first element from the array (`const [firstNode] = nodes`), then destructure properties from that object (`const { id, health } = firstNode`). These can be chained or written separately.
+
+**Requirement 3** introduces `Array.prototype.find()` — the version of `indexOf` that works on objects. Unlike `includes()` and `indexOf()` which compare by reference or exact value, `find()` accepts a callback that tests each element:
+
+```javascript
+nodes.find(n => n.id === "8BJT")
+// Returns the first node object where n.id === "8BJT"
+// Returns undefined if no match is found
+```
+
+You will use `.find()` constantly starting in Tier 2. This is your first exposure to it.
+
+**Requirement 4** tests spread for object composition — taking an existing object and adding new properties in one expression. The `network` property must come from the variable you destructured in Requirement 1, not hardcoded.
+
+**Requirement 5** tests the `in` operator for property existence checking before accessing a value.
+
+---
+
+## Approach
+
+Work through each requirement in order. Requirement 1's variables feed into Requirements 2, 3, and 4. Do not skip ahead.
+
+If Requirement 3 is unfamiliar — `.find()` takes a function and returns the first element for which that function returns `true`. This is a preview of Tier 2's array methods module. Read the hint in the requirements carefully.
+
+---
+
+## After You Pass
+
+**Tier 01 Capstone unlocks.**
+
+The capstone is the final gate before Tier 02 opens. It is a full diagnostic challenge using everything from all four modules: primitive types, variables and scope, conditionals, arrays and objects. You will receive a broken program with 8 deliberate errors and must find and fix every one.
+
+After the capstone, Tier 02: JavaScript Deeply begins. That tier takes everything you have built here and shows you how data actually moves — loops, functions, closures, asynchronous behavior. The concepts that make the difference between reading code and writing code.
+
+Go.
