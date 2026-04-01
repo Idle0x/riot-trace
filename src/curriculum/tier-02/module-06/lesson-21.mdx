@@ -1,0 +1,424 @@
+---
+tierId: 2
+moduleId: 6
+lessonId: 21
+title: "Higher-Order Functions — Functions That Work With Functions"
+mode: "terminal"
+xpReward: 70
+syntaxHint: "function outer(fn) { return fn(); }"
+
+task1Code: |
+  // TASK 1 — REPLICATION
+  // Build a configurable node filter factory.
+  //
+  // Write a function called createFilter that:
+  // - Takes one parameter: threshold (a number)
+  // - RETURNS a new function that:
+  //   - Takes a node object
+  //   - Returns true if node.health >= threshold
+  //
+  // Then:
+  // 1. Use createFilter(80) to create a const called isHealthy
+  // 2. Use createFilter(50) to create a const called isViable
+  //
+  // Apply them to this dataset:
+  const nodes = [
+    { id: "7A5r", health: 95 },
+    { id: "8BJT", health: 47 },
+    { id: "8PjP", health: 78 },
+    { id: "Bfn2", health: 55 },
+    { id: "Xk91", health: 91 }
+  ];
+  //
+  // Log nodes.filter(isHealthy).length   → 2
+  // Log nodes.filter(isViable).length    → 4
+
+task1Logic: |
+  if (!logs.some(l => l === 2)) throw new Error('Task Failed: nodes.filter(isHealthy).length should be 2. isHealthy should return true when node.health >= 80. Nodes passing: 7A5r(95) and Xk91(91). createFilter should return a function: threshold => node => node.health >= threshold');
+  if (!logs.some(l => l === 4)) throw new Error('Task Failed: nodes.filter(isViable).length should be 4. isViable should return true when node.health >= 50. Passing: 7A5r(95), 8PjP(78), Bfn2(55), Xk91(91). Node 8BJT(47) is excluded.');
+
+task2Code: |
+  // TASK 2 — MUTATION
+  // This higher-order function system has three bugs.
+  //
+  // A function that applies a transformation and then a validator:
+  function processAndValidate(value, transform, validate) {
+    const result = transform(value);
+    return validate(result);    // should return { result, isValid }
+    // BUG 1: returns only isValid boolean, not both values
+    // Fix: return { result, isValid: validate(result) }
+    //      (do NOT call validate twice — compute once, use twice)
+  }
+  //
+  // A function that runs another function N times:
+  function runNTimes(fn, n) {
+    for (let i = 0; n < n; i++) {  // BUG 2: wrong variable in condition
+      fn(i);
+    }
+  }
+  //
+  // A function that creates a logged version of any function:
+  function withLogging(fn) {
+    return function(...args) {
+      console.log(`Calling with: ${args}`);
+      const result = fn(...args);
+      // BUG 3: missing return of result
+      console.log(`Result: ${result}`);
+    };
+  }
+  //
+  const { result, isValid } = processAndValidate(
+    85,
+    health => health * 1.1,      // transform: boost by 10%
+    boosted => boosted >= 90     // validate: is it now >= 90?
+  );
+  console.log(result.toFixed(1));  // should be: "93.5"
+  console.log(isValid);            // should be: true
+  //
+  const logged_double = withLogging(n => n * 2);
+  const doubled = logged_double(5);
+  console.log(doubled);            // should be: 10 (not undefined)
+
+task2Logic: |
+  if (!logs.some(l => l === '93.5')) throw new Error('Task Failed: result should be 93.5 (85 * 1.1 = 93.5). Fix Bug 1: return { result, isValid: validate(result) } from processAndValidate. Store the transformed result first, then validate it.');
+  if (!logs.some(l => l === true)) throw new Error('Task Failed: isValid should be true (93.5 >= 90). This follows from fixing Bug 1 correctly.');
+  if (!logs.some(l => l === 10)) throw new Error('Task Failed: doubled should be 10 (5 * 2). Fix Bug 3: the withLogging wrapper must return the result of calling fn. Add return before fn(...args).');
+
+task3Code: |
+  // TASK 3 — SYNTHESIS
+  // Build the riot-trace function composition system.
+  //
+  // Part A: Write a function called compose that takes two functions
+  //         f and g, and returns a new function that applies g first,
+  //         then passes the result to f.
+  //         compose(f, g)(x) is equivalent to f(g(x))
+  //
+  // Part B: Write a function called memoize that takes a function fn
+  //         and returns a new version that caches results.
+  //         If the same argument is passed twice, return the cached
+  //         result without calling fn again.
+  //         (Use a plain object as the cache: const cache = {})
+  //
+  // Test compose:
+  const addTen = n => n + 10;
+  const doubleIt = n => n * 2;
+  const doubleThenAdd = compose(addTen, doubleIt);
+  // doubleThenAdd(5) → doubleIt(5) = 10 → addTen(10) = 20
+  console.log(doubleThenAdd(5));   // 20
+  console.log(doubleThenAdd(15));  // 40
+  //
+  // Test memoize:
+  let callCount = 0;
+  const expensiveCalc = memoize(n => {
+    callCount++;
+    return n * n;
+  });
+  //
+  console.log(expensiveCalc(7));   // 49 (callCount becomes 1)
+  console.log(expensiveCalc(7));   // 49 (callCount stays 1 — cached)
+  console.log(expensiveCalc(8));   // 64 (callCount becomes 2)
+  console.log(callCount);          // 2 — only 2 actual computations
+
+task3Logic: |
+  if (!logs.some(l => l === 20)) throw new Error('Task Failed: compose(addTen, doubleIt)(5) should be 20. compose applies g (doubleIt) first: 5*2=10, then f (addTen): 10+10=20. compose(f, g) returns x => f(g(x)).');
+  if (!logs.some(l => l === 40)) throw new Error('Task Failed: compose(addTen, doubleIt)(15) should be 40. 15*2=30, 30+10=40.');
+  if (!logs.some(l => l === 49)) throw new Error('Task Failed: expensiveCalc(7) should return 49 (7*7). The memoize wrapper should call the original function and cache the result.');
+  if (!logs.some(l => l === 64)) throw new Error('Task Failed: expensiveCalc(8) should return 64 (8*8). This is a new argument so the cache misses and the function is called.');
+  if (!logs.some(l => l === 2)) throw new Error('Task Failed: callCount should be 2. The second call to expensiveCalc(7) should use the cache and NOT increment callCount. Only the first call to each unique argument actually runs the function.');
+---
+
+## Functions as Values
+
+In JavaScript, functions are values. Not just executable instructions — actual values, like numbers and strings. This means:
+
+- A function can be stored in a variable
+- A function can be passed as an argument to another function
+- A function can be returned from a function
+
+You have been using this already. Every time you wrote `nodes.filter(node => node.health > 80)`, you passed a function as an argument to `filter`. `filter` is a **higher-order function** — a function that receives a function as an argument, or returns a function, or both.
+
+This lesson makes that mechanism explicit and extends it. Understanding higher-order functions is what makes `.map()`, `.filter()`, `.reduce()`, custom React hooks, middleware, and event listeners comprehensible at their foundation.
+
+---
+
+## Functions That Accept Functions
+
+The simplest higher-order pattern: a function that takes a callback and calls it:
+
+```javascript
+function runTwice(fn) {
+  fn();
+  fn();
+}
+
+runTwice(() => console.log("hello"));
+// hello
+// hello
+```
+
+`fn` is just a parameter. At call time, it receives a function. Inside `runTwice`, it is called with `()`.
+
+A more realistic example — a retry wrapper:
+
+```javascript
+function withRetry(fn, maxAttempts = 3) {
+  let attempts = 0;
+  while (attempts < maxAttempts) {
+    try {
+      return fn();  // try calling the function
+    } catch (error) {
+      attempts++;
+      if (attempts === maxAttempts) throw error;  // re-throw on last attempt
+      console.log(`Attempt ${attempts} failed. Retrying...`);
+    }
+  }
+}
+
+withRetry(() => fetchNodeData("7A5r"), 3);
+```
+
+`withRetry` does not know or care what `fn` does. It only knows it should call it, catch failures, and retry. This separation — the retry logic and the actual work — makes both parts independently reusable and testable.
+
+---
+
+## Functions That Return Functions — Closures in Action
+
+A function that returns another function is one of the most powerful patterns in JavaScript:
+
+```javascript
+function createMultiplier(factor) {
+  return n => n * factor;  // closes over 'factor'
+}
+
+const double = createMultiplier(2);
+const triple = createMultiplier(3);
+const times10 = createMultiplier(10);
+
+double(5)   // 10
+triple(5)   // 15
+times10(5)  // 50
+```
+
+`createMultiplier` is a **factory function** — it produces configured functions on demand. Each returned function closes over its own `factor` value.
+
+The same pattern creates configurable filters, validators, and formatters:
+
+```javascript
+// Filter factory — the pattern from Task 1:
+function createFilter(threshold) {
+  return node => node.health >= threshold;
+}
+
+const isHealthy = createFilter(80);   // node => node.health >= 80
+const isViable = createFilter(50);    // node => node.health >= 50
+const isElite = createFilter(90);     // node => node.health >= 90
+
+nodes.filter(isHealthy)  // healthy nodes
+nodes.filter(isViable)   // viable nodes
+nodes.filter(isElite)    // elite nodes
+```
+
+The same array method. The same data. Three different filter behaviors from one factory.
+
+---
+
+## Wrappers — Enhancing Functions Without Modifying Them
+
+A wrapper function takes an existing function and returns a new version with enhanced behavior. This is one of the most used patterns in professional codebases:
+
+```javascript
+// Logging wrapper:
+function withLogging(fn) {
+  return function(...args) {
+    console.log(`Calling ${fn.name} with:`, args);
+    const result = fn(...args);
+    console.log(`Result:`, result);
+    return result;  // critical — must return the result
+  };
+}
+
+const loggedFilter = withLogging(createFilter(80));
+loggedFilter({ id: "7A5r", health: 95 });
+// Calling createFilter with: [{id:"7A5r", health:95}]
+// Result: true
+```
+
+The wrapping function adds behavior before and after without touching the original. This is the **decorator pattern** — used in middleware systems, React HOCs, caching layers, and authentication wrappers.
+
+The most common mistake in wrappers: forgetting to `return result`. Without the return, the wrapper runs but the caller gets `undefined` instead of the actual result.
+
+---
+
+## Memoization — Caching Results
+
+One of the most valuable higher-order patterns: remember the results of expensive computations so you never calculate the same input twice:
+
+```javascript
+function memoize(fn) {
+  const cache = {};  // closed over — persists between calls
+  return function(arg) {
+    if (cache[arg] !== undefined) {
+      return cache[arg];  // cache hit — return stored result
+    }
+    const result = fn(arg);
+    cache[arg] = result;  // cache miss — compute and store
+    return result;
+  };
+}
+
+const expensiveSquare = memoize(n => {
+  // Imagine this is slow:
+  return n * n;
+});
+
+expensiveSquare(10);  // computes — cache miss
+expensiveSquare(10);  // returns cached 100 instantly
+expensiveSquare(10);  // still cached
+expensiveSquare(20);  // computes — new argument
+```
+
+In your xandeum-pulse health scoring system, the sigmoid calculation runs for every node on every poll. With memoization, scores for nodes with unchanged data would be retrieved from cache instantly.
+
+---
+
+## Compose — Combining Functions Into Pipelines
+
+`compose` takes two functions and returns a new function that runs them in sequence:
+
+```javascript
+function compose(f, g) {
+  return x => f(g(x));
+}
+// compose(f, g)(x) means: apply g first, then f
+// Read right-to-left: g → f
+
+const addTen = n => n + 10;
+const double = n => n * 2;
+
+const doubleThenAdd = compose(addTen, double);
+// doubleThenAdd(5) = addTen(double(5)) = addTen(10) = 20
+```
+
+This is function composition from mathematics. It is the conceptual foundation of every data transformation pipeline you write — though you usually express it as method chaining (`.filter().map().reduce()`) rather than explicit `compose` calls.
+
+---
+
+## Partial Application — Pre-Filling Arguments
+
+```javascript
+function multiply(a, b) {
+  return a * b;
+}
+
+// Manual partial application with a closure:
+function partial(fn, firstArg) {
+  return (...remainingArgs) => fn(firstArg, ...remainingArgs);
+}
+
+const double = partial(multiply, 2);   // pre-fills 2 as first argument
+const triple = partial(multiply, 3);
+
+double(5)   // 10
+triple(5)   // 15
+```
+
+Partial application is related to the factory pattern — both create specialized functions from general ones. The difference: partial application explicitly pre-fills some of an existing function's arguments.
+
+---
+
+## Common Mistakes
+
+**Mistake 1 — Calling the function instead of passing it:**
+```javascript
+nodes.filter(isHealthy());   // Wrong — calls isHealthy, passes its return value (true/false)
+nodes.filter(isHealthy);     // Correct — passes the function itself as the callback
+```
+
+**Mistake 2 — Forgetting to return in a wrapper:**
+```javascript
+function withTiming(fn) {
+  return (...args) => {
+    const start = Date.now();
+    fn(...args);            // Wrong — result is lost
+    console.log(`${Date.now() - start}ms`);
+  };
+}
+// Fix: const result = fn(...args); ... return result;
+```
+
+**Mistake 3 — Memoization with object arguments:**
+```javascript
+// Object keys in cache will be "[object Object]" — wrong!
+const cached = memoize(processNode);
+cached({ id: "7A5r" });  // cache key: "[object Object]"
+cached({ id: "8BJT" });  // cache key: "[object Object]" — same key!
+// Fix: use JSON.stringify for object arguments, or use a Map
+```
+
+**Mistake 4 — Confusing compose order:**
+```javascript
+compose(f, g)(x)  // g runs first, then f
+// Read the arguments right-to-left to understand execution order
+```
+
+---
+
+## Micro-Drills
+
+**Drill 1:** Write a `withErrorHandling(fn, fallback)` higher-order function that:
+- Returns a new function with the same signature as `fn`
+- Tries calling `fn` with the provided arguments
+- If `fn` throws, returns `fallback` instead
+
+**Drill 2:** What logs and why?
+```javascript
+function makeCounter(start = 0) {
+  let count = start;
+  return {
+    increment: () => ++count,
+    decrement: () => --count,
+    getValue: () => count
+  };
+}
+
+const counter = makeCounter(10);
+counter.increment();
+counter.increment();
+counter.decrement();
+console.log(counter.getValue());
+```
+
+**Drill 3:** Write `pipe(...fns)` — the left-to-right version of compose. `pipe(f, g, h)(x)` should equal `h(g(f(x)))`. Test it with three functions.
+
+**Drill 4:** How does this memoize work for negative numbers?
+```javascript
+function memoize(fn) {
+  const cache = {};
+  return n => cache[n] !== undefined ? cache[n] : (cache[n] = fn(n));
+}
+const m = memoize(n => n * 2);
+m(-1);
+m(-1);  // does it use the cache?
+```
+
+---
+
+## Go Deeper
+
+- **javascript.info — Function binding:** https://javascript.info/bind — covers higher-order patterns and `bind`
+- **javascript.info — Decorators and forwarding:** https://javascript.info/call-apply-decorators — the wrapper/decorator pattern in depth
+- **MDN — First-class functions:** https://developer.mozilla.org/en-US/docs/Glossary/First-class_Function
+- **Mostly Adequate Guide to Functional Programming — Chapter 4 (Currying):** https://mostly-adequate.gitbook.io/mostly-adequate-guide/ch04 — free online book, serious but readable
+- **Fun Fun Function — Higher Order Functions:** https://www.youtube.com/watch?v=BMUiFMZr7vk — classic video, relaxed but rigorous
+
+---
+
+## The Crucible
+
+**Task 1 — Replication.** A filter factory. The function returns a function. The returned function takes a node and checks its health. The closure keeps `threshold` alive. `createFilter(80)` produces `isHealthy`. `createFilter(50)` produces `isViable`. Applied to the dataset with `.filter()`, the counts should be 2 and 4 respectively.
+
+**Task 2 — Mutation.** Three bugs across three patterns. Bug 1 in `processAndValidate` — the function currently returns only the boolean result of `validate`. It should return an object `{ result, isValid }` — compute the transformed value first, then validate it. Bug 2 in `runNTimes` — the loop condition uses `n < n` (always false) instead of `i < n`. Bug 3 in `withLogging` — the wrapper calls `fn` but does not return its result. Classic wrapper mistake.
+
+**Task 3 — Synthesis.** Implement `compose` and `memoize` from scratch. `compose(f, g)` returns `x => f(g(x))`. `memoize(fn)` returns a function that checks the cache before calling `fn`. The `callCount` test is the proof — if memoization works correctly, calling with `7` twice only increments `callCount` once.
+
+Go.
