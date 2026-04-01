@@ -2,55 +2,447 @@
 tierId: 1
 moduleId: 3
 lessonId: 10
-title: "Logical Operators"
-xpReward: 40
-scenario: "Using a single 'if' statement and the && operator, log 'Access granted' ONLY if loggedIn is true AND admin is true."
-startingCode: "const loggedIn = true;\nconst admin = true;\n\n// Write your condition below\n"
-syntaxHint: "if (conditionA && conditionB) {\n  // runs if BOTH are true\n}"
-validationLogic: "if (!code.includes('&&')) throw new Error('Task Failed: You must use the && operator.'); if (!logs.includes('Access granted')) throw new Error('Task Failed: Logic did not grant access when both are true.');"
+title: "Ternary & Switch — Concise Decisions"
+mode: "terminal"
+xpReward: 70
+syntaxHint: "const result = condition ? 'yes' : 'no';"
+
+task1Code: |
+  // TASK 1 — REPLICATION
+  // Convert this if/else to a single ternary expression.
+  // The result must be stored in a const called nodeStatus
+  // and then logged.
+  //
+  // Original logic:
+  // if (health > 80) { nodeStatus = "ONLINE"; }
+  // else { nodeStatus = "DEGRADED"; }
+  //
+  // Use this value:
+  const health = 73;
+  //
+  // Expected output: DEGRADED
+
+task1Logic: |
+  if (!logs.some(l => l === 'DEGRADED')) throw new Error('Task Failed: health is 73, which is not above 80. The ternary should produce "DEGRADED". Make sure you log the const nodeStatus, not write a console.log inside the ternary.');
+
+task2Code: |
+  // TASK 2 — MUTATION
+  // This switch statement has two bugs:
+  // 1. The "mainnet" case is missing a break statement
+  //    (causing fall-through into the "devnet" case)
+  // 2. The default case is missing entirely
+  //    (unknown networks log nothing)
+  //
+  // Fix both issues.
+  //
+  const network = "mainnet";
+  //
+  switch (network) {
+    case "mainnet":
+      console.log("PRODUCTION NETWORK");
+    case "devnet":
+      console.log("DEVELOPMENT NETWORK");
+      break;
+  }
+  //
+  // Expected output (only): PRODUCTION NETWORK
+
+task2Logic: |
+  if (logs.length !== 1) throw new Error('Task Failed: Expected exactly 1 line of output. Got ' + logs.length + '. Without a break after the "mainnet" case, execution falls through into "devnet" and logs both strings. Add break after the first console.log.');
+  if (!logs.some(l => l === 'PRODUCTION NETWORK')) throw new Error('Task Failed: network is "mainnet" so only "PRODUCTION NETWORK" should log. Check that you added break after the mainnet case.');
+
+task3Code: |
+  // TASK 3 — SYNTHESIS
+  // Build the complete riot-trace node status display system
+  // using both ternary and switch.
+  //
+  // Use these values:
+  const nodeHealth = 91;
+  const nodeNetwork = "devnet";
+  const nodeVersion = "1.2.0";
+  const latestVersion = "1.2.1";
+  //
+  // Part A — Ternary:
+  // Create a const called healthBadge using a ternary.
+  // If nodeHealth >= 90: "ELITE"
+  // Otherwise: "STANDARD"
+  // Log healthBadge.
+  //
+  // Part B — Switch:
+  // Write a switch on nodeNetwork that logs:
+  // "mainnet" → "ENV: PRODUCTION"
+  // "devnet"  → "ENV: DEVELOPMENT"
+  // "testnet" → "ENV: TESTING"
+  // default   → "ENV: UNKNOWN"
+  //
+  // Part C — Ternary:
+  // Create a const called versionAlert using a ternary.
+  // If nodeVersion does NOT equal latestVersion: "UPDATE REQUIRED"
+  // Otherwise: "VERSION OK"
+  // Log versionAlert.
+  //
+  // Expected output (in order):
+  // ELITE
+  // ENV: DEVELOPMENT
+  // UPDATE REQUIRED
+
+task3Logic: |
+  if (!logs.some(l => l === 'ELITE')) throw new Error('Task Failed: nodeHealth is 91, which is >= 90. healthBadge should be "ELITE". Check your ternary condition.');
+  if (!logs.some(l => l === 'ENV: DEVELOPMENT')) throw new Error('Task Failed: nodeNetwork is "devnet". The switch should match the "devnet" case and log "ENV: DEVELOPMENT".');
+  if (!logs.some(l => l === 'UPDATE REQUIRED')) throw new Error('Task Failed: nodeVersion is "1.2.0" and latestVersion is "1.2.1" — they are not equal. versionAlert should be "UPDATE REQUIRED".');
 ---
 
-A node is "at risk" if health is low AND it's on mainnet. A user can access a dashboard if they're logged in OR they're an owner. Real conditions are rarely single checks. 
+## When if/else Becomes Noise
 
+Look at this code from your riot-sop transaction categorizer:
 
-
-### The Combiners
-
-**1. AND (`&&`)**
-BOTH conditions must be true for the block to execute.
 ```javascript
-const health = 65;
+let displayLabel;
+if (transaction.type === "inflow") {
+  displayLabel = "IN";
+} else {
+  displayLabel = "OUT";
+}
+```
+
+Six lines. One decision. One result stored in a variable. The `if/else` structure here is not adding clarity — it is adding length. The ternary operator and the switch statement are JavaScript's tools for expressing decisions concisely when `if/else` is overkill.
+
+Concise does not mean clever. The goal is removing noise without removing meaning.
+
+---
+
+## The Ternary Operator
+
+The ternary is a compressed `if/else` that produces a value:
+
+```javascript
+condition ? valueIfTrue : valueIfFalse
+```
+
+Read it as: "if condition, then valueIfTrue, otherwise valueIfFalse."
+
+```javascript
+// if/else version (6 lines):
+let status;
+if (health > 80) {
+  status = "ONLINE";
+} else {
+  status = "DEGRADED";
+}
+
+// Ternary version (1 line):
+const status = health > 80 ? "ONLINE" : "DEGRADED";
+```
+
+The result of a ternary is a value — it can be stored in a variable, returned from a function, passed as an argument, or embedded in a template literal:
+
+```javascript
+// Stored:
+const badge = xp >= 5000 ? "ELITE" : "STANDARD";
+
+// Returned:
+function getLabel(health) {
+  return health > 80 ? "healthy" : "at risk";
+}
+
+// In a template literal:
+console.log(`Node status: ${health > 80 ? "ONLINE" : "DEGRADED"}`);
+
+// As a function argument:
+console.log(health > 80 ? "ONLINE" : "DEGRADED");
+```
+
+---
+
+## When to Use Ternary
+
+The ternary is appropriate when:
+
+1. You are choosing between two values based on a condition
+2. The condition fits comfortably on one line
+3. Both the true and false branches are simple values — not complex logic
+
+```javascript
+// Good ternary use — simple value assignment:
+const color = isOnline ? "green" : "red";
+const prefix = isAdmin ? "[ADMIN]" : "[USER]";
+const label = version === latest ? "CURRENT" : "OUTDATED";
+
+// Bad ternary use — complex branches that need their own lines:
+const result = nodes.length > 0
+  ? nodes.filter(n => n.health > 80).map(n => n.id).join(", ")
+  : fetchDefaultNodes().then(d => d.slice(0, 5));
+// This is unreadable. Use if/else here.
+```
+
+The test: can you read the ternary out loud as a sentence without hesitating? If yes, use it. If no, use `if/else`.
+
+---
+
+## Never Nest Ternaries
+
+Nested ternaries — ternaries inside ternaries — are a readability disaster that professional code reviews will reject:
+
+```javascript
+// Never do this:
+const rank = xp >= 5000 ? "Elite" : xp >= 2500 ? "Senior" : xp >= 1000 ? "Operator" : "Recruit";
+
+// This is what that actually says — nearly impossible to parse:
+const rank = xp >= 5000
+  ? "Elite"
+  : (xp >= 2500
+    ? "Senior"
+    : (xp >= 1000
+      ? "Operator"
+      : "Recruit"));
+```
+
+For more than two outcomes, use `if/else if/else` or `switch`. That is exactly what those tools are for.
+
+---
+
+## The Switch Statement
+
+`switch` is designed for one specific situation: checking **one value** against **many possible cases**. It is cleaner than a long `if/else if` chain when you are comparing one variable to multiple exact values.
+
+```javascript
+switch (valueToCheck) {
+  case possibleValue1:
+    // runs if valueToCheck === possibleValue1
+    break;
+  case possibleValue2:
+    // runs if valueToCheck === possibleValue2
+    break;
+  default:
+    // runs if no case matched
+}
+```
+
+Concrete example:
+
+```javascript
 const network = "mainnet";
 
-if (health < 70 && network === "mainnet") {
-  console.log("Mainnet node at risk");  // logs — both conditions are true
+switch (network) {
+  case "mainnet":
+    console.log("Production network");
+    break;
+  case "devnet":
+    console.log("Development network");
+    break;
+  case "testnet":
+    console.log("Testing network");
+    break;
+  default:
+    console.log("Unknown network: " + network);
 }
+// Output: Production network
 ```
 
-**2. OR (`||`)**
-AT LEAST ONE condition must be true.
+---
+
+## The break Statement — Never Forget It
+
+Without `break`, execution **falls through** to the next case and keeps running until it hits a `break` or the end of the switch:
+
 ```javascript
-const isAdmin = false;
-const isOwner = true;
+const network = "mainnet";
 
-if (isAdmin || isOwner) {
-  console.log("Access granted");  // logs — isOwner is true
+switch (network) {
+  case "mainnet":
+    console.log("Production network");
+    // no break here!
+  case "devnet":
+    console.log("Development network");
+    break;
+  case "testnet":
+    console.log("Testing network");
+    break;
 }
+// Output:
+// Production network
+// Development network   ← fell through from mainnet case!
 ```
 
-**3. NOT (`!`)**
-Inverts a boolean value. `!true` becomes `false`.
+This behavior — fall-through — is almost always a bug. The only intentional use is when multiple cases should share the same code:
+
 ```javascript
-const isOffline = false;
-if (!isOffline) {
-  console.log("Node is reachable");  // logs — !false = true
+// Intentional fall-through: mainnet and stagingnet both treated as production
+switch (network) {
+  case "mainnet":
+  case "stagingnet":
+    console.log("Production-like environment");
+    break;
+  case "devnet":
+  case "testnet":
+    console.log("Development environment");
+    break;
 }
 ```
 
-### Short-Circuit Evaluation
-JavaScript is lazy (in a good way). It stops reading the moment it knows the answer:
-* `A && B` — if A is false, JS doesn't even bother looking at B. It already knows the whole statement can't be true.
-* `A || B` — if A is true, JS stops. It already knows the statement is true.
+When two empty cases stack like this, it is intentional. When a case has code and no `break`, it is almost always a bug. The rule: every case that has code inside it needs a `break`.
 
-### Your Assignment
-Write a strict security check. Combine `loggedIn` and `admin` using the `&&` operator. If both are true, grant access.
+---
+
+## Switch Uses Strict Equality
+
+The comparison in `switch` uses `===` — strict equality. This means types must match:
+
+```javascript
+const value = 1;
+
+switch (value) {
+  case "1":
+    console.log("string one");  // does not match — "1" !== 1
+    break;
+  case 1:
+    console.log("number one");  // matches
+    break;
+}
+// Output: number one
+```
+
+If your switch is not matching when you expect it to, check that the case value type matches the switch expression type.
+
+---
+
+## Switch vs if/else if — When to Choose Each
+
+Use `switch` when:
+- You are checking one variable against multiple exact values
+- All cases are discrete (not ranges)
+- You have 3 or more cases
+
+```javascript
+// Good switch candidate — discrete string values:
+switch (tier) {
+  case "Code Literacy": ...
+  case "JavaScript Deeply": ...
+  case "React Mental Model": ...
+}
+
+// Bad switch candidate — ranges (use if/else if instead):
+// switch cannot express "greater than 80"
+```
+
+Use `if/else if` when:
+- You are checking ranges (`health > 80`, `xp >= 5000`)
+- Each condition is a different expression, not the same variable against different values
+- The conditions involve multiple variables
+
+---
+
+## Common Mistakes
+
+**Mistake 1 — Missing break (fall-through bug):**
+```javascript
+switch (status) {
+  case "online":
+    console.log("online");
+    // missing break!
+  case "degraded":
+    console.log("degraded"); // runs even when status is "online"
+    break;
+}
+```
+
+**Mistake 2 — Missing default:**
+```javascript
+switch (network) {
+  case "mainnet": console.log("production"); break;
+  case "devnet": console.log("development"); break;
+  // If network is "testnet", nothing happens — silent skip
+}
+// Always add default to handle unexpected values
+```
+
+**Mistake 3 — Ternary with side effects (console.log inside ternary):**
+```javascript
+// Wrong pattern — ternary produces a value, not an action:
+health > 80 ? console.log("healthy") : console.log("at risk");
+
+// Use if/else for side effects:
+if (health > 80) { console.log("healthy"); }
+else { console.log("at risk"); }
+
+// Use ternary for values:
+const label = health > 80 ? "healthy" : "at risk";
+console.log(label);
+```
+
+**Mistake 4 — Type mismatch in switch:**
+```javascript
+const code = "1";
+switch (code) {
+  case 1: console.log("found"); break;  // won't match — "1" !== 1
+  case "1": console.log("found"); break; // will match
+}
+```
+
+---
+
+## Micro-Drills
+
+**Drill 1:** Convert each `if/else` to a ternary:
+```javascript
+// A:
+let prefix;
+if (isAdmin) { prefix = "[ADMIN]"; } else { prefix = "[USER]"; }
+
+// B:
+let direction;
+if (transaction.type === "inflow") { direction = "↑"; } else { direction = "↓"; }
+
+// C:
+let badge;
+if (xp >= 5000) { badge = "🏆"; } else { badge = ""; }
+```
+
+**Drill 2:** Rewrite this broken switch with all bugs fixed:
+```javascript
+const env = "staging";
+switch (env) {
+  case "production"
+    console.log("PROD");
+  case "staging":
+    console.log("STAGE");
+    break
+  case "development":
+    console.log("DEV");
+    break;
+}
+```
+
+**Drill 3:** For each scenario, decide: ternary, switch, or if/else if?
+- Checking if a number is above, below, or equal to a threshold
+- Mapping a day name string to a schedule label ("Monday" → "Standup", "Friday" → "Review", etc.)
+- Choosing between "Loading..." and actual content based on a boolean
+
+**Drill 4:** What is wrong with this ternary? Rewrite it correctly:
+```javascript
+const score = health > 80
+  ? health > 95 ? "Perfect" : "Good"
+  : health > 60 ? "Warning" : "Critical";
+```
+
+---
+
+## Go Deeper
+
+- **javascript.info — Conditional operator '?':** https://javascript.info/ifelse#conditional-operator — explains when ternary is appropriate and warns against nested ternaries
+- **javascript.info — The switch statement:** https://javascript.info/switch — covers fall-through, default, and grouping cases
+- **MDN — Conditional (ternary) operator:** https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_operator
+- **MDN — switch:** https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/switch
+- **Web Dev Simplified — Ternary Operator:** https://www.youtube.com/watch?v=OPNhSOEoFoU — 6 minutes, practical examples
+
+---
+
+## The Crucible
+
+**Task 1 — Replication.** One ternary. One `const`. One `console.log`. The condition checks if health exceeds 80. It does not (73 is not above 80). The ternary should produce `"DEGRADED"`. Store it. Log it. Two lines of code.
+
+**Task 2 — Mutation.** Two bugs in the switch. Find them both. The fall-through bug is visible — there is a missing `break` between two cases. The missing `default` is invisible — there is simply nothing there. Add both. After your fix, only one line should log.
+
+**Task 3 — Synthesis.** Three parts. Two ternaries and one switch. Each part is independent. Write them in order. The switch needs all four cases including `default`. Both ternaries use conditions you have seen before. Three logs, in order.
+
+Go.
