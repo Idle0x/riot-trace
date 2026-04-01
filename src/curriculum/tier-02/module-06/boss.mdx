@@ -1,0 +1,178 @@
+---
+tierId: 2
+moduleId: 6
+type: "boss"
+title: "Module 06 Boss Fight — The Function Engine"
+mode: "terminal"
+xpReward: 150
+startingCode: |
+  // ═══════════════════════════════════════════════════════
+  // MODULE 06 BOSS FIGHT — THE FUNCTION ENGINE
+  // ═══════════════════════════════════════════════════════
+  //
+  // No hints. No scaffold. No theory panel.
+  // This is the complete test of Module 06.
+  //
+  // THE SCENARIO:
+  // You are building riot-trace's core scoring and reward
+  // engine. It must handle node evaluation, XP tracking,
+  // and configurable thresholds — all using the function
+  // patterns from this module.
+  //
+  // ─────────────────────────────────────────────────────────
+  // YOUR MISSION: Produce EXACTLY this output:
+  //
+  //   82.5
+  //   ELITE
+  //   3
+  //   500
+  //   Module-01: 2 lessons, 140 XP
+  //   Module-02: 0 lessons, 0 XP
+  //
+  // ─────────────────────────────────────────────────────────
+  //
+  // You are given this dataset:
+  const nodes = [
+    { id: "7A5r", health: 95, storage: 250, version: "1.2.1" },
+    { id: "8BJT", health: 47, storage: 23,  version: "1.2.0" },
+    { id: "8PjP", health: 78, storage: 180, version: "1.2.1" },
+    { id: "Bfn2", health: 55, storage: 95,  version: "1.2.0" },
+    { id: "Xk91", health: 91, storage: 310, version: "1.2.1" }
+  ];
+  const latestVersion = "1.2.1";
+  //
+  // ─────────────────────────────────────────────────────────
+  //
+  // REQUIREMENT 1 — Pure function:
+  //
+  //   Write a function called scoreNode that takes a node object
+  //   and latestVersion string.
+  //   Returns a number: (health * 0.5) + (storage * 0.1) +
+  //                     (version === latestVersion ? 10 : 0)
+  //
+  //   Call scoreNode(nodes[0], latestVersion) and log the result
+  //   to 1 decimal place using .toFixed(1).
+  //   (Line 1: nodes[0] is 7A5r: 95*0.5 + 250*0.1 + 10 = 47.5+25+10 = 82.5)
+  //
+  // ─────────────────────────────────────────────────────────
+  //
+  // REQUIREMENT 2 — Function returning function (factory):
+  //
+  //   Write a factory function called createClassifier that takes
+  //   a threshold number and returns a function that:
+  //   - Takes a node
+  //   - Returns "ELITE" if node.health >= threshold
+  //   - Returns "STANDARD" otherwise
+  //
+  //   Create an elite classifier with threshold 90.
+  //   Apply it to nodes[0] (health 95) and log the result.
+  //   (Line 2: "ELITE")
+  //
+  // ─────────────────────────────────────────────────────────
+  //
+  // REQUIREMENT 3 — Higher-order function as argument:
+  //
+  //   Write a function called countWhere that takes:
+  //   - An array
+  //   - A predicate function (returns true/false)
+  //   Returns the count of elements where predicate returns true.
+  //
+  //   Count how many nodes have health above 70.
+  //   Log the count.
+  //   (Line 3: nodes with health > 70: 7A5r(95), 8PjP(78), Xk91(91) = 3)
+  //
+  // ─────────────────────────────────────────────────────────
+  //
+  // REQUIREMENT 4 — Closure for private state:
+  //
+  //   Write a function called createXPBank that takes no arguments.
+  //   It maintains a private balance (starts at 0).
+  //   Returns an object with:
+  //   - deposit(amount): adds to balance, returns new balance
+  //   - withdraw(amount): subtracts from balance (min 0), returns new balance
+  //   - getBalance(): returns current balance
+  //
+  //   Create a bank. Deposit 300, deposit 250, withdraw 50.
+  //   Log the final balance.
+  //   (Line 4: 300 + 250 - 50 = 500)
+  //
+  // ─────────────────────────────────────────────────────────
+  //
+  // REQUIREMENT 5 — Closure for independent instances:
+  //
+  //   Write a function createModule(name) that tracks:
+  //   - private lessonsComplete (starts 0)
+  //   - private totalXP (starts 0)
+  //
+  //   Returns an object with:
+  //   - complete(xpAward): increments lessonsComplete, adds xpAward to totalXP
+  //   - report(): returns the string:
+  //     "[name]: [lessonsComplete] lessons, [totalXP] XP"
+  //
+  //   Create two modules: "Module-01" and "Module-02".
+  //   Call complete(70) twice on Module-01.
+  //   Do NOT call complete on Module-02.
+  //
+  //   Log module1.report() → "Module-01: 2 lessons, 140 XP"
+  //   Log module2.report() → "Module-02: 0 lessons, 0 XP"
+  //   (Lines 5 and 6)
+  //
+  // ─────────────────────────────────────────────────────────
+  //
+  // CONSTRAINTS:
+  // - scoreNode must be a pure function (no side effects)
+  // - createClassifier must return a function (not just compute inline)
+  // - countWhere must accept any predicate — not hardcoded to health
+  // - createXPBank must use closure for private state (no public .balance)
+  // - Module-01 and Module-02 must have completely independent state
+  // - Exactly 6 lines of output
+  //
+  // SYS.EXEC →
+
+validationLogic: |
+  if (logs.length !== 6) throw new Error('ENGINE_HALT: Expected exactly 6 lines of output. Got ' + logs.length + '. Each requirement produces exactly one log line.');
+  if (logs[0] !== '82.5') throw new Error('REQ_1_FAIL: Line 1 must be the string "82.5" (from .toFixed(1)). scoreNode(nodes[0], latestVersion) = 95*0.5 + 250*0.1 + 10 = 47.5 + 25 + 10 = 82.5. Use .toFixed(1) which returns the string "82.5". Received: ' + JSON.stringify(logs[0]));
+  if (logs[1] !== 'ELITE') throw new Error('REQ_2_FAIL: Line 2 must be "ELITE". createClassifier(90) returns a function. That function receives nodes[0] (health 95). 95 >= 90 → "ELITE". Received: ' + JSON.stringify(logs[1]));
+  if (logs[2] !== 3) throw new Error('REQ_3_FAIL: Line 3 must be 3. Nodes with health > 70: 7A5r(95), 8PjP(78), Xk91(91). countWhere takes the nodes array and an arrow function predicate. Log the return value directly. Received: ' + JSON.stringify(logs[2]));
+  if (logs[3] !== 500) throw new Error('REQ_4_FAIL: Line 4 must be 500. deposit(300) → 300, deposit(250) → 550, withdraw(50) → 500. Log getBalance() or the return value of withdraw(50). Received: ' + JSON.stringify(logs[3]));
+  if (logs[4] !== 'Module-01: 2 lessons, 140 XP') throw new Error('REQ_5_FAIL: Line 5 must be "Module-01: 2 lessons, 140 XP". Call complete(70) twice on module1. Each call increments lessonsComplete and adds 70 to totalXP. 2 calls → 2 lessons, 140 XP. Received: ' + JSON.stringify(logs[4]));
+  if (logs[5] !== 'Module-02: 0 lessons, 0 XP') throw new Error('REQ_5b_FAIL: Line 6 must be "Module-02: 0 lessons, 0 XP". module2 must have completely independent state. Calling complete on module1 must NOT affect module2. If module2 shows anything other than 0 lessons and 0 XP, your two modules are sharing state — each createModule call must create fresh private variables. Received: ' + JSON.stringify(logs[5]));
+---
+
+## The Test
+
+Module 06 covered the complete function toolkit: declarations and expressions, arrow syntax, higher-order functions that accept and return functions, and closures that give functions persistent private memory.
+
+This boss fight uses all five areas in a single coherent system. Each requirement demonstrates a distinct pattern — and they are designed so that confusing any two of them will produce wrong output.
+
+---
+
+## What This Tests
+
+**Requirement 1** tests pure function discipline. `scoreNode` receives all its inputs as parameters, performs a calculation, and returns a result. No external state accessed, no mutations, no side effects. `.toFixed(1)` returns a string — the validator checks for the string `"82.5"`, not the number `82.5`.
+
+**Requirement 2** tests the factory pattern. `createClassifier` is called once with a threshold, and returns a function. That returned function is then called with a node. The two steps happen separately — build the classifier, then apply it. Writing the classification inline instead of returning a function will fail the constraint check.
+
+**Requirement 3** tests passing functions as arguments. `countWhere` is a general-purpose function — it has no knowledge of nodes, health, or any domain concept. It takes any array and any predicate. You pass the domain knowledge as a callback argument.
+
+**Requirement 4** tests the closure for private state pattern. The XP bank's `balance` variable must be in the closure scope — not a property on the returned object. After three operations (deposit 300, deposit 250, withdraw 50), the balance is 500.
+
+**Requirement 5** is the critical test of closure independence. `createModule` must be called twice, producing two objects backed by completely separate private variables. Any shared state between them — caused by declaring the tracking variables outside `createModule` — will cause Module-02 to show Module-01's data. The proof is simple: Module-02's report must show 0 lessons and 0 XP even though Module-01 has 2 lessons and 140 XP.
+
+---
+
+## Approach
+
+Build and verify each requirement in sequence. Requirements 4 and 5 use similar patterns — build 4 first, then use the same closure technique for 5.
+
+The most likely failure point: Requirement 5 state independence. If you declare `lessonsComplete` and `totalXP` in an outer scope and reuse them for both module instances, both modules will share those variables. Each call to `createModule` must create its own fresh variables inside its own execution context.
+
+---
+
+## After You Pass
+
+**Module 07 unlocks: Data Transformation — The Complete Pipeline.**
+
+Module 07 builds directly on Modules 05 and 06. It puts the iteration tools (map, filter, reduce, sort) together with the function patterns (higher-order functions, closures) to build real data processing pipelines — the exact code that runs inside your xandeum-pulse dashboard to transform raw API responses into the leaderboard, health distribution, and geographic analysis you built.
+
+Go.
