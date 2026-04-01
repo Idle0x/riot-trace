@@ -1,0 +1,502 @@
+---
+tierId: 1
+moduleId: 4
+lessonId: 12
+title: "Objects — Keyed Collections"
+mode: "terminal"
+xpReward: 70
+syntaxHint: "const obj = { key: 'value' }; console.log(obj.key);"
+
+task1Code: |
+  // TASK 1 — REPLICATION
+  // Build a complete node object and access its properties.
+  //
+  // 1. Declare a const called node with these properties:
+  //    id: "7A5rRdbGp4jUm4TA"
+  //    health: 95
+  //    network: "mainnet"
+  //    storage: 250
+  //    version: "1.2.1"
+  //    isOnline: true
+  //
+  // 2. Log node.health using dot notation
+  // 3. Log node["network"] using bracket notation
+  // 4. Log the number of keys in the object using Object.keys()
+  //
+  // Expected output (3 lines):
+  // 95
+  // mainnet
+  // 6
+
+task1Logic: |
+  if (!logs.some(l => l === 95)) throw new Error('Task Failed: Log node.health. It should be the number 95, not the string "95".');
+  if (!logs.some(l => l === 'mainnet')) throw new Error('Task Failed: Log node["network"] using bracket notation. The value is "mainnet".');
+  if (!logs.some(l => l === 6)) throw new Error('Task Failed: Log Object.keys(node).length to count the number of properties. The node object has 6 properties.');
+
+task2Code: |
+  // TASK 2 — MUTATION
+  // This node object has three problems. Fix all of them.
+  //
+  // Problem 1: The health score is stored as a string "78" instead
+  //            of the number 78 — fix it in the object literal
+  //
+  // Problem 2: The code tries to add a lastSeen property using
+  //            incorrect syntax — fix the property assignment
+  //
+  // Problem 3: The code checks for a property using the wrong method —
+  //            fix it to use the correct existence check
+  //
+  const node = {
+    id: "8BJT",
+    health: "78",      // Problem 1: should be a number
+    network: "devnet"
+  };
+  //
+  node["lastSeen"] === "2026-03-17";    // Problem 2: should assign, not compare
+  //
+  if (node.hasProperty("lastSeen")) {  // Problem 3: wrong method name
+    console.log("lastSeen exists");
+  }
+  //
+  console.log(typeof node.health);     // should log: number
+  console.log(node.lastSeen);          // should log: 2026-03-17
+
+task2Logic: |
+  if (!logs.some(l => l === 'number')) throw new Error('Task Failed: node.health should be a number. Change "78" (string) to 78 (number) in the object literal. typeof node.health should return "number".');
+  if (!logs.some(l => l === '2026-03-17')) throw new Error('Task Failed: node.lastSeen should be "2026-03-17". Fix the assignment — use = not ===. Then the property exists and logs correctly.');
+
+task3Code: |
+  // TASK 3 — SYNTHESIS
+  // Build and manipulate a complete system configuration object.
+  //
+  // 1. Declare a const called systemConfig with these properties:
+  //    version: "1.2.0"
+  //    network: "mainnet"
+  //    maxNodes: 500
+  //    features: { darkMode: true, realtime: false }
+  //    lastUpdated: null
+  //
+  // 2. Update version to "1.2.1" (new release deployed)
+  // 3. Enable realtime by setting features.realtime to true
+  // 4. Set lastUpdated to "2026-03-17"
+  //
+  // 5. Log systemConfig.version
+  // 6. Log systemConfig.features.realtime
+  // 7. Log systemConfig.lastUpdated
+  //
+  // 8. Log all the top-level keys using Object.keys()
+  //
+  // Expected output (4 lines):
+  // 1.2.1
+  // true
+  // 2026-03-17
+  // [ 'version', 'network', 'maxNodes', 'features', 'lastUpdated' ]
+
+task3Logic: |
+  if (!logs.some(l => l === '1.2.1')) throw new Error('Task Failed: After updating, systemConfig.version should be "1.2.1".');
+  if (!logs.some(l => l === true)) throw new Error('Task Failed: After enabling it, systemConfig.features.realtime should be true.');
+  if (!logs.some(l => l === '2026-03-17')) throw new Error('Task Failed: After setting it, systemConfig.lastUpdated should be "2026-03-17".');
+  const keysLog = logs.find(l => Array.isArray(l));
+  if (!keysLog) throw new Error('Task Failed: Log Object.keys(systemConfig). It should return an array of the 5 top-level property names.');
+  if (keysLog.length !== 5) throw new Error('Task Failed: Object.keys(systemConfig) should have 5 keys. Got ' + keysLog.length);
+---
+
+## Why Objects Are the Core of Everything
+
+Every node in xandeum-pulse is an object. Every transaction in riot-sop is an object. Every user, every configuration setting, every API response — objects. Where arrays are lists of things, objects are descriptions of one thing.
+
+When the RPC endpoint returns data about a node, it returns something like this:
+
+```javascript
+{
+  id: "7A5rRdbGp4jUm4TA",
+  health: 95,
+  network: "mainnet",
+  storage: 250,
+  version: "1.2.1",
+  uptime: 8.5,
+  location: { city: "Tokyo", country: "Japan", lat: 35.6762, lng: 139.6503 },
+  credits: 45689,
+  isOnline: true
+}
+```
+
+Your code reads `.health`, `.network`, `.location.city`. It modifies `.health` when a new snapshot arrives. It checks `"version" in node` to decide whether to show the update badge. Every single one of those operations is a different object concept. This lesson covers all of them.
+
+---
+
+## What an Object Actually Is
+
+An object is a collection of **key-value pairs**. Keys are strings (or Symbols, which you will rarely use). Values can be anything — strings, numbers, booleans, arrays, other objects, functions.
+
+```javascript
+const node = {
+  id: "7A5rRdb",           // string value
+  health: 95,              // number value
+  isOnline: true,          // boolean value
+  scores: [95, 91, 88],   // array value
+  location: {              // nested object value
+    city: "Tokyo",
+    country: "Japan"
+  },
+  getStatus() {            // function value (method)
+    return this.isOnline ? "online" : "offline";
+  }
+};
+```
+
+The `{  }` syntax is called an **object literal**. It is the standard way to create objects in JavaScript.
+
+---
+
+## Accessing Properties — Two Syntaxes
+
+### Dot Notation — The Standard
+
+```javascript
+const node = { id: "7A5r", health: 95, network: "mainnet" };
+
+node.health     // 95
+node.network    // "mainnet"
+node.missing    // undefined — property doesn't exist, no error
+```
+
+Use dot notation whenever the property name is known at write time and is a valid JavaScript identifier (letters, digits, underscores, dollar signs — no spaces or hyphens).
+
+### Bracket Notation — When the Key Is Dynamic
+
+```javascript
+node["health"]    // 95 — same result as dot notation
+node["network"]   // "mainnet"
+
+// The key can be a variable:
+const property = "health";
+node[property]    // 95 — looks up whatever string is in 'property'
+
+// Required for keys that aren't valid identifiers:
+const unusual = { "health score": 95, "is-online": true };
+unusual["health score"]  // 95 — dot notation doesn't work with spaces
+unusual["is-online"]     // true
+```
+
+In practice, dot notation is used 90% of the time. Bracket notation appears when iterating over an object's keys, accessing dynamic property names, or working with keys that contain characters dot notation cannot handle.
+
+---
+
+## Accessing Nested Properties
+
+```javascript
+const node = {
+  id: "7A5r",
+  location: {
+    city: "Tokyo",
+    country: "Japan",
+    coordinates: { lat: 35.6762, lng: 139.6503 }
+  }
+};
+
+node.location.city                     // "Tokyo"
+node.location.coordinates.lat         // 35.6762
+node["location"]["city"]              // "Tokyo" — bracket notation equivalent
+node.location["coordinates"]["lng"]   // 139.6503 — can mix both notations
+```
+
+Each `.` or `[]` goes one level deeper. There is no limit to nesting depth.
+
+**Danger zone — accessing nested properties that might not exist:**
+
+```javascript
+const node = { id: "7A5r" };  // no location property
+node.location.city             // TypeError: Cannot read properties of undefined
+                               // node.location is undefined, you cannot access .city on it
+
+// Safe approach — optional chaining from Lesson 4:
+node.location?.city            // undefined — no crash
+node.location?.coordinates?.lat  // undefined — no crash
+```
+
+---
+
+## Adding and Modifying Properties
+
+You can add new properties or modify existing ones after an object is created, even when declared with `const`:
+
+```javascript
+const node = { id: "7A5r", health: 95 };
+
+// Modify existing property:
+node.health = 87;
+console.log(node.health);   // 87
+
+// Add new property:
+node.version = "1.2.1";
+console.log(node.version);  // "1.2.1"
+
+// Add nested property:
+node.location = { city: "Tokyo", country: "Japan" };
+console.log(node.location.city);  // "Tokyo"
+
+// Both dot and bracket notation work for assignment:
+node["lastSeen"] = "2026-03-17";
+node.credits = 45689;
+```
+
+Remember from Lesson 5: `const` protects the binding (the label), not the content. You can modify properties of a `const` object. You cannot reassign the variable to a completely different object.
+
+---
+
+## Deleting Properties
+
+```javascript
+const node = { id: "7A5r", health: 95, debug: "temporary" };
+
+delete node.debug;
+console.log(node.debug);  // undefined — property removed
+console.log(node);        // { id: "7A5r", health: 95 }
+```
+
+Use `delete` sparingly. In most cases, setting a property to `null` or `undefined` is clearer than deleting it entirely — deletion changes the object's structure, which can cause issues with TypeScript types and serialization.
+
+---
+
+## Checking If a Property Exists
+
+```javascript
+const node = { id: "7A5r", health: 95 };
+
+// 'in' operator — checks own AND inherited properties
+"health" in node       // true
+"missing" in node      // false
+"toString" in node     // true — inherited from Object prototype
+
+// hasOwnProperty() — checks only own properties
+node.hasOwnProperty("health")     // true
+node.hasOwnProperty("toString")   // false — inherited, not own
+node.hasOwnProperty("missing")    // false
+
+// Optional chaining (from Lesson 4) — access safely without checking first:
+node.location?.city    // undefined if location doesn't exist — no crash
+```
+
+For most cases, `"key" in obj` is the right check. Use `hasOwnProperty` when you specifically need to exclude inherited properties.
+
+---
+
+## Inspecting Objects — Object Utility Methods
+
+```javascript
+const node = { id: "7A5r", health: 95, network: "mainnet" };
+
+// Object.keys() — returns array of property names (strings)
+Object.keys(node)    // ["id", "health", "network"]
+
+// Object.values() — returns array of property values
+Object.values(node)  // ["7A5r", 95, "mainnet"]
+
+// Object.entries() — returns array of [key, value] pairs
+Object.entries(node) // [["id", "7A5r"], ["health", 95], ["network", "mainnet"]]
+```
+
+These three methods are how you iterate over an object:
+
+```javascript
+// Log every property name and value:
+Object.entries(node).forEach(([key, value]) => {
+  console.log(`${key}: ${value}`);
+});
+// id: 7A5r
+// health: 95
+// network: mainnet
+```
+
+You will use `Object.keys()`, `Object.values()`, and `Object.entries()` constantly in Tier 2 when you learn array methods like `.map()` and `.filter()`.
+
+---
+
+## Copying Objects — Spread and Object.assign
+
+Like arrays, objects are reference types. Assigning an object to a new variable gives both variables the same reference:
+
+```javascript
+const original = { health: 95, network: "mainnet" };
+const reference = original;      // not a copy — same object
+reference.health = 50;
+console.log(original.health);    // 50 — original changed!
+
+// Shallow copy with spread:
+const copy = { ...original };    // new object, same property values
+copy.health = 50;
+console.log(original.health);    // 95 — original unchanged
+
+// Spread also merges objects (later keys override earlier):
+const updated = { ...original, health: 87, version: "1.2.1" };
+// { health: 87, network: "mainnet", version: "1.2.1" }
+// health from 'original' is overridden by the explicit 87
+```
+
+The spread `{ ...obj }` creates a **shallow copy** — top-level properties are copied by value, but nested objects are still shared:
+
+```javascript
+const node = { id: "7A5r", location: { city: "Tokyo" } };
+const copy = { ...node };
+copy.location.city = "Osaka";
+console.log(node.location.city);  // "Osaka" — nested object is still shared!
+```
+
+For deeply nested objects, you need a deep copy. The simplest approach:
+
+```javascript
+const deepCopy = JSON.parse(JSON.stringify(node));
+// Converts to JSON string (all shared references broken) then parses back
+// Limitation: doesn't work for functions, undefined, or special types
+```
+
+---
+
+## Object Shorthand — Modern Syntax
+
+When a variable name matches a property name, you can use shorthand:
+
+```javascript
+const id = "7A5r";
+const health = 95;
+const network = "mainnet";
+
+// Verbose:
+const node = { id: id, health: health, network: network };
+
+// Shorthand — identical result:
+const node = { id, health, network };
+```
+
+This shorthand is everywhere in modern JavaScript. When you see `{ id, health, network }` without colons, each property name and variable name are the same.
+
+---
+
+## Computed Property Names
+
+Property names can be expressions wrapped in `[]`:
+
+```javascript
+const prefix = "node";
+const obj = {
+  [prefix + "_id"]: "7A5r",    // property name: "node_id"
+  [`${prefix}_health`]: 95,    // property name: "node_health"
+};
+
+// Useful for dynamic keys:
+const key = "mainnet";
+const stats = {
+  [key]: { nodes: 147, health: 82 }
+};
+stats.mainnet.nodes  // 147
+```
+
+---
+
+## Common Mistakes
+
+**Mistake 1 — Accessing a property that doesn't exist and chaining deeper:**
+```javascript
+const node = { id: "7A5r" };
+node.location.city  // TypeError — node.location is undefined
+node.location?.city // undefined — safe with optional chaining
+```
+
+**Mistake 2 — Comparing objects with ===:**
+```javascript
+const a = { health: 95 };
+const b = { health: 95 };
+a === b  // false — different objects in memory, even though contents are identical
+// To compare object contents, use JSON.stringify or a library:
+JSON.stringify(a) === JSON.stringify(b)  // true
+```
+
+**Mistake 3 — Forgetting that property access on undefined crashes:**
+```javascript
+const response = null;
+response.data   // TypeError: Cannot read properties of null (reading 'data')
+response?.data  // undefined — safe
+```
+
+**Mistake 4 — Using === to check property existence:**
+```javascript
+if (node.version === undefined) { }  // works but fragile — version could be explicitly set to undefined
+if ("version" in node) { }           // correct — checks if key exists at all
+if (node.hasOwnProperty("version")) { }  // also correct
+```
+
+**Mistake 5 — Mutating a shared nested object:**
+```javascript
+const original = { config: { timeout: 5000 } };
+const copy = { ...original };           // shallow copy
+copy.config.timeout = 10000;            // modifies the SHARED nested object
+console.log(original.config.timeout);  // 10000 — original affected!
+```
+
+---
+
+## Micro-Drills
+
+**Drill 1:** Given this object, write the access expressions:
+```javascript
+const system = {
+  version: "1.2.1",
+  stats: {
+    nodes: 201,
+    networks: ["mainnet", "devnet"]
+  }
+};
+// Access: the version string
+// Access: the number of nodes
+// Access: the first network string
+// Access: the last network string using .length
+```
+
+**Drill 2:** Predict the output:
+```javascript
+const a = { x: 1, y: 2 };
+const b = { ...a, y: 99, z: 3 };
+console.log(b.x);
+console.log(b.y);
+console.log(b.z);
+console.log(a.y);
+```
+
+**Drill 3:** What does each check return?
+```javascript
+const node = { id: "7A5r", health: 95 };
+console.log("health" in node);
+console.log("version" in node);
+console.log(node.hasOwnProperty("health"));
+console.log(node.hasOwnProperty("toString"));
+```
+
+**Drill 4:** Fix this without changing the check logic:
+```javascript
+const node = { health: 95 };
+const status = node.status.label;  // crashes
+console.log(status);
+```
+
+---
+
+## Go Deeper
+
+- **javascript.info — Objects:** https://javascript.info/object — the complete object guide, section by section
+- **javascript.info — Object methods, "this":** https://javascript.info/object-methods — covers methods and why `this` exists (preview of Tier 2)
+- **MDN — Working with objects:** https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Working_with_objects
+- **Fireship — JavaScript Objects in 100 Seconds:** https://www.youtube.com/watch?v=napDjGFjHR0
+- **Object methods visualizer:** https://object-methods.netlify.app — interactive reference for Object.keys, Object.values, Object.entries
+
+---
+
+## The Crucible
+
+**Task 1 — Replication.** Build a six-property object. Access two properties with different notations. Count the properties using `Object.keys().length`. The health value must be a number — not the string `"95"`. The validator checks type.
+
+**Task 2 — Mutation.** Three separate bugs. Problem 1 is in the object literal itself — wrong type. Problem 2 is the operator on the property assignment line (`===` is comparison, `=` is assignment). Problem 3 is a method name that doesn't exist — `hasOwnProperty` is the correct one. Fix all three.
+
+**Task 3 — Synthesis.** Build a nested object. Modify three properties after creation — including one inside a nested object. Log four values in order. The `Object.keys()` log produces an array — log it directly, the validator checks the array content.
+
+Go.
