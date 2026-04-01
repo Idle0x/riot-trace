@@ -1,0 +1,432 @@
+---
+tierId: 2
+moduleId: 5
+lessonId: 14
+title: "For Loops — Manual Iteration"
+mode: "terminal"
+xpReward: 70
+syntaxHint: "for (let i = 0; i < array.length; i++) { }"
+
+task1Code: |
+  // TASK 1 — REPLICATION
+  // Loop through the tier names and log each one
+  // with its position number (not index — humans count from 1).
+  //
+  // Use a standard for loop.
+  //
+  const tiers = [
+    "Code Literacy",
+    "JavaScript Deeply",
+    "React Mental Model",
+    "Web Platform"
+  ];
+  //
+  // Expected output (4 lines):
+  // 1: Code Literacy
+  // 2: JavaScript Deeply
+  // 3: React Mental Model
+  // 4: Web Platform
+
+task1Logic: |
+  if (!logs.some(l => l === '1: Code Literacy')) throw new Error('Task Failed: First line should be "1: Code Literacy". Use i + 1 for the position number (not the index), and format as `${i + 1}: ${tiers[i]}`.');
+  if (!logs.some(l => l === '2: JavaScript Deeply')) throw new Error('Task Failed: Second line should be "2: JavaScript Deeply".');
+  if (!logs.some(l => l === '3: React Mental Model')) throw new Error('Task Failed: Third line should be "3: React Mental Model".');
+  if (!logs.some(l => l === '4: Web Platform')) throw new Error('Task Failed: Fourth line should be "4: Web Platform".');
+
+task2Code: |
+  // TASK 2 — MUTATION
+  // This loop should log every health score above 70,
+  // then stop entirely when it encounters the value 40
+  // (a critically low node that halts processing).
+  //
+  // It has two bugs: the condition logs the wrong scores,
+  // and the halt logic is missing entirely.
+  //
+  const healthScores = [95, 88, 71, 62, 40, 78, 91];
+  //
+  for (let i = 0; i < healthScores.length; i++) {
+    if (healthScores[i] < 70) {    // BUG 1: wrong comparison direction
+      console.log(healthScores[i]);
+    }
+    // BUG 2: no halt when score equals 40
+  }
+  //
+  // Expected output (3 lines):
+  // 95
+  // 88
+  // 71
+
+task2Logic: |
+  if (logs.length !== 3) throw new Error('Task Failed: Expected exactly 3 lines. Got ' + logs.length + '. Fix both bugs: (1) change the condition to > 70 to log scores above 70, and (2) add a break statement when healthScores[i] === 40 to halt processing before reaching 40.');
+  if (!logs.some(l => l === 95)) throw new Error('Task Failed: 95 should be logged (it is above 70).');
+  if (!logs.some(l => l === 88)) throw new Error('Task Failed: 88 should be logged (it is above 70).');
+  if (!logs.some(l => l === 71)) throw new Error('Task Failed: 71 should be logged (it is above 70).');
+
+task3Code: |
+  // TASK 3 — SYNTHESIS
+  // Analyze the xandeum-pulse node dataset using two loops.
+  //
+  const nodes = [
+    { id: "7A5r", health: 95, network: "mainnet" },
+    { id: "8BJT", health: 47, network: "mainnet" },
+    { id: "8PjP", health: 78, network: "devnet"  },
+    { id: "Bfn2", health: 55, network: "mainnet" },
+    { id: "Xk91", health: 91, network: "devnet"  }
+  ];
+  //
+  // Loop 1 — for...of:
+  // Iterate over nodes using for...of.
+  // Log each node's id and health in this format: "7A5r — 95"
+  // (5 lines total)
+  //
+  // Loop 2 — standard for loop:
+  // Use a standard for loop to count how many nodes
+  // have health above 70. Store the count in a let variable.
+  // After the loop, log: "Healthy nodes: X"
+  // where X is the count.
+  //
+  // Expected output (6 lines):
+  // 7A5r — 95
+  // 8BJT — 47
+  // 8PjP — 78
+  // Bfn2 — 55
+  // Xk91 — 91
+  // Healthy nodes: 3
+
+task3Logic: |
+  if (!logs.some(l => l === '7A5r — 95')) throw new Error('Task Failed: Loop 1 should log "7A5r — 95". Format: `${node.id} — ${node.health}`.');
+  if (!logs.some(l => l === '8BJT — 47')) throw new Error('Task Failed: Loop 1 should log "8BJT — 47".');
+  if (!logs.some(l => l === '8PjP — 78')) throw new Error('Task Failed: Loop 1 should log "8PjP — 78".');
+  if (!logs.some(l => l === 'Bfn2 — 55')) throw new Error('Task Failed: Loop 1 should log "Bfn2 — 55".');
+  if (!logs.some(l => l === 'Xk91 — 91')) throw new Error('Task Failed: Loop 1 should log "Xk91 — 91".');
+  if (!logs.some(l => l === 'Healthy nodes: 3')) throw new Error('Task Failed: Loop 2 should count nodes with health > 70. That is 7A5r (95), 8PjP (78), Xk91 (91) — three nodes. Log "Healthy nodes: 3".');
+---
+
+## From Reading to Executing
+
+Tier 01 was about reading code and understanding what it means. You learned data types, variables, conditionals, and data structures. You can look at a piece of JavaScript and say precisely what every line does.
+
+Tier 02 is about writing code that does things. The first thing programs do — the thing that separates a list of values from a useful system — is **iteration**: doing something to every item in a collection, one at a time.
+
+Your xandeum-pulse dashboard does not display 201 nodes by writing 201 lines of code. It loops over the array and processes each node in turn. Your riot-sop financial summary does not add 30 transactions manually. It iterates and accumulates. Everything in application development that works with data uses iteration.
+
+This lesson covers the manual approach — the explicit `for` loop. The next four lessons cover the modern functional alternatives that you will use far more often. You need both: the functional methods because they are cleaner and more expressive, and the `for` loop because it is the foundation that makes those methods understandable.
+
+---
+
+## The Standard For Loop — Complete Anatomy
+
+```javascript
+for (let i = 0; i < 5; i++) {
+  console.log(i);
+}
+// Output: 0, 1, 2, 3, 4
+```
+
+Three parts inside the parentheses, separated by semicolons:
+
+```javascript
+for (initialization; condition; update) {
+  // body — runs each iteration
+}
+```
+
+**Initialization** — `let i = 0`
+Runs once before the loop starts. Creates the loop counter variable.
+Always use `let`, not `const` — `i` changes each iteration.
+
+**Condition** — `i < 5`
+Evaluated before each iteration. If `true`, the body runs. If `false`, the loop stops.
+When the loop starts, `i` is 0. `0 < 5` is true. Body runs.
+After the update, `i` is 1. `1 < 5` is true. Body runs.
+...eventually `i` is 5. `5 < 5` is false. Loop stops.
+
+**Update** — `i++`
+Runs after each iteration. `i++` is shorthand for `i = i + 1`.
+The update runs after the body, before the next condition check.
+
+---
+
+## Looping Over Arrays
+
+The most common use case: iterating over every element in an array:
+
+```javascript
+const nodes = ["node-A", "node-B", "node-C"];
+
+for (let i = 0; i < nodes.length; i++) {
+  console.log(nodes[i]);
+}
+// node-A
+// node-B
+// node-C
+```
+
+`nodes[i]` accesses the element at position `i`. As `i` goes from 0 to `nodes.length - 1`, you visit every element.
+
+**Always use `nodes.length` in the condition**, not a hardcoded number. If the array grows, the loop automatically handles the new elements:
+
+```javascript
+// Bad — breaks if array changes:
+for (let i = 0; i < 3; i++) { }
+
+// Good — always correct:
+for (let i = 0; i < nodes.length; i++) { }
+```
+
+---
+
+## The for...of Loop — Clean Iteration Without Index
+
+When you just need each element and do not need the index, `for...of` is cleaner:
+
+```javascript
+const nodes = ["node-A", "node-B", "node-C"];
+
+for (const node of nodes) {
+  console.log(node);
+}
+// node-A
+// node-B
+// node-C
+```
+
+No counter variable. No `[i]` access. Each iteration, `node` is the current element.
+
+Use `const` in `for...of` — the loop variable is a new binding each iteration, not a reassigned one. TypeScript will also correctly infer the type of `node` from the array's type.
+
+**When to use each:**
+- `for...of` — when you need each element but not its index
+- Standard `for` — when you need the index (for position labels, accessing neighboring elements, backwards iteration)
+
+---
+
+## The for...in Loop — Object Keys
+
+`for...in` iterates over the **keys** of an object:
+
+```javascript
+const node = { id: "7A5r", health: 95, network: "mainnet" };
+
+for (const key in node) {
+  console.log(key, node[key]);
+}
+// id 7A5r
+// health 95
+// network mainnet
+```
+
+Use `for...in` for objects when you need to dynamically process every property. However, `Object.entries()` with `for...of` is usually cleaner for this:
+
+```javascript
+for (const [key, value] of Object.entries(node)) {
+  console.log(`${key}: ${value}`);
+}
+```
+
+**Never use `for...in` on arrays.** It iterates over indices as strings and can include inherited properties. Always use `for...of` or a standard `for` loop for arrays.
+
+---
+
+## break and continue — Controlling the Loop
+
+**`break`** — exits the loop immediately. Nothing after it in the current iteration runs. The loop ends:
+
+```javascript
+const scores = [95, 88, 40, 71, 91];
+
+for (const score of scores) {
+  if (score < 50) {
+    console.log("Critical score found — halting");
+    break;    // stops the loop entirely
+  }
+  console.log(score);
+}
+// 95
+// 88
+// Critical score found — halting
+// (71 and 91 never reached)
+```
+
+**`continue`** — skips the rest of the current iteration and moves to the next one. The loop continues:
+
+```javascript
+const scores = [95, 47, 88, 71, 55, 91];
+
+for (const score of scores) {
+  if (score < 70) continue;    // skip this score, go to next
+  console.log(score);
+}
+// 95
+// 88
+// 71
+// 91
+// (47 and 55 were skipped)
+```
+
+---
+
+## Counting and Accumulating with For Loops
+
+For loops are the foundation of counting and aggregation — even though in Tier 2 you will learn `.reduce()` which handles this more elegantly:
+
+```javascript
+const healthScores = [95, 47, 88, 71, 55, 91, 62, 78];
+
+// Count scores above a threshold:
+let healthyCount = 0;
+for (const score of healthScores) {
+  if (score > 80) healthyCount++;
+}
+console.log(`Healthy nodes: ${healthyCount}`);  // 3
+
+// Sum all scores:
+let total = 0;
+for (const score of healthScores) {
+  total += score;  // shorthand for: total = total + score
+}
+const average = total / healthScores.length;
+console.log(`Average health: ${average.toFixed(1)}`);  // 73.4
+
+// Find the maximum:
+let max = healthScores[0];
+for (const score of healthScores) {
+  if (score > max) max = score;
+}
+console.log(`Best health: ${max}`);  // 95
+```
+
+Each pattern — count, sum, find — shows the same structure: initialize a variable outside the loop, update it inside the loop, use it after the loop.
+
+---
+
+## Nested Loops
+
+A loop inside a loop. Each iteration of the outer loop runs the entire inner loop:
+
+```javascript
+const networks = ["mainnet", "devnet"];
+const statuses = ["online", "offline"];
+
+for (const network of networks) {
+  for (const status of statuses) {
+    console.log(`${network} — ${status}`);
+  }
+}
+// mainnet — online
+// mainnet — offline
+// devnet — online
+// devnet — offline
+```
+
+Nested loops are O(n²) — with large arrays they get slow fast. Lesson 79 in Tier 6 covers this in detail. For now, use them when you genuinely need to compare or combine two collections. Avoid them when one loop would work.
+
+---
+
+## The Infinite Loop — The Loop You Must Never Write
+
+A loop whose condition never becomes `false` runs forever and crashes the browser or Node process:
+
+```javascript
+// Never do this:
+for (let i = 0; i >= 0; i++) {
+  console.log(i);  // i is always >= 0, condition never false
+}
+
+// Also never do this:
+while (true) {
+  // without a break, this runs forever
+}
+```
+
+Signs your loop might be infinite:
+- The condition variable is never updated
+- The update moves `i` in the wrong direction (`i++` when condition is `i > 0`)
+- The condition can never become `false` for the given data
+
+If your browser tab freezes while testing a loop, force-close it, fix the loop, and reload.
+
+---
+
+## Common Mistakes
+
+**Mistake 1 — Off-by-one in the condition:**
+```javascript
+const arr = [1, 2, 3];
+// Wrong — i <= arr.length includes index 3 which doesn't exist:
+for (let i = 0; i <= arr.length; i++) {
+  console.log(arr[i]);  // logs 1, 2, 3, undefined
+}
+// Correct:
+for (let i = 0; i < arr.length; i++) { }
+```
+
+**Mistake 2 — Modifying the array while iterating:**
+```javascript
+const nodes = ["a", "b", "c"];
+for (let i = 0; i < nodes.length; i++) {
+  nodes.push("d");  // array grows every iteration — infinite loop
+}
+```
+
+**Mistake 3 — Using for...in on arrays:**
+```javascript
+const arr = [1, 2, 3];
+for (const key in arr) {
+  console.log(key);   // "0", "1", "2" — string indices, not values
+  console.log(arr[key]);  // 1, 2, 3 — works but wrong tool
+}
+// Use for...of instead
+```
+
+**Mistake 4 — Forgetting that i++ runs AFTER the body:**
+```javascript
+for (let i = 0; i < 3; i++) {
+  console.log(i);  // logs 0, 1, 2 — not 1, 2, 3
+}
+// If you want 1, 2, 3: log i + 1 or start with i = 1 and use i <= 3
+```
+
+---
+
+## Micro-Drills
+
+**Drill 1:** Without running it, predict the complete output:
+```javascript
+for (let i = 5; i > 0; i--) {
+  if (i === 3) continue;
+  console.log(i);
+}
+```
+
+**Drill 2:** Write a `for` loop that logs every even number from 0 to 10 inclusive.
+
+**Drill 3:** Given `const nodes = [{health:95},{health:47},{health:78}]`, write a loop that logs only nodes with health above 60 using `continue` to skip others.
+
+**Drill 4:** What is the difference between these two loops? When would you choose each?
+```javascript
+for (let i = 0; i < nodes.length; i++) { }
+for (const node of nodes) { }
+```
+
+---
+
+## Go Deeper
+
+- **javascript.info — Loops: while and for:** https://javascript.info/while-for — complete coverage with interactive examples
+- **MDN — for statement:** https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for
+- **MDN — for...of:** https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...of
+- **Fireship — JavaScript Loops in 100 Seconds:** https://www.youtube.com/watch?v=x7Xzvm0iLCI
+- **JavaScript Visualizer 9000:** https://www.jsv9000.app — paste any loop here and step through it iteration by iteration to see exactly what changes each cycle
+
+---
+
+## The Crucible
+
+**Task 1 — Replication.** A standard `for` loop over an array. Log each item with its human-readable position (1-based, not 0-based). The format string uses a template literal with `i + 1` for the number and `tiers[i]` for the name.
+
+**Task 2 — Mutation.** Two bugs. The condition checks `< 70` but should check `> 70` — it is logging low scores instead of high ones. And the loop has no `break` when it hits 40 — add one. After the fix, exactly three scores should log before the loop halts.
+
+**Task 3 — Synthesis.** Two separate loops over the same array. The first uses `for...of` to log a formatted string per node. The second uses a standard `for` to count. The count must be accumulated into a `let` variable and logged after the loop with the exact format `"Healthy nodes: 3"`.
+
+Go.
