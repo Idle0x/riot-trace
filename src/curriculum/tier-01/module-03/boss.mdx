@@ -1,0 +1,171 @@
+---
+tierId: 1
+moduleId: 3
+type: "boss"
+title: "Module 03 Boss Fight — The Node Triage System"
+mode: "terminal"
+xpReward: 150
+startingCode: |
+  // ═══════════════════════════════════════════════════════
+  // MODULE 03 BOSS FIGHT — THE NODE TRIAGE SYSTEM
+  // ═══════════════════════════════════════════════════════
+  //
+  // No hints. No scaffold. No theory panel.
+  // This is the complete test of Module 03.
+  //
+  // THE SCENARIO:
+  // riot-trace needs a node triage function that evaluates
+  // a node object and produces a complete diagnostic report.
+  //
+  // You are given this node:
+  const node = {
+    id: "7A5rRdbGp4jUm4TA",
+    health: 47,
+    network: "mainnet",
+    version: "1.2.0",
+    storage: 250,
+    isUnderMaintenance: false
+  };
+  //
+  // const latestVersion = "1.2.1";
+  const latestVersion = "1.2.1";
+  //
+  // ─────────────────────────────────────────────────────────
+  //
+  // YOUR MISSION: Write code that produces EXACTLY this output:
+  //
+  //   CRITICAL
+  //   mainnet: PRODUCTION
+  //   UPDATE REQUIRED
+  //   REACHABLE
+  //   TRIAGE COMPLETE — 3 issues detected
+  //
+  // ─────────────────────────────────────────────────────────
+  //
+  // REQUIREMENT 1 — if/else if/else (health classification):
+  //
+  //   Log the health tier based on node.health:
+  //   >= 90        → "ELITE"
+  //   >= 70        → "OPERATIONAL"
+  //   >= 50        → "DEGRADED"
+  //   below 50     → "CRITICAL"
+  //
+  // ─────────────────────────────────────────────────────────
+  //
+  // REQUIREMENT 2 — switch (network environment):
+  //
+  //   Log the environment label based on node.network:
+  //   "mainnet"  → "mainnet: PRODUCTION"
+  //   "devnet"   → "devnet: DEVELOPMENT"
+  //   "testnet"  → "testnet: TESTING"
+  //   default    → node.network + ": UNKNOWN"
+  //
+  // ─────────────────────────────────────────────────────────
+  //
+  // REQUIREMENT 3 — ternary (version check):
+  //
+  //   Using a ternary, create a const called versionStatus.
+  //   If node.version !== latestVersion: "UPDATE REQUIRED"
+  //   Otherwise: "VERSION OK"
+  //   Log versionStatus.
+  //
+  // ─────────────────────────────────────────────────────────
+  //
+  // REQUIREMENT 4 — logical operators (maintenance check):
+  //
+  //   Using ! and a simple if statement, log "REACHABLE" if
+  //   the node is NOT under maintenance.
+  //   If it IS under maintenance, log "UNDER MAINTENANCE".
+  //
+  // ─────────────────────────────────────────────────────────
+  //
+  // REQUIREMENT 5 — combined logic (issue counter):
+  //
+  //   Count the number of issues detected using &&, ||, and
+  //   comparison operators. An issue is:
+  //   - health below 70 (not operational)
+  //   - version not matching latestVersion
+  //   - storage below 100 (using node.storage)
+  //
+  //   Count how many of those 3 conditions are true.
+  //   Log: "TRIAGE COMPLETE — X issues detected"
+  //   where X is the count (0, 1, 2, or 3).
+  //
+  //   For the given node, X should be 3:
+  //   health 47 < 70 → issue
+  //   version "1.2.0" !== "1.2.1" → issue
+  //   storage 250 is NOT below 100 → NOT an issue
+  //
+  //   Wait — that is only 2 issues. Re-read the node values.
+  //   storage is 250. The threshold is below 100.
+  //   250 is not below 100. That is NOT an issue.
+  //   Count carefully. The answer is 2, not 3.
+  //
+  //   The final line must be: "TRIAGE COMPLETE — 2 issues detected"
+  //
+  // ─────────────────────────────────────────────────────────
+  //
+  // CONSTRAINTS:
+  // - Requirement 1 must use if/else if/else (not ternary)
+  // - Requirement 2 must use switch with all 3 cases + default
+  // - Requirement 3 must use a ternary stored in a const
+  // - Requirement 4 must use the ! operator
+  // - Requirement 5 must count dynamically — do not hardcode "2"
+  //
+  // SYS.EXEC →
+
+validationLogic: |
+  if (logs.length !== 5) throw new Error('TRIAGE_HALT: Expected exactly 5 lines of output. Got ' + logs.length + '. Each requirement produces one log line. Check for accidental extra console.log calls or missing requirements.');
+  if (logs[0] !== 'CRITICAL') throw new Error('REQ_1_FAIL: node.health is 47, which is below 50. The health tier should be "CRITICAL". Check that your if/else if/else chain tests in the correct order (highest first) and that the below-50 case logs "CRITICAL". Received: ' + JSON.stringify(logs[0]));
+  if (logs[1] !== 'mainnet: PRODUCTION') throw new Error('REQ_2_FAIL: node.network is "mainnet". The switch should log "mainnet: PRODUCTION". Check that you have a break after this case and that the string matches exactly. Received: ' + JSON.stringify(logs[1]));
+  if (logs[2] !== 'UPDATE REQUIRED') throw new Error('REQ_3_FAIL: node.version "1.2.0" does not equal latestVersion "1.2.1". versionStatus should be "UPDATE REQUIRED". Check your ternary condition — it should trigger when they are NOT equal (use !==). Received: ' + JSON.stringify(logs[2]));
+  if (logs[3] !== 'REACHABLE') throw new Error('REQ_4_FAIL: node.isUnderMaintenance is false. !false is true. The if block should run and log "REACHABLE". Received: ' + JSON.stringify(logs[3]));
+  if (logs[4] !== 'TRIAGE COMPLETE — 2 issues detected') throw new Error('REQ_5_FAIL: Count the issues: health 47 < 70 (yes, issue), version mismatch (yes, issue), storage 250 < 100 (no, not an issue). Total: 2. The final line must be exactly "TRIAGE COMPLETE — 2 issues detected". Note the em dash (—) not a hyphen (-). Received: ' + JSON.stringify(logs[4]));
+---
+
+## The Test
+
+Module 03 covered how JavaScript makes decisions. `if/else if/else` for multi-path branching based on ranges. `switch` for matching one value against multiple exact cases. Ternary for producing a value from a simple two-path decision. Logical operators (`&&`, `||`, `!`) for combining conditions. All four tools. This boss fight uses all four in one program.
+
+---
+
+## What This Tests
+
+**Requirement 1** tests that your `if/else if` chain is ordered correctly and uses the right thresholds. Health 47 is below 50 — it must reach the final branch without matching any of the higher thresholds.
+
+**Requirement 2** tests that your `switch` has the correct case strings, proper `break` statements, and a functioning `default`. One missing `break` will cause fall-through. The output string format — `"mainnet: PRODUCTION"` — must be exact.
+
+**Requirement 3** tests that you know when to use a ternary. The condition is a `!==` check — if the versions do not match, there is an update available.
+
+**Requirement 4** tests the `!` operator directly. `isUnderMaintenance` is `false`. Negating it with `!` produces `true`. The `if` block runs and logs `"REACHABLE"`.
+
+**Requirement 5** is the integration challenge. You must count how many boolean conditions are true and produce a dynamic count — not a hardcoded number. One approach: convert each condition to a number using `Number(condition)` or a ternary, then add them:
+
+```javascript
+const issueCount = Number(condition1) + Number(condition2) + Number(condition3);
+// Number(true) === 1, Number(false) === 0
+```
+
+Another approach: use a `let` counter and increment it with `if` statements. Either works.
+
+The deliberate misdirection in the requirements — "the answer is 3... wait, no, re-read the values" — is intentional. Read the actual data before assuming. `storage` is `250`. The threshold is `< 100`. `250 < 100` is `false`. That is not an issue. The answer is `2`.
+
+**The em dash in the final line is real.** The character `—` is a Unicode em dash (U+2014), not two hyphens. Copy it from the requirements if needed.
+
+---
+
+## Approach
+
+Build each requirement one at a time, verify the output is correct, then move to the next. Do not attempt to write all five requirements at once.
+
+After you have all five outputs correct individually, verify the complete sequence matches the expected output exactly — five lines, exact strings, correct order.
+
+---
+
+## After You Pass
+
+**Module 04 unlocks: Collections — Arrays & Objects.**
+
+Arrays and objects are the two most important data structures in JavaScript. Every piece of data in your applications lives in one or both. Every node in xandeum-pulse is an object. Every list of transactions in riot-sop is an array. Module 04 makes you fluent in reading, writing, and manipulating both.
+
+Go.
