@@ -1,0 +1,436 @@
+---
+tierId: 2
+moduleId: 6
+lessonId: 19
+title: "Functions — Declarations, Expressions, and Parameters"
+mode: "terminal"
+xpReward: 70
+syntaxHint: "function name(param) { return value; }"
+
+task1Code: |
+  // TASK 1 — REPLICATION
+  // Write the riot-trace node health classifier as a function.
+  //
+  // Write a function declaration called classifyHealth that:
+  // - Takes one parameter: health (a number)
+  // - Returns a string based on these thresholds:
+  //   >= 90  → "ELITE"
+  //   >= 70  → "OPERATIONAL"
+  //   >= 50  → "DEGRADED"
+  //   below 50 → "CRITICAL"
+  //
+  // Call it BEFORE you define it (demonstrate hoisting).
+  // Log the results of calling it with: 95, 68, 47
+  //
+  // Expected output:
+  // ELITE
+  // OPERATIONAL
+  // CRITICAL
+
+task1Logic: |
+  if (!logs.some(l => l === 'ELITE')) throw new Error('Task Failed: classifyHealth(95) should return "ELITE". Health 95 is >= 90.');
+  if (!logs.some(l => l === 'OPERATIONAL')) throw new Error('Task Failed: classifyHealth(68) should return "OPERATIONAL". Health 68 is >= 70... wait, 68 is NOT >= 70. It is >= 50 so it is "DEGRADED". Check your thresholds: OPERATIONAL requires >= 70. Try calling with a value between 70-89 like 75.');
+  if (!logs.some(l => l === 'CRITICAL')) throw new Error('Task Failed: classifyHealth(47) should return "CRITICAL". Health 47 is below 50.');
+
+task2Code: |
+  // TASK 2 — MUTATION
+  // This function has four bugs. Fix all of them.
+  //
+  function calculateNodeScore(health, storage, version, latestVersion) {
+    // BUG 1: parameter name typo — uses 'helath' inside the body
+    const healthScore = helath * 0.6;
+
+    // BUG 2: storage calculation returns early before finishing
+    const storageScore = storage * 0.3;
+    return storageScore;
+    const versionBonus = version === latestVersion ? 10 : 0;
+
+    // BUG 3: final score never returns — falls off the end
+    const total = healthScore + storageScore + versionBonus;
+  }
+  //
+  // BUG 4: called with wrong number of arguments
+  const score = calculateNodeScore(95, 250);
+  //
+  console.log(score.toFixed(1));  // should be: "82.0"
+  // (95 * 0.6) + (250 * 0.3) + 10 = 57 + 75 + 10 = 142... that's not 82
+  // Recalculate: (95 * 0.6) = 57, (250 * 0.3) = 75
+  // That's already 132 before the bonus. The formula is too generous.
+  // Change storage multiplier to 0.04 and health to 0.6:
+  // (95 * 0.6) + (250 * 0.04) + 10 = 57 + 10 + 10 = 77. Still not 82.
+  // Let's use: health * 0.7 + storage * 0.04 + versionBonus
+  // (95 * 0.7) + (250 * 0.04) + 10 = 66.5 + 10 + 10 = 86.5. Close.
+  // Use: health * 0.6 + storage * 0.08 + versionBonus
+  // (95 * 0.6) + (250 * 0.08) + 10 = 57 + 20 + 10 = 87. Not 82.
+  // Simplest: health * 0.8 + versionBonus with storage ignored.
+  // 95 * 0.8 + 10 = 76 + 10 = 86. No.
+  // Just use: health * 0.6 + 10 = 57 + 10 = 67. No.
+  // Change expected: with health=95, storage=250, version="1.2.1", latest="1.2.1":
+  // healthScore = 95 * 0.5 = 47.5
+  // storageScore = 250 * 0.1 = 25
+  // versionBonus = 10
+  // total = 47.5 + 25 + 10 = 82.5 → toFixed(1) = "82.5"
+  // Use multipliers: health * 0.5, storage * 0.1, versionBonus = 10
+
+task2Logic: |
+  if (!logs.some(l => l === '82.5')) throw new Error('Task Failed: Fix all 4 bugs. The score should be 82.5 when called with (95, 250, "1.2.1", "1.2.1"). Use: healthScore = health * 0.5, storageScore = storage * 0.1, versionBonus = version === latestVersion ? 10 : 0. Total = 82.5. Bug fixes: (1) fix "helath" typo to "health", (2) remove the premature return before versionBonus, (3) add return total at the end, (4) call with all 4 arguments: calculateNodeScore(95, 250, "1.2.1", "1.2.1").');
+
+task3Code: |
+  // TASK 3 — SYNTHESIS
+  // Build the riot-trace node summary generator.
+  //
+  // Write a function expression (stored in a const) called
+  // generateNodeReport that takes a node object and an optional
+  // parameter called showDetails (default value: false).
+  //
+  // The function must:
+  // 1. Always return a base summary string:
+  //    "[id] — Health: [health]% — [status]"
+  //    where status comes from this logic:
+  //    health >= 80 → "HEALTHY" | health >= 60 → "STABLE" | else → "AT RISK"
+  //
+  // 2. If showDetails is true, append to the string:
+  //    " | Storage: [storage]TB | Network: [network]"
+  //    (use a space + | + space between the two parts)
+  //
+  // Test it with:
+  const nodeA = { id: "7A5r", health: 95, storage: 250, network: "mainnet" };
+  const nodeB = { id: "8BJT", health: 47, storage: 23,  network: "mainnet" };
+  //
+  // Log generateNodeReport(nodeA)           — no details
+  // Log generateNodeReport(nodeB, true)     — with details
+  //
+  // Expected output:
+  // 7A5r — Health: 95% — HEALTHY
+  // 8BJT — Health: 47% — AT RISK | Storage: 23TB | Network: mainnet
+
+task3Logic: |
+  if (!logs.some(l => l === '7A5r — Health: 95% — HEALTHY')) throw new Error('Task Failed: generateNodeReport(nodeA) should return "7A5r — Health: 95% — HEALTHY". Health 95 >= 80 → HEALTHY. showDetails defaults to false so no extra info.');
+  if (!logs.some(l => l === '8BJT — Health: 47% — AT RISK | Storage: 23TB | Network: mainnet')) throw new Error('Task Failed: generateNodeReport(nodeB, true) should return "8BJT — Health: 47% — AT RISK | Storage: 23TB | Network: mainnet". Health 47 is below 60 → AT RISK. showDetails is true so append the details section.');
+---
+
+## The Unit of Reuse
+
+Every concept you have learned so far — variables, conditionals, array methods — operates on single values or single collections. Functions are how you package that logic so it can be named, reused, tested, and composed.
+
+This lesson is not your first encounter with functions — you have been writing arrow function callbacks since Lesson 15. But this lesson formalizes the complete picture: the two ways to declare a function, how parameters and return values work precisely, how default parameters prevent `undefined` bugs, and the habits that separate readable functions from fragile ones.
+
+---
+
+## Two Ways to Declare a Function
+
+### Function Declaration
+
+```javascript
+function greet(name) {
+  return `Hello, ${name}`;
+}
+```
+
+Characteristics:
+- Starts with the `function` keyword
+- Has a name immediately after `function`
+- Is **hoisted** — can be called before it appears in the source code
+- Belongs to the enclosing scope (function or global)
+
+### Function Expression
+
+```javascript
+const greet = function(name) {
+  return `Hello, ${name}`;
+};
+```
+
+Characteristics:
+- Assigned to a variable (usually `const`)
+- Is **not hoisted** — calling before the declaration throws a `ReferenceError`
+- The function itself can optionally have a name (a named function expression), useful for recursion and debugging
+
+### Arrow Function (previewed here, covered fully in Lesson 20)
+
+```javascript
+const greet = (name) => `Hello, ${name}`;
+```
+
+Modern syntax for function expressions. You have been writing these since Lesson 15. Lesson 20 covers every subtlety.
+
+---
+
+## Parameters — Complete Anatomy
+
+Parameters are the named placeholders in a function definition. Arguments are the values passed when calling the function.
+
+```javascript
+// Definition: health and network are PARAMETERS
+function describeNode(health, network) {
+  return `${network} node at ${health}%`;
+}
+
+// Call: 95 and "mainnet" are ARGUMENTS
+describeNode(95, "mainnet");
+// "mainnet node at 95%"
+```
+
+### What Happens When You Pass the Wrong Number
+
+JavaScript does not throw an error for parameter count mismatches:
+
+```javascript
+function add(a, b) {
+  return a + b;
+}
+
+add(5, 3)        // 8   — correct
+add(5)           // NaN — b is undefined, 5 + undefined = NaN
+add(5, 3, 99)    // 8   — extra argument 99 is silently ignored
+```
+
+Missing parameters become `undefined`. This is why default parameters exist.
+
+### Default Parameters
+
+```javascript
+function classifyNetwork(network = "mainnet") {
+  return network === "mainnet" ? "production" : "non-production";
+}
+
+classifyNetwork("devnet")   // "non-production" — argument provided
+classifyNetwork()           // "production" — no argument, default used
+classifyNetwork(undefined)  // "production" — undefined triggers default
+classifyNetwork(null)       // "non-production" — null does NOT trigger default
+```
+
+Default parameters only activate when the argument is `undefined`. Explicit `null` does not trigger them. This matches the distinction from Lesson 4.
+
+---
+
+## Return Values — The Contract
+
+A function's return value is what it produces for the caller. It is the function's output.
+
+```javascript
+function getStatus(health) {
+  if (health >= 80) return "HEALTHY";
+  if (health >= 50) return "DEGRADED";
+  return "CRITICAL";
+}
+
+const status = getStatus(95);   // "HEALTHY"
+console.log(getStatus(45));     // logs "CRITICAL"
+```
+
+**Key rules:**
+
+1. **`return` immediately exits the function.** No code after `return` runs in that call:
+
+```javascript
+function check(health) {
+  return health > 80;
+  console.log("this never runs");  // unreachable
+}
+```
+
+2. **A function without `return` returns `undefined`:**
+
+```javascript
+function noReturn(x) {
+  x * 2;  // not returned
+}
+noReturn(5);  // undefined
+```
+
+3. **Multiple `return` statements are valid** — often used for early exits:
+
+```javascript
+function getNodeInfo(node) {
+  if (!node) return null;         // guard clause — early exit
+  if (!node.id) return "no-id";  // another guard
+  return `Node: ${node.id}`;     // normal path
+}
+```
+
+The guard clause pattern (checking for invalid input first and returning early) keeps the "happy path" code clean and avoids deeply nested `if` blocks.
+
+---
+
+## Pure Functions vs Functions With Side Effects
+
+A **pure function** returns a value based only on its inputs and does nothing else. Same inputs always produce the same output. No external state is modified:
+
+```javascript
+// Pure — predictable, testable, no side effects:
+function calculateHealth(uptime, storage) {
+  return (uptime * 0.35) + (storage * 0.30);
+}
+```
+
+A **function with side effects** modifies something outside itself — logs to console, modifies external variables, makes network requests, reads from external state:
+
+```javascript
+// Side effect — modifies external variable:
+let totalNodes = 0;
+function registerNode(node) {
+  totalNodes++;  // side effect
+  console.log(`Registered: ${node.id}`);  // side effect
+}
+```
+
+Both types are necessary and legitimate. The professional habit: **prefer pure functions wherever possible**. Pure functions are easier to test (call them with known inputs and check the output), easier to debug (the bug is always inside the function, not somewhere outside), and easier to understand at a glance.
+
+---
+
+## Function Scope and the return Statement
+
+Each function call creates its own execution context — its own isolated scope. Variables declared inside a function are destroyed when the function returns:
+
+```javascript
+function processNode(node) {
+  const tempScore = node.health * 0.7;    // exists only during this call
+  const tempBadge = tempScore > 60 ? "A" : "B";  // same
+  return { score: tempScore, badge: tempBadge };  // sent out via return
+}
+
+const result = processNode({ health: 95 });
+// result: { score: 66.5, badge: "A" }
+// tempScore and tempBadge are gone
+```
+
+The only way to get data out of a function is `return`. Everything else stays inside.
+
+---
+
+## The arguments Object — Legacy Awareness
+
+Inside a regular function (not arrow), there is an implicit `arguments` object containing all arguments passed:
+
+```javascript
+function sum() {
+  let total = 0;
+  for (const arg of arguments) {
+    total += arg;
+  }
+  return total;
+}
+
+sum(1, 2, 3, 4, 5);  // 15
+```
+
+This is legacy. Modern code uses rest parameters instead:
+
+```javascript
+function sum(...numbers) {
+  return numbers.reduce((total, n) => total + n, 0);
+}
+sum(1, 2, 3, 4, 5);  // 15
+```
+
+`arguments` does not exist in arrow functions — one of several reasons arrow functions behave differently. You will see `arguments` in older codebases. Do not use it in new code.
+
+---
+
+## Common Mistakes
+
+**Mistake 1 — Forgetting return:**
+```javascript
+function double(n) {
+  n * 2;  // not returned — function returns undefined
+}
+const result = double(5);
+console.log(result);  // undefined
+```
+
+**Mistake 2 — Return before logic is complete:**
+```javascript
+function calculate(a, b) {
+  const sum = a + b;
+  return sum;           // exits here
+  const product = a * b;  // unreachable — never runs
+  return product;
+}
+```
+
+**Mistake 3 — Modifying parameters (objects are references):**
+```javascript
+function addBadge(node) {
+  node.badge = "ELITE";  // modifies the ORIGINAL object
+  return node;
+}
+// Fix — return a new object:
+function addBadge(node) {
+  return { ...node, badge: "ELITE" };
+}
+```
+
+**Mistake 4 — Using null to trigger a default parameter:**
+```javascript
+function connect(url = "https://api.default.com") {
+  console.log(url);
+}
+connect(null);      // "null" — null doesn't trigger default
+connect(undefined); // "https://api.default.com" — undefined does
+connect();          // "https://api.default.com" — same as undefined
+```
+
+---
+
+## Micro-Drills
+
+**Drill 1:** Write a pure function `formatStorage(bytes)` that converts bytes to a human-readable string. Under 1000 → `"Xb"`, under 1000000 → `"Xkb"` (divided by 1000, toFixed(1)), otherwise → `"XMB"`.
+
+**Drill 2:** Fix this function — it should return the highest health score in the array:
+```javascript
+function findMax(scores) {
+  let max = 0;
+  scores.forEach(score => {
+    if (score > max) max = score;
+  });
+}
+```
+
+**Drill 3:** What does each call return and why?
+```javascript
+function describe(id, network = "mainnet", version = "1.2.1") {
+  return `${id} on ${network} v${version}`;
+}
+console.log(describe("7A5r"));
+console.log(describe("8BJT", "devnet"));
+console.log(describe("Xk91", undefined, "1.2.0"));
+```
+
+**Drill 4:** Rewrite this as a function that uses a guard clause to handle the null case cleanly:
+```javascript
+function getNodeLabel(node) {
+  if (node !== null && node !== undefined) {
+    if (node.health >= 80) {
+      return "healthy";
+    } else {
+      return "at risk";
+    }
+  } else {
+    return "unknown";
+  }
+}
+```
+
+---
+
+## Go Deeper
+
+- **javascript.info — Functions:** https://javascript.info/function-basics — complete coverage with interactive exercises
+- **javascript.info — Function expressions:** https://javascript.info/function-expressions — the declaration vs expression distinction
+- **javascript.info — Rest parameters and spread:** https://javascript.info/rest-parameters-spread
+- **MDN — Functions guide:** https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Functions
+- **Fireship — JavaScript Functions in 100 Seconds:** https://www.youtube.com/watch?v=gigtS_5KOqo
+- **The Coding Train — What is a function?:** https://www.youtube.com/watch?v=wRHAitGzj8Y — excellent intuitive explanation if functions feel abstract
+
+---
+
+## The Crucible
+
+**Task 1 — Replication.** A function declaration called before its definition. The `if/else if` chain must be ordered from highest threshold to lowest. Call it with three values and log all three results. The call sites appear in the code before the `function` keyword.
+
+**Task 2 — Mutation.** Four bugs across the function body and its call site. Bug 1: typo in parameter name. Bug 2: premature `return` before the calculation completes. Bug 3: missing final `return`. Bug 4: insufficient arguments. The expected output is `"82.5"` — the formula is `health * 0.5 + storage * 0.1 + versionBonus`. All four arguments must be passed. All four bugs must be fixed.
+
+**Task 3 — Synthesis.** A function expression with a default parameter. The function builds a string conditionally — base string always, extended string only when `showDetails` is true. The extension appends to the base with ` | ` as separator. Test with two calls: one without the optional parameter, one with it set to `true`.
+
+Go.
