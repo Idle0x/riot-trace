@@ -1,0 +1,388 @@
+---
+tierId: 2
+moduleId: 5
+lessonId: 16
+title: "map — Transforming Every Element"
+mode: "terminal"
+xpReward: 70
+syntaxHint: "const result = array.map(item => transformed);"
+
+task1Code: |
+  // TASK 1 — REPLICATION
+  // Transform raw node data into display-ready summaries.
+  //
+  const nodes = [
+    { id: "7A5r", health: 95, network: "mainnet" },
+    { id: "8BJT", health: 47, network: "devnet"  },
+    { id: "Xk91", health: 91, network: "mainnet" }
+  ];
+  //
+  // Use .map() to create a new array called summaries.
+  // Each element should be a string in this format:
+  // "[id] on [network]: [health]%"
+  //
+  // Then log summaries[0]
+  // Then log summaries.length
+  //
+  // Expected output:
+  // [7A5r] on mainnet: 95%
+  // 3
+
+task1Logic: |
+  if (!logs.some(l => l === '[7A5r] on mainnet: 95%')) throw new Error('Task Failed: summaries[0] should be "[7A5r] on mainnet: 95%". Use .map() to transform each node: `[${node.id}] on ${node.network}: ${node.health}%`.');
+  if (!logs.some(l => l === 3)) throw new Error('Task Failed: summaries.length should be 3. map() always returns an array the same length as the input.');
+
+task2Code: |
+  // TASK 2 — MUTATION
+  // This map has three bugs. Fix all of them.
+  //
+  const scores = [95, 47, 88, 71, 55];
+  //
+  // Bug 1: Missing return in full function body
+  const doubled = scores.map(score => {
+    score * 2;           // BUG 1: no return
+  });
+  //
+  // Bug 2: map used for a side effect instead of transformation
+  // (should use forEach here — but fix it to collect results instead)
+  const logged = scores.map(score => {
+    console.log(score);  // BUG 2: map should transform, not just log
+    // to fix: return a transformed value AND remove the console.log
+    // transform each score by adding 10
+  });
+  //
+  // Bug 3: The result is expected to have 5 items but something is wrong
+  const halved = scores.map((score, index) => {
+    if (index % 2 === 0) return score / 2;
+    // BUG 3: odd-indexed items have no return — they become undefined
+  });
+  //
+  console.log(doubled);   // should be: [190, 94, 176, 142, 110]
+  console.log(logged);    // should be: [105, 57, 98, 81, 65]
+  console.log(halved);    // should be: [47.5, undefined, 44, undefined, 27.5]
+  // Note: halved with undefined is CORRECT for Bug 3's fix —
+  // the bug is that it was missing the explicit return undefined
+  // which makes the intent unclear. Add: else return undefined;
+  // Actually for Bug 3: just make it return 0 for odd indices.
+  // Expected halved: [47.5, 0, 44, 0, 27.5]
+
+task2Logic: |
+  const doubledLog = logs.find(l => Array.isArray(l) && l[0] === 190);
+  if (!doubledLog) throw new Error('Task Failed: doubled should be [190, 94, 176, 142, 110]. Add a return statement inside the map callback: return score * 2.');
+  const loggedArr = logs.find(l => Array.isArray(l) && l[0] === 105);
+  if (!loggedArr) throw new Error('Task Failed: logged should be [105, 57, 98, 81, 65]. Replace console.log(score) with return score + 10. map should return a value, not just log.');
+  const halvedArr = logs.find(l => Array.isArray(l) && l[0] === 47.5);
+  if (!halvedArr) throw new Error('Task Failed: halved should be [47.5, 0, 44, 0, 27.5]. Add else return 0; for odd-indexed items so all 5 items have an explicit return value.');
+
+task3Code: |
+  // TASK 3 — SYNTHESIS
+  // Build the xandeum-pulse node enrichment pipeline.
+  //
+  const rawNodes = [
+    { id: "7A5r", health: 95, storage: 250, version: "1.2.1" },
+    { id: "8BJT", health: 47, storage: 23,  version: "1.2.0" },
+    { id: "8PjP", health: 78, storage: 180, version: "1.2.1" },
+    { id: "Bfn2", health: 55, storage: 95,  version: "1.2.0" },
+    { id: "Xk91", health: 91, storage: 310, version: "1.2.1" }
+  ];
+  //
+  const latestVersion = "1.2.1";
+  //
+  // Use .map() to create enrichedNodes — a new array where each
+  // element spreads the original node and ADDS these properties:
+  //
+  //   healthBadge:  "ELITE" if health >= 90, "STANDARD" otherwise
+  //   needsUpdate:  true if version !== latestVersion, false otherwise
+  //   storageGB:    storage value divided by 1000, rounded to 2 decimals
+  //                 (use .toFixed(2) — note: this returns a STRING)
+  //
+  // Log enrichedNodes[0].healthBadge  → "ELITE"
+  // Log enrichedNodes[1].needsUpdate  → true
+  // Log enrichedNodes[2].storageGB    → "0.18"
+  // Log enrichedNodes.length          → 5
+
+task3Logic: |
+  if (!logs.some(l => l === 'ELITE')) throw new Error('Task Failed: enrichedNodes[0].healthBadge should be "ELITE". Node 7A5r has health 95 which is >= 90. Use a ternary in the map callback.');
+  if (!logs.some(l => l === true)) throw new Error('Task Failed: enrichedNodes[1].needsUpdate should be true. Node 8BJT has version "1.2.0" which is not the latest. Use version !== latestVersion.');
+  if (!logs.some(l => l === '0.18')) throw new Error('Task Failed: enrichedNodes[2].storageGB should be "0.18". Node 8PjP has storage 180. 180 / 1000 = 0.18. Use (storage / 1000).toFixed(2).');
+  if (!logs.some(l => l === 5)) throw new Error('Task Failed: enrichedNodes.length should be 5. map() returns an array the same length as the input.');
+---
+
+## The Most Used Array Method
+
+`.map()` is the most frequently used array method in JavaScript and in React. Every list you render, every dataset you transform, every API response you reshape — all of it uses `.map()`.
+
+The core concept is simple: transform every element in an array into something new, and collect the results in a new array:
+
+```javascript
+const scores = [95, 47, 88, 71];
+const doubled = scores.map(score => score * 2);
+// [190, 94, 176, 142]
+```
+
+One array goes in. A new array comes out. The original is unchanged. The output array is always the same length as the input.
+
+---
+
+## How map Works Internally
+
+You can think of `.map()` as a `for` loop that collects return values:
+
+```javascript
+// What map does internally (conceptual):
+function map(array, transform) {
+  const result = [];
+  for (const item of array) {
+    result.push(transform(item));  // collect each return value
+  }
+  return result;
+}
+```
+
+This explains the most common mistake: forgetting `return` in a full-body callback. If the callback does not return anything, `undefined` is pushed into the result array:
+
+```javascript
+const scores = [95, 47, 88];
+
+// Concise arrow — implicit return (no braces):
+scores.map(score => score * 2)  // [190, 94, 176] ✓
+
+// Full body — MUST use explicit return:
+scores.map(score => {
+  score * 2;         // no return — pushes undefined
+})
+// [undefined, undefined, undefined] ✗
+
+scores.map(score => {
+  return score * 2;  // explicit return
+})
+// [190, 94, 176] ✓
+```
+
+**Rule:** When you use `{}` braces in a map callback, you need `return`. When you omit braces (concise body), `return` is implicit.
+
+---
+
+## Transforming Objects — The Spread Pattern
+
+The most powerful use of `.map()` is transforming arrays of objects. The spread-and-add pattern creates new objects with additional computed properties:
+
+```javascript
+const nodes = [
+  { id: "7A5r", health: 95 },
+  { id: "8BJT", health: 47 },
+  { id: "Xk91", health: 91 }
+];
+
+const enriched = nodes.map(node => ({
+  ...node,                                          // spread original
+  status: node.health > 80 ? "healthy" : "at risk", // add computed property
+  rank: null                                         // add placeholder property
+}));
+// [
+//   { id: "7A5r", health: 95, status: "healthy", rank: null },
+//   { id: "8BJT", health: 47, status: "at risk", rank: null },
+//   { id: "Xk91", health: 91, status: "healthy", rank: null }
+// ]
+```
+
+**Note the `( )` around `{ }`** in the arrow function: `node => ({ ...node })`. This is required. Without the parentheses, JavaScript cannot tell if `{` is the start of a function body or the start of an object literal. The parentheses make it unambiguous: this is an object.
+
+```javascript
+// Wrong — JavaScript thinks { is a function body:
+nodes.map(node => { ...node, status: "healthy" })  // SyntaxError
+
+// Correct — parens tell JS it's an object literal:
+nodes.map(node => ({ ...node, status: "healthy" }))
+```
+
+---
+
+## Extracting a Single Property
+
+A simple but extremely common use of `.map()`: pull one property from each object into a flat array:
+
+```javascript
+const nodes = [
+  { id: "7A5r", health: 95 },
+  { id: "8BJT", health: 47 },
+  { id: "Xk91", health: 91 }
+];
+
+const ids = nodes.map(node => node.id);
+// ["7A5r", "8BJT", "Xk91"]
+
+const healths = nodes.map(node => node.health);
+// [95, 47, 91]
+```
+
+---
+
+## map Always Returns the Same Length
+
+This is a guarantee, not just a behavior: `.map()` always returns an array with exactly the same number of elements as the input:
+
+```javascript
+[1, 2, 3].map(n => n * 2)        // [2, 4, 6] — 3 in, 3 out
+[1, 2, 3].map(n => "x")          // ["x", "x", "x"] — 3 in, 3 out
+[1, 2, 3].map(n => undefined)    // [undefined, undefined, undefined] — 3 in, 3 out
+```
+
+If you want to produce fewer elements than the input, use `.filter()` (next lesson). If you want to collapse everything into a single value, use `.reduce()` (Lesson 18).
+
+---
+
+## When NOT to Use map
+
+`.map()` is for transformation — producing a new array. Do not use it when:
+
+**You only want side effects** (logging, network calls, DOM manipulation):
+```javascript
+// Wrong — using map for side effects:
+nodes.map(node => console.log(node.id));  // returns [undefined, undefined, ...]
+// Right — use forEach:
+nodes.forEach(node => console.log(node.id));
+```
+
+**You want to filter elements out:**
+```javascript
+// Wrong — map always returns the same length:
+const healthy = nodes.map(node => {
+  if (node.health > 80) return node;
+  // else returns undefined — healthy has undefined holes
+});
+// Right — use .filter():
+const healthy = nodes.filter(node => node.health > 80);
+```
+
+---
+
+## The Index and Array Parameters
+
+Like `forEach`, `map`'s callback receives `(element, index, array)`:
+
+```javascript
+const nodes = ["7A5r", "8BJT", "Xk91"];
+
+const ranked = nodes.map((id, index) => ({
+  rank: index + 1,
+  id: id
+}));
+// [{ rank: 1, id: "7A5r" }, { rank: 2, id: "8BJT" }, { rank: 3, id: "Xk91" }]
+```
+
+---
+
+## Chaining map With Other Methods
+
+Because `.map()` returns a new array, you can call another method on the result immediately:
+
+```javascript
+const nodes = [
+  { id: "7A5r", health: 95, network: "mainnet" },
+  { id: "8BJT", health: 47, network: "devnet"  },
+  { id: "Xk91", health: 91, network: "mainnet" }
+];
+
+// Get IDs of mainnet nodes with health above 80:
+const result = nodes
+  .filter(node => node.network === "mainnet")
+  .filter(node => node.health > 80)
+  .map(node => node.id);
+// ["7A5r", "Xk91"]
+```
+
+You will build full transformation pipelines like this in Lesson 24.
+
+---
+
+## Common Mistakes
+
+**Mistake 1 — Missing return in full-body callback:**
+```javascript
+scores.map(score => {
+  score * 2;    // no return → all elements become undefined
+});
+```
+
+**Mistake 2 — Returning an object without parens in concise body:**
+```javascript
+nodes.map(node => { id: node.id })   // SyntaxError
+nodes.map(node => ({ id: node.id })) // Valid
+```
+
+**Mistake 3 — Using map for side effects:**
+```javascript
+nodes.map(node => console.log(node.id));  // forEach is the right tool
+```
+
+**Mistake 4 — Expecting map to filter:**
+```javascript
+const healthy = nodes.map(n => n.health > 80 ? n : null);
+// [node, null, node] — nulls pollute the result
+// Use .filter() instead
+```
+
+**Mistake 5 — Mutating the original inside map:**
+```javascript
+nodes.map(node => {
+  node.status = "processed";  // mutates the original — side effect
+  return node;
+});
+// Use spread instead: return { ...node, status: "processed" };
+```
+
+---
+
+## Micro-Drills
+
+**Drill 1:** Given `[1, 2, 3, 4, 5]`, write a single `.map()` that produces `["odd", "even", "odd", "even", "odd"]`.
+
+**Drill 2:** What does this produce and why?
+```javascript
+const result = [10, 20, 30].map(n => {
+  n / 2;
+});
+console.log(result);
+```
+
+**Drill 3:** Transform this array into summary strings:
+```javascript
+const transactions = [
+  { id: "tx1", amount: 5000, type: "inflow"  },
+  { id: "tx2", amount: 2000, type: "outflow" },
+  { id: "tx3", amount: 8000, type: "inflow"  }
+];
+// Expected: ["tx1: +₦5000", "tx2: -₦2000", "tx3: +₦8000"]
+// + for inflow, - for outflow. Use ternary.
+```
+
+**Drill 4:** Fix this map so it produces `[{id:"a",doubled:2},{id:"b",doubled:4}]`:
+```javascript
+const arr = [{id: "a", value: 1}, {id: "b", value: 2}];
+const result = arr.map(item => {
+  ...item,
+  doubled: item.value * 2
+});
+```
+
+---
+
+## Go Deeper
+
+- **javascript.info — Array methods — map:** https://javascript.info/array-methods#map
+- **MDN — Array.prototype.map():** https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map
+- **Web Dev Simplified — Map vs forEach:** https://www.youtube.com/watch?v=oQcAKQ2lmFI — 7 minutes, clear distinction
+- **Visualize it:** https://array-methods-cheatsheet.netlify.app — interactive diagram showing map's input-to-output transformation
+
+---
+
+## The Crucible
+
+**Task 1 — Replication.** One `.map()` call producing a string per node. Two logs: the first element and the length. The length check confirms you understand that map returns an array the same size as the input.
+
+**Task 2 — Mutation.** Three bugs, all classic map mistakes. Bug 1 is missing `return` in a full-body callback — the result is all `undefined`. Bug 2 is using map for a side effect (console.log) instead of returning a transformed value — replace the log with `return score + 10`. Bug 3 is not returning a value for all code paths — the odd-indexed branch falls through and returns `undefined`. Add `else return 0`.
+
+**Task 3 — Synthesis.** The spread-and-add enrichment pattern. Each node gets three computed properties added via spread. The `storageGB` uses `.toFixed(2)` which returns a string — so the expected log is the string `"0.18"` not the number `0.18`. Four logs confirming all three added properties work correctly and the array length is preserved.
+
+Go.
