@@ -1,0 +1,394 @@
+---
+tierId: 2
+moduleId: 6
+lessonId: 22
+title: "Closures — Functions That Remember"
+mode: "terminal"
+xpReward: 70
+syntaxHint: "function outer() { let x = 0; return () => x; }"
+
+task1Code: |
+  // TASK 1 — REPLICATION
+  // Build the riot-trace XP accumulator using closures.
+  //
+  // Write a function called createXPTracker that:
+  // - Takes an optional starting XP value (default: 0)
+  // - Returns an OBJECT with three methods, all using closures
+  //   to access the same private xp variable:
+  //
+  //   award(amount)  — adds amount to xp, returns new total
+  //   deduct(amount) — subtracts amount from xp (minimum 0),
+  //                    returns new total
+  //   getTotal()     — returns current xp without modifying it
+  //
+  // Test it:
+  const tracker = createXPTracker(100);
+  //
+  console.log(tracker.award(300));    // 400
+  console.log(tracker.award(150));    // 550
+  console.log(tracker.deduct(50));    // 500
+  console.log(tracker.getTotal());    // 500
+
+task1Logic: |
+  if (!logs.some(l => l === 400)) throw new Error('Task Failed: tracker.award(300) should return 400 (started at 100, added 300). The xp variable must be in the outer createXPTracker scope, closed over by all three methods.');
+  if (!logs.some(l => l === 550)) throw new Error('Task Failed: tracker.award(150) should return 550. The second award should ADD to the existing 400, not reset to 100+150. The closure must share the same xp variable across calls.');
+  if (!logs.some(l => l === 500)) throw new Error('Task Failed: tracker.deduct(50) should return 500. Deduct 50 from 550.');
+  if (!logs.some(l => l === 500)) throw new Error('Task Failed: tracker.getTotal() should return 500 (the current xp value, unchanged).');
+
+task2Code: |
+  // TASK 2 — MUTATION
+  // These closures have classic bugs. Fix all three.
+  //
+  // BUG 1: The classic var-in-loop closure trap.
+  // All three timeouts log the same value instead of 0, 1, 2.
+  const loggers = [];
+  for (var i = 0; i < 3; i++) {
+    loggers.push(() => i);  // BUG 1: var — all closures share the same 'i'
+  }
+  // After the loop, i = 3
+  console.log(loggers[0]());  // should be: 0
+  console.log(loggers[1]());  // should be: 1
+  console.log(loggers[2]());  // should be: 2
+  //
+  // BUG 2: This counter resets every time because count is
+  // declared inside the returned function instead of the outer scope.
+  function makeCounter() {
+    return function() {
+      let count = 0;  // BUG 2: count declared here resets on every call
+      count++;
+      return count;
+    };
+  }
+  const counter = makeCounter();
+  console.log(counter());  // should be: 1
+  console.log(counter());  // should be: 2
+  console.log(counter());  // should be: 3
+  //
+  // BUG 3: The stale closure — the greet function was created when
+  // name was "riot" and never captures the updated value.
+  // Fix it so greet always uses the current name.
+  let name = "riot";
+  const greet = () => `Hello, ${name}`;
+  name = "trace";
+  console.log(greet());  // should be: "Hello, trace" (current value)
+  // (This one might already work — check what it logs and explain why)
+
+task2Logic: |
+  if (!logs.some(l => l === 0)) throw new Error('Task Failed: loggers[0]() should return 0. Bug 1: change var to let in the for loop. With let, each iteration gets its own block-scoped i, so each closure captures a different value.');
+  if (!logs.some(l => l === 1)) throw new Error('Task Failed: loggers[1]() should return 1. Fix: for (let i = 0; ...)');
+  if (!logs.some(l => l === 2)) throw new Error('Task Failed: loggers[2]() should return 2. Fix: for (let i = 0; ...)');
+  const counterLogs = logs.filter(l => l === 1 || l === 2 || l === 3);
+  if (counterLogs.length < 3) throw new Error('Task Failed: counter() should return 1, 2, 3 on successive calls. Bug 2: move "let count = 0" to inside makeCounter() but OUTSIDE the returned function. Then count persists between calls via closure.');
+  if (!logs.some(l => l === 'Hello, trace')) throw new Error('Task Failed: greet() should return "Hello, trace". The arrow function closes over the name variable binding — when name is reassigned, greet sees the new value. This one should work once Bug 1 and 2 are fixed. If it still fails, check that you have not accidentally redeclared name inside greet.');
+
+task3Code: |
+  // TASK 3 — SYNTHESIS
+  // Build the riot-trace module state system using closures.
+  //
+  // Write a function createModuleState(moduleId) that:
+  // - Stores private state: lessonsComplete (starts 0), xp (starts 0),
+  //   and an isUnlocked flag (starts false)
+  //
+  // - Returns an object with these methods:
+  //
+  //   unlock()            — sets isUnlocked to true
+  //   completeLesson(xpAward) — if unlocked, increments lessonsComplete
+  //                             and adds xpAward to xp. Returns the
+  //                             string: "[moduleId] — Lesson [n] complete (+[xp] XP)"
+  //                             If not unlocked, returns: "[moduleId] — LOCKED"
+  //
+  //   getState()          — returns a snapshot object:
+  //                         { moduleId, lessonsComplete, xp, isUnlocked }
+  //
+  // Test:
+  const module1 = createModuleState("Module-01");
+  const module2 = createModuleState("Module-02");
+  //
+  console.log(module1.completeLesson(70));  // "Module-01 — LOCKED"
+  module1.unlock();
+  console.log(module1.completeLesson(70));  // "Module-01 — Lesson 1 complete (+70 XP)"
+  console.log(module1.completeLesson(70));  // "Module-01 — Lesson 2 complete (+70 XP)"
+  console.log(module2.completeLesson(70));  // "Module-02 — LOCKED"
+  //
+  const state = module1.getState();
+  console.log(state.lessonsComplete);       // 2
+  console.log(state.xp);                   // 140
+
+task3Logic: |
+  if (!logs.some(l => l === 'Module-01 — LOCKED')) throw new Error('Task Failed: Before unlock(), completeLesson should return "[moduleId] — LOCKED". The isUnlocked flag starts false.');
+  if (!logs.some(l => l === 'Module-01 — Lesson 1 complete (+70 XP)')) throw new Error('Task Failed: After unlock(), first completeLesson(70) should return "Module-01 — Lesson 1 complete (+70 XP)". lessonsComplete starts at 0, increments to 1 on first call.');
+  if (!logs.some(l => l === 'Module-01 — Lesson 2 complete (+70 XP)')) throw new Error('Task Failed: Second completeLesson(70) should return "Module-01 — Lesson 2 complete (+70 XP)". lessonsComplete should now be 2.');
+  if (!logs.some(l => l === 'Module-02 — LOCKED')) throw new Error('Task Failed: module2 is a separate instance with its own private state. Its isUnlocked starts false. Unlocking module1 should not affect module2.');
+  if (!logs.some(l => l === 2)) throw new Error('Task Failed: module1.getState().lessonsComplete should be 2 after two completed lessons.');
+  if (!logs.some(l => l === 140)) throw new Error('Task Failed: module1.getState().xp should be 140 (70 + 70 from two lessons).');
+---
+
+## The Concept Behind React Hooks
+
+When you write `const [count, setCount] = useState(0)`, React is using a closure to remember `count` between renders. The `count` variable persists because the setter function and the state itself are held together in a closure. Understanding closures is understanding the mechanism behind every hook you use.
+
+A closure is created whenever a function is defined inside another function. The inner function **retains access to the outer function's variables even after the outer function has finished executing**. The outer function's scope does not disappear — the inner function holds a reference to it.
+
+---
+
+## The Anatomy of a Closure
+
+```javascript
+function createCounter() {
+  let count = 0;  // this variable lives in createCounter's scope
+
+  return function increment() {
+    count++;       // increment can still access count
+    return count;  // even after createCounter() has finished
+  };
+}
+
+const counter = createCounter();
+// createCounter() has returned — normally count would be garbage collected
+// But counter holds a reference to increment, which holds a reference to count
+// So count stays alive as long as counter exists
+
+counter();  // 1
+counter();  // 2
+counter();  // 3
+```
+
+Three things happening here:
+1. `createCounter()` is called — a new scope is created with `count = 0`
+2. `createCounter()` returns — but the returned function `increment` keeps a live reference to `count`
+3. Each subsequent call to `counter()` modifies the same `count` through the closure
+
+---
+
+## Each Call Creates a New Closure
+
+Every time the outer function runs, a completely fresh scope is created. Multiple closures from the same factory are independent:
+
+```javascript
+const counter1 = createCounter();
+const counter2 = createCounter();
+
+counter1();  // 1
+counter1();  // 2
+counter2();  // 1 — independent! counter2 has its own count
+counter1();  // 3 — counter1's count is still 3
+```
+
+This is what enables the factory and module patterns from Lesson 21. `createFilter(80)` and `createFilter(50)` each have their own closure over their own `threshold` value.
+
+---
+
+## The var-in-Loop Closure Trap
+
+One of the most famous JavaScript bugs, still encountered in legacy code:
+
+```javascript
+// The trap:
+for (var i = 0; i < 3; i++) {
+  setTimeout(() => console.log(i), 100);
+}
+// After 100ms, logs: 3, 3, 3 (not 0, 1, 2)
+```
+
+Why? `var` is function-scoped — there is only ONE `i` variable shared by all three closures. By the time the timeouts fire (100ms), the loop has finished and `i` is `3`. All three functions close over the same `i`.
+
+```javascript
+// The fix — let creates a new binding per iteration:
+for (let i = 0; i < 3; i++) {
+  setTimeout(() => console.log(i), 100);
+}
+// After 100ms, logs: 0, 1, 2
+```
+
+With `let`, each loop iteration creates a new block scope with its own `i`. Each closure captures a different variable.
+
+---
+
+## The Stale Closure — React's Most Confusing Bug
+
+Closures capture the variable binding, not a snapshot of the value at a point in time. But this interacts subtly with reassignment:
+
+```javascript
+let name = "riot";
+const greet = () => `Hello, ${name}`;
+
+name = "trace";
+greet();  // "Hello, trace" — closure sees the current value of name
+```
+
+Arrow functions close over the variable binding itself. When `name` is reassigned, the binding still points to the updated value. `greet` sees `"trace"` because it reads `name` at call time, not at definition time.
+
+**The React stale closure is different.** In React, state values are captured at render time. A `useEffect` callback closes over the value of state from the render when the effect was created:
+
+```javascript
+function Counter() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      console.log(count);    // STALE — always 0 from initial render
+      setCount(count + 1);   // STALE — always sets to 0 + 1 = 1
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);  // empty deps — effect runs once, closes over count = 0
+}
+```
+
+The `count` inside the interval callback is not the live `count` variable — it is the value of `count` when the effect ran (0). Even as state updates, the closure sees the original snapshot.
+
+**Fix 1 — Updater function (most common):**
+```javascript
+setCount(prev => prev + 1);  // prev is always current — doesn't use closure
+```
+
+**Fix 2 — Add count to dependencies (re-creates the closure on change):**
+```javascript
+useEffect(() => {
+  const interval = setInterval(() => {
+    setCount(count + 1);  // now current for each render
+  }, 1000);
+  return () => clearInterval(interval);
+}, [count]);  // new closure when count changes
+```
+
+**Fix 3 — useRef (persists without triggering re-renders):**
+```javascript
+const countRef = useRef(count);
+countRef.current = count;  // always current — updated on every render
+useEffect(() => {
+  const interval = setInterval(() => {
+    setCount(countRef.current + 1);  // reads from ref, always fresh
+  }, 1000);
+}, []);
+```
+
+You will use all three patterns in Tier 3. Recognizing which pattern fits which situation comes from understanding the closure mechanics here.
+
+---
+
+## Private State via Closures — The Module Pattern
+
+Closures are the original mechanism for private state in JavaScript (before `class` and `#private` fields). The outer function's variables are completely inaccessible from outside — they are private by nature:
+
+```javascript
+function createNodeMonitor(nodeId) {
+  let healthHistory = [];  // private — nothing outside can access this directly
+  let alertThreshold = 50; // private
+
+  return {
+    recordHealth(score) {
+      healthHistory.push(score);
+      if (score < alertThreshold) {
+        return `ALERT: ${nodeId} health dropped to ${score}%`;
+      }
+      return `OK: ${nodeId} at ${score}%`;
+    },
+    setThreshold(value) {
+      alertThreshold = value;
+    },
+    getHistory() {
+      return [...healthHistory];  // return a copy — not the private array
+    }
+  };
+}
+
+const monitor = createNodeMonitor("7A5r");
+monitor.recordHealth(95);       // "OK: 7A5r at 95%"
+monitor.recordHealth(42);       // "ALERT: 7A5r health dropped to 42%"
+monitor.healthHistory;          // undefined — private
+monitor.getHistory();           // [95, 42] — copy via the public method
+```
+
+This pattern — private data, public interface — is the foundation of React's component state model. The `useState` hook hides the actual state variable and exposes only `count` and `setCount`.
+
+---
+
+## Common Mistakes
+
+**Mistake 1 — The var-in-loop trap:**
+```javascript
+for (var i = 0; i < n; i++) {
+  // closures here all share the same i
+}
+// Fix: use let
+```
+
+**Mistake 2 — Reinitializing state inside the returned function:**
+```javascript
+function makeCounter() {
+  return function() {
+    let count = 0;  // resets on every call — not a closure over shared state
+    return ++count; // always returns 1
+  };
+}
+// Fix: move let count = 0 to the outer function
+```
+
+**Mistake 3 — Expecting closures to capture values, not bindings:**
+```javascript
+let x = 5;
+const getX = () => x;
+x = 10;
+getX();  // 10 — captures the BINDING (variable), not the value 5
+// This is usually correct behavior — but surprising when not expected
+```
+
+**Mistake 4 — Sharing state unintentionally:**
+```javascript
+// If counter1 and counter2 share the same let count in an outer scope,
+// incrementing one affects the other. Each closure must have its own
+// variable from a fresh outer function call.
+```
+
+---
+
+## Micro-Drills
+
+**Drill 1:** What logs and why?
+```javascript
+function multiply(x) {
+  return y => x * y;
+}
+const triple = multiply(3);
+const times10 = multiply(10);
+console.log(triple(5));
+console.log(times10(triple(2)));
+```
+
+**Drill 2:** Fix the var-in-loop trap without changing `var` to `let`. Use an IIFE (immediately invoked function expression) to create a new scope per iteration. Hint: `(function(j) { ... })(i)`.
+
+**Drill 3:** Write a `createPrivateCounter()` that exposes `increment()`, `decrement()`, and `reset()` but makes the count value inaccessible from outside. Verify that `counter.count` returns `undefined` while `counter.increment()` returns the correct value.
+
+**Drill 4:** Why does this not work as a counter?
+```javascript
+function badCounter() {
+  return {
+    count: 0,
+    increment() { return ++this.count; }
+  };
+}
+// This works fine actually. Why is this NOT using closures?
+// And why might closures be preferable to the public property approach?
+```
+
+---
+
+## Go Deeper
+
+- **javascript.info — Variable scope, closure:** https://javascript.info/closure — the definitive written explanation with interactive examples. Read the entire article.
+- **MDN — Closures:** https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures — thorough with practical examples
+- **JavaScript Visualizer 9000:** https://www.jsv9000.app — paste any closure example and watch the scope chain and closure form visually
+- **Codesmith — JS The Hard Parts: Closure:** https://www.youtube.com/watch?v=71AtaJpJHw0 — Will Sentance's 1-hour deep dive. Best video explanation of closures that exists.
+- **Fun Fun Function — Closures:** https://www.youtube.com/watch?v=CQqwU2Ixu-U — more accessible 11-minute explanation
+
+---
+
+## The Crucible
+
+**Task 1 — Replication.** An XP tracker using the module pattern. The `xp` variable is private — no direct access. All three methods close over the same `xp`. `award` and `deduct` modify it and return the new value. `deduct` has a minimum of 0 (use `Math.max(0, xp - amount)`). Starting at 100, the four calls should produce 400, 550, 500, 500.
+
+**Task 2 — Mutation.** Three classic closure bugs. Bug 1 is `var` in a loop — change to `let`. Bug 2 is `let count` declared inside the returned function (resets every call) — move it to `makeCounter`'s scope. Bug 3 may already work — arrow functions close over the binding, and reassigning `name` updates what `greet` sees. Verify it logs `"Hello, trace"` and understand why.
+
+**Task 3 — Synthesis.** A module state system. Each call to `createModuleState` creates completely independent private state. The two module instances must not share variables. `completeLesson` is conditional on `isUnlocked`. `lessonsComplete` increments each call. The `getState()` snapshot confirms the private values without direct access.
+
+Go.
