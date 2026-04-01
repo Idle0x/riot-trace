@@ -1,0 +1,402 @@
+---
+tierId: 2
+moduleId: 5
+lessonId: 18
+title: "reduce & sort — Collapsing and Ordering"
+mode: "terminal"
+xpReward: 70
+syntaxHint: "const total = array.reduce((acc, item) => acc + item, 0);"
+
+task1Code: |
+  // TASK 1 — REPLICATION
+  // Calculate financial metrics from the riot-sop transaction log.
+  //
+  const transactions = [
+    { id: "tx1", amount: 50000, type: "inflow"  },
+    { id: "tx2", amount: 2000,  type: "outflow" },
+    { id: "tx3", amount: 15000, type: "outflow" },
+    { id: "tx4", amount: 8000,  type: "inflow"  },
+    { id: "tx5", amount: 25000, type: "inflow"  }
+  ];
+  //
+  // 1. Use .reduce() to calculate total inflow amount.
+  //    (Only add amounts where type === "inflow")
+  //    Log the result.
+  //
+  // 2. Use .reduce() to calculate net flow:
+  //    add inflows, subtract outflows.
+  //    Log the result.
+  //
+  // 3. Sort a COPY of transactions by amount descending (largest first).
+  //    Log the id of the first item in the sorted array.
+  //
+  // Expected output:
+  // 83000
+  // 66000
+  // tx1
+
+task1Logic: |
+  if (!logs.some(l => l === 83000)) throw new Error('Task Failed: Total inflow is 50000 + 8000 + 25000 = 83000. Use reduce: start at 0, add amount only when type === "inflow".');
+  if (!logs.some(l => l === 66000)) throw new Error('Task Failed: Net flow is 83000 (inflows) - 17000 (outflows) = 66000. Use reduce: add when inflow, subtract when outflow.');
+  if (!logs.some(l => l === 'tx1')) throw new Error('Task Failed: The largest transaction is tx1 (50000). Sort a copy of transactions by amount descending using [...transactions].sort((a,b) => b.amount - a.amount). Log sorted[0].id.');
+
+task2Code: |
+  // TASK 2 — MUTATION
+  // This reduce/sort code has four bugs. Fix all of them.
+  //
+  const scores = [95, 47, 88, 71, 55, 91, 62];
+  //
+  // BUG 1: reduce is missing its initial value
+  const sum = scores.reduce((acc, score) => acc + score);
+  // (Works accidentally for numbers but is dangerous — always provide initial value)
+  // Fix: add , 0 as the second argument to reduce
+  //
+  // BUG 2: reduce callback doesn't return the accumulator
+  const max = scores.reduce((acc, score) => {
+    if (score > acc) acc = score;
+    // missing return!
+  }, 0);
+  //
+  // BUG 3: sort mutates the original — should copy first
+  const sortedAsc = scores.sort((a, b) => a - b);
+  // After this line, 'scores' itself is sorted — the original is modified
+  // Fix: const sortedAsc = [...scores].sort((a, b) => a - b);
+  //
+  // BUG 4: sort comparator is in wrong order for descending
+  const sortedDesc = [...scores].sort((a, b) => a - b);  // BUG 4: should be b - a
+  //
+  console.log(sum);           // should be: 509
+  console.log(max);           // should be: 95
+  console.log(sortedAsc[0]);  // should be: 47 (smallest)
+  console.log(sortedDesc[0]); // should be: 95 (largest)
+
+task2Logic: |
+  if (!logs.some(l => l === 509)) throw new Error('Task Failed: Sum of [95,47,88,71,55,91,62] = 509. Add the initial value 0 as second argument to reduce: scores.reduce((acc, score) => acc + score, 0).');
+  if (!logs.some(l => l === 95)) throw new Error('Task Failed: Max score is 95. The reduce callback must return the accumulator: add return acc; at the end of the callback body, or return score > acc ? score : acc;');
+  if (!logs.some(l => l === 47)) throw new Error('Task Failed: Smallest score is 47. Sort ascending with (a, b) => a - b. Copy first to avoid mutating the original.');
+  if (!logs.some(l => l === 95)) throw new Error('Task Failed: Largest score should be first in descending sort. Change (a, b) => a - b to (a, b) => b - a for the descending sort.');
+
+task3Code: |
+  // TASK 3 — SYNTHESIS
+  // Build the complete xandeum-pulse network statistics object
+  // using a single reduce call.
+  //
+  const nodes = [
+    { id: "7A5r", health: 95, network: "mainnet", storage: 250 },
+    { id: "8BJT", health: 47, network: "mainnet", storage: 23  },
+    { id: "8PjP", health: 78, network: "devnet",  storage: 180 },
+    { id: "Bfn2", health: 55, network: "mainnet", storage: 95  },
+    { id: "Xk91", health: 91, network: "devnet",  storage: 310 }
+  ];
+  //
+  // Use a single .reduce() to produce an object called stats with:
+  //   totalNodes:    total number of nodes (hint: acc.totalNodes + 1)
+  //   totalStorage:  sum of all storage values
+  //   avgHealth:     calculated AFTER reduce as totalHealth / totalNodes
+  //                  (track totalHealth inside reduce, compute avg outside)
+  //   mainnetCount:  count of mainnet nodes
+  //   topNode:       the node object with the highest health score
+  //
+  // Start your accumulator with this shape:
+  // { totalNodes: 0, totalStorage: 0, totalHealth: 0, mainnetCount: 0, topNode: null }
+  //
+  // After the reduce, add avgHealth to the stats object.
+  //
+  // Log stats.totalNodes   → 5
+  // Log stats.totalStorage → 858
+  // Log stats.avgHealth    → 73.2
+  // Log stats.mainnetCount → 3
+  // Log stats.topNode.id   → "7A5r"
+
+task3Logic: |
+  if (!logs.some(l => l === 5)) throw new Error('Task Failed: stats.totalNodes should be 5. Increment acc.totalNodes by 1 in each reduce iteration.');
+  if (!logs.some(l => l === 858)) throw new Error('Task Failed: stats.totalStorage should be 858 (250+23+180+95+310). Add acc.totalStorage += node.storage in reduce.');
+  if (!logs.some(l => l === 73.2)) throw new Error('Task Failed: stats.avgHealth should be 73.2 ((95+47+78+55+91)/5 = 366/5 = 73.2). Track totalHealth in reduce, then compute avgHealth = totalHealth/totalNodes after reduce and add it to stats.');
+  if (!logs.some(l => l === 3)) throw new Error('Task Failed: stats.mainnetCount should be 3 (7A5r, 8BJT, Bfn2). Increment when node.network === "mainnet".');
+  if (!logs.some(l => l === '7A5r')) throw new Error('Task Failed: stats.topNode.id should be "7A5r" (health 95, the highest). Track topNode: if node.health > acc.topNode?.health || !acc.topNode, update acc.topNode = node.');
+---
+
+## Collapsing and Ordering
+
+You now have three of the four core array transformation tools. `forEach` runs a function on each element. `map` transforms each element into something new. `filter` removes elements that don't qualify.
+
+The fourth tool — `reduce` — does something different: it collapses an entire array into a single value. That value can be a number, a string, an object, or even another array.
+
+`sort` is a different category: it reorders the elements of an array. Together, `reduce` and `sort` complete your data manipulation toolkit.
+
+---
+
+## reduce — The Swiss Army Knife
+
+```javascript
+array.reduce(callback, initialValue)
+```
+
+The callback receives two things:
+- `acc` — the accumulator: the running result, starts as `initialValue`
+- `current` — the current element being processed
+
+Whatever the callback returns becomes the new `acc` for the next iteration:
+
+```javascript
+const scores = [95, 47, 88, 71];
+
+const total = scores.reduce((acc, score) => {
+  return acc + score;
+}, 0);
+// Iteration 1: acc=0,  score=95 → returns 95
+// Iteration 2: acc=95, score=47 → returns 142
+// Iteration 3: acc=142,score=88 → returns 230
+// Iteration 4: acc=230,score=71 → returns 301
+// Result: 301
+```
+
+The initial value `0` is the starting point for `acc`. If you omit it, `reduce` uses the first array element as the initial `acc` and starts processing from the second element — which works for simple sums but causes unexpected behavior in most other cases. **Always provide an initial value.**
+
+---
+
+## The Return Rule — Most Critical
+
+The most common `reduce` bug: forgetting to return the accumulator:
+
+```javascript
+// WRONG — acc is updated but never returned:
+const max = scores.reduce((acc, score) => {
+  if (score > acc) acc = score;
+  // no return!
+}, 0);
+// max is undefined — the callback returned nothing on the last iteration
+
+// CORRECT — always return acc:
+const max = scores.reduce((acc, score) => {
+  if (score > acc) acc = score;
+  return acc;
+}, 0);
+
+// Or with ternary:
+const max = scores.reduce((acc, score) => score > acc ? score : acc, 0);
+```
+
+Every path through the reduce callback must return `acc`. If any iteration returns `undefined`, that becomes the new `acc`, and everything after that is wrong.
+
+---
+
+## reduce to a Number
+
+```javascript
+const transactions = [
+  { amount: 50000, type: "inflow"  },
+  { amount: 2000,  type: "outflow" },
+  { amount: 15000, type: "outflow" },
+  { amount: 8000,  type: "inflow"  }
+];
+
+// Sum all amounts:
+const total = transactions.reduce((acc, tx) => acc + tx.amount, 0);
+// 75000
+
+// Net flow (add inflows, subtract outflows):
+const net = transactions.reduce((acc, tx) => {
+  return tx.type === "inflow"
+    ? acc + tx.amount
+    : acc - tx.amount;
+}, 0);
+// 41000
+
+// Count items matching a condition:
+const inflowCount = transactions.reduce(
+  (acc, tx) => tx.type === "inflow" ? acc + 1 : acc,
+  0
+);
+// 2
+```
+
+---
+
+## reduce to an Object — Grouping and Aggregating
+
+`reduce` becomes most powerful when the accumulator is an object:
+
+```javascript
+const nodes = [
+  { id: "7A5r", network: "mainnet" },
+  { id: "8BJT", network: "devnet"  },
+  { id: "8PjP", network: "mainnet" },
+  { id: "Xk91", network: "devnet"  }
+];
+
+// Group nodes by network:
+const byNetwork = nodes.reduce((acc, node) => {
+  const net = node.network;
+  if (!acc[net]) acc[net] = [];    // create array if first in this group
+  acc[net].push(node);             // add to the group
+  return acc;                      // always return acc
+}, {});
+// {
+//   mainnet: [{ id: "7A5r"... }, { id: "8PjP"... }],
+//   devnet:  [{ id: "8BJT"... }, { id: "Xk91"... }]
+// }
+
+// Count by network:
+const counts = nodes.reduce((acc, node) => {
+  acc[node.network] = (acc[node.network] || 0) + 1;
+  return acc;
+}, {});
+// { mainnet: 2, devnet: 2 }
+```
+
+---
+
+## sort — Reordering Elements
+
+`sort()` reorders the elements of an array **in place** (mutates the original) and returns the sorted array.
+
+**Always sort a copy** unless you deliberately want to mutate the original:
+
+```javascript
+const scores = [95, 47, 88, 71];
+
+// DANGER — sorts in place:
+scores.sort();                       // mutates scores
+const sorted = scores.sort();        // sorted and scores are the same array!
+
+// SAFE — sort a copy:
+const sorted = [...scores].sort();   // scores unchanged
+```
+
+---
+
+## The Comparator Function
+
+Without a comparator, `sort` converts everything to strings and sorts lexicographically (alphabetically). This breaks number sorting:
+
+```javascript
+[10, 1, 20, 2, 100].sort()
+// [1, 10, 100, 2, 20] — alphabetical, NOT numeric!
+```
+
+The comparator function receives two elements `(a, b)` and must return:
+- Negative number → `a` comes before `b`
+- Zero → order unchanged
+- Positive number → `b` comes before `a`
+
+```javascript
+// Numeric ascending (smallest first):
+[...scores].sort((a, b) => a - b)
+// a - b: if a < b → negative → a comes first (correct for ascending)
+
+// Numeric descending (largest first):
+[...scores].sort((a, b) => b - a)
+// b - a: if b > a → positive → b comes first (correct for descending)
+
+// Strings ascending:
+["banana", "apple", "cherry"].sort((a, b) => a.localeCompare(b))
+
+// Sorting objects by property:
+nodes.sort((a, b) => b.health - a.health)  // descending by health
+```
+
+---
+
+## Combining sort With Other Methods
+
+```javascript
+// Top 3 healthiest mainnet nodes:
+const leaderboard = nodes
+  .filter(node => node.network === "mainnet")
+  .sort((a, b) => b.health - a.health)
+  .slice(0, 3)
+  .map((node, index) => ({
+    rank: index + 1,
+    id: node.id,
+    health: node.health
+  }));
+```
+
+Read it as a pipeline: filter → sort → take top 3 → format for display. This is precisely what your xandeum-pulse leaderboard page does.
+
+---
+
+## Common Mistakes
+
+**Mistake 1 — Missing initial value in reduce:**
+```javascript
+[].reduce((acc, n) => acc + n)
+// TypeError: Reduce of empty array with no initial value
+// Always provide initial value: .reduce((acc, n) => acc + n, 0)
+```
+
+**Mistake 2 — Forgetting to return acc:**
+```javascript
+items.reduce((acc, item) => {
+  acc.count++;
+  // missing return acc!
+}, { count: 0 });
+```
+
+**Mistake 3 — Sorting without copying:**
+```javascript
+const sorted = items.sort((a, b) => a - b);
+// items itself is now sorted — use [...items].sort()
+```
+
+**Mistake 4 — Wrong sort direction:**
+```javascript
+// For descending, b - a (not a - b):
+items.sort((a, b) => a - b)  // ascending — smallest first
+items.sort((a, b) => b - a)  // descending — largest first
+```
+
+**Mistake 5 — Sorting numbers without a comparator:**
+```javascript
+[10, 1, 20, 2].sort()        // [1, 10, 2, 20] — string sort, wrong!
+[10, 1, 20, 2].sort((a,b) => a - b)  // [1, 2, 10, 20] — numeric sort, correct
+```
+
+---
+
+## Micro-Drills
+
+**Drill 1:** Using `reduce`, find the node with the lowest health score from the nodes array.
+
+**Drill 2:** What is wrong with this and what does it produce?
+```javascript
+const total = [10, 20, 30].reduce((acc, n) => {
+  acc + n;
+}, 0);
+```
+
+**Drill 3:** Sort `["banana", "Apple", "cherry", "apple"]` alphabetically case-insensitively. What method ensures case-insensitive comparison?
+
+**Drill 4:** Without running it, predict the result:
+```javascript
+const arr = [3, 1, 4, 1, 5, 9, 2, 6];
+const result = [...arr]
+  .sort((a, b) => b - a)
+  .slice(0, 3)
+  .reduce((acc, n) => acc + n, 0);
+console.log(result);
+```
+
+---
+
+## Go Deeper
+
+- **javascript.info — Array methods — reduce:** https://javascript.info/array-methods#reduce-reduceright
+- **javascript.info — Array methods — sort:** https://javascript.info/array-methods#sort-fn
+- **MDN — Array.prototype.reduce():** https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce
+- **MDN — Array.prototype.sort():** https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort
+- **Visual reduce explainer:** https://dev.to/producthackers/solving-problems-with-reduce-49e3 — step-by-step visual walkthrough of complex reduce operations
+- **Fireship — JavaScript Array reduce in 100 Seconds:** https://www.youtube.com/watch?v=tVCYa_bnITg
+
+---
+
+## The Crucible
+
+**Task 1 — Replication.** Two `reduce` operations and one `sort`. The conditional reduce for net flow uses a ternary inside the callback — add when inflow, subtract when outflow. The sort requires copying first (`[...transactions]`) and using `b.amount - a.amount` for descending.
+
+**Task 2 — Mutation.** Four bugs. Bug 1: missing initial value (add `, 0`). Bug 2: missing `return acc` in the max-finding reduce. Bug 3: sorting without copying first (the original `scores` gets mutated). Bug 4: wrong comparator direction for descending. Fix all four — the outputs are specific numbers that confirm each fix.
+
+**Task 3 — Synthesis.** One `reduce` call building a multi-property stats object. The accumulator starts with a predefined shape. Each property tracks something different: count, sum, conditional count, and object tracking (topNode). `avgHealth` is computed after the reduce using values stored in the stats object. Five separate logs confirming each stat. This is the pattern used in every real-world analytics dashboard.
+
+Go.
