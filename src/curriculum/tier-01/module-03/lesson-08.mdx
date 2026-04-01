@@ -1,0 +1,417 @@
+---
+tierId: 1
+moduleId: 3
+lessonId: 8
+title: "The If Statement — Making Decisions"
+mode: "terminal"
+xpReward: 70
+syntaxHint: "if (condition) { } else { }"
+
+task1Code: |
+  // TASK 1 — REPLICATION
+  // A node is considered healthy if its health score is above 80.
+  // Write an if/else that logs "HEALTHY" if nodeHealth is above 80,
+  // or "AT RISK" if it is not.
+  //
+  // Use this value:
+  const nodeHealth = 95;
+  //
+  // Expected output: HEALTHY
+
+task1Logic: |
+  if (!logs.some(l => l === 'HEALTHY')) throw new Error('Task Failed: nodeHealth is 95, which is above 80. Your if condition should produce "HEALTHY". Check that your condition uses > 80 and your log outputs the exact string "HEALTHY".');
+
+task2Code: |
+  // TASK 2 — MUTATION
+  // This code should log "UPDATE AVAILABLE" when a node is behind
+  // on its version, but the condition logic is inverted — it logs
+  // "UP TO DATE" for an outdated node and "UPDATE AVAILABLE" for
+  // a current one. Fix the condition without changing the log strings.
+  //
+  const currentVersion = "1.2.0";
+  const latestVersion = "1.2.1";
+  //
+  if (currentVersion === latestVersion) {
+    console.log("UPDATE AVAILABLE");
+  } else {
+    console.log("UP TO DATE");
+  }
+
+task2Logic: |
+  if (!logs.some(l => l === 'UPDATE AVAILABLE')) throw new Error('Task Failed: currentVersion "1.2.0" does not equal latestVersion "1.2.1", so the node needs an update. Fix the condition so that inequality (not equality) triggers "UPDATE AVAILABLE".');
+
+task3Code: |
+  // TASK 3 — SYNTHESIS
+  // The riot-trace XP ranking system classifies operators by their
+  // total XP. Write an if/else if/else chain that logs the correct
+  // rank label for the given XP value.
+  //
+  // Use this value:
+  const totalXP = 4200;
+  //
+  // Ranking thresholds:
+  // 5000 or above  → "ELITE OPERATOR"
+  // 2500 to 4999   → "SENIOR OPERATOR"
+  // 1000 to 2499   → "OPERATOR"
+  // below 1000     → "RECRUIT"
+  //
+  // Expected output for 4200: SENIOR OPERATOR
+
+task3Logic: |
+  if (!logs.some(l => l === 'SENIOR OPERATOR')) throw new Error('Task Failed: totalXP is 4200, which falls in the 2500–4999 range. Expected "SENIOR OPERATOR". Check your threshold conditions — make sure they use >= for the lower bound and the chain evaluates top-to-bottom.');
+---
+
+## Why Decisions Are Everything
+
+Your xandeum-pulse dashboard does not show the same thing for every node. A node with health 95 gets a green badge. A node with health 47 gets a red alert. A node running version 1.2.0 gets an "UPDATE" indicator. A node on devnet is styled differently from a node on mainnet.
+
+Every one of those visual differences is driven by a conditional somewhere in the code. An `if` statement evaluated a value, got `true` or `false`, and chose which path to take.
+
+This lesson is about writing those decisions precisely. Not just making them work — making them readable, correctly ordered, and covering every case.
+
+---
+
+## The if Statement — Full Anatomy
+
+```javascript
+if (condition) {
+  // this block runs when condition is true
+}
+```
+
+The condition inside the parentheses is evaluated. If it is truthy, the block executes. If it is falsy, the block is skipped entirely.
+
+```javascript
+const health = 95;
+
+if (health > 80) {
+  console.log("Node is healthy");
+}
+// Output: Node is healthy
+// Because 95 > 80 evaluates to true
+```
+
+```javascript
+const health = 45;
+
+if (health > 80) {
+  console.log("Node is healthy");
+}
+// Output: (nothing)
+// Because 45 > 80 evaluates to false — the block is skipped
+```
+
+---
+
+## if/else — Two Paths
+
+When you need to handle both outcomes — when the condition is true AND when it is false — add an `else` block:
+
+```javascript
+const health = 45;
+
+if (health > 80) {
+  console.log("HEALTHY");
+} else {
+  console.log("AT RISK");
+}
+// Output: AT RISK
+```
+
+One of the two blocks always runs. Never both. Never neither. This is guaranteed.
+
+```javascript
+// The full anatomy:
+if (condition) {
+  // runs when condition is truthy
+} else {
+  // runs when condition is falsy
+  // "else" means "in every other case"
+}
+```
+
+---
+
+## if/else if/else — Multiple Conditions
+
+When you have more than two possible outcomes, chain `else if` blocks:
+
+```javascript
+const health = 68;
+
+if (health >= 90) {
+  console.log("Excellent");
+} else if (health >= 70) {
+  console.log("Good");
+} else if (health >= 50) {
+  console.log("Warning");
+} else {
+  console.log("Critical");
+}
+// Output: Warning
+```
+
+**The evaluation order is critical.** JavaScript tests each condition from top to bottom. The first condition that is `true` executes its block. All remaining conditions are skipped — even if they would also be true.
+
+```javascript
+// This produces the wrong result because of ordering:
+const health = 95;
+
+if (health >= 50) {
+  console.log("Warning");       // prints this — 95 >= 50 is true
+} else if (health >= 90) {
+  console.log("Excellent");     // never reached — the first condition won
+}
+// Output: Warning  ← wrong for health = 95
+
+// Correct — test most specific (highest) first:
+if (health >= 90) {
+  console.log("Excellent");     // 95 >= 90 is true — prints this
+} else if (health >= 50) {
+  console.log("Warning");       // never reached
+}
+// Output: Excellent  ← correct
+```
+
+**Rule:** In an `if/else if` chain that uses `>=` or `>`, write the highest threshold first and descend. The first match wins.
+
+---
+
+## The else Block Is Optional
+
+You do not always need an `else`:
+
+```javascript
+const version = "1.2.0";
+const latest = "1.2.1";
+
+if (version !== latest) {
+  console.log("UPDATE AVAILABLE");
+}
+// If version equals latest, nothing happens — that is fine
+// Not every condition needs two paths
+```
+
+Only add `else` when there is genuinely something to do in the "false" case. Unnecessary `else` blocks add code without adding meaning.
+
+---
+
+## Conditions Are Just Expressions
+
+Any expression that produces a truthy or falsy value works as a condition. You are not limited to comparisons:
+
+```javascript
+// Boolean variable directly:
+const isOnline = true;
+if (isOnline) { console.log("Node reachable"); }
+
+// Function return value:
+if (nodes.includes("mainnet-01")) { console.log("Node found"); }
+
+// Negation:
+const isOffline = false;
+if (!isOffline) { console.log("Node is reachable"); }
+
+// String (truthy if non-empty):
+const network = "mainnet";
+if (network) { console.log("Network is set"); }
+
+// Number (truthy if non-zero):
+const nodeCount = 201;
+if (nodeCount) { console.log("Nodes exist"); }
+```
+
+Anything falsy (`false`, `0`, `""`, `null`, `undefined`, `NaN`) skips the block. Everything else executes it.
+
+---
+
+## Nested Conditions
+
+You can place `if` statements inside other `if` statements:
+
+```javascript
+const health = 85;
+const network = "mainnet";
+
+if (health > 80) {
+  if (network === "mainnet") {
+    console.log("Healthy mainnet node");
+  } else {
+    console.log("Healthy devnet node");
+  }
+} else {
+  console.log("Node needs attention regardless of network");
+}
+```
+
+Use nesting carefully. More than two levels deep becomes hard to read. If you find yourself deeply nested, the logical operators (`&&`, `||`) from the next lesson usually produce cleaner code.
+
+---
+
+## Curly Braces — Always Use Them
+
+JavaScript technically allows you to omit the curly braces when a block contains only one statement:
+
+```javascript
+// Valid but dangerous:
+if (health > 80) console.log("HEALTHY");
+
+// This looks like it will check the version too, but it won't:
+if (health > 80)
+  console.log("HEALTHY");
+  console.log("Version: 1.2.1");  // this ALWAYS runs — it's outside the if
+```
+
+The second `console.log` is not inside the `if` block. It runs regardless. This is one of the most common sources of subtle bugs in JavaScript code. Real codebases have shipped serious bugs because of this exact pattern.
+
+**Always use curly braces.** No exceptions. It costs two characters and eliminates an entire category of bug.
+
+---
+
+## Reading Your Own Conditionals
+
+A skill that separates confident developers from uncertain ones: reading a condition out loud and being able to say immediately what it does.
+
+Practice this on every condition you write:
+
+```javascript
+if (health >= 90 && network === "mainnet") { }
+// "If health is 90 or above AND the network is exactly mainnet"
+
+if (!isLoading && data !== null) { }
+// "If NOT loading AND data is not null"
+
+if (xp >= 5000 || isAdmin) { }
+// "If XP is 5000 or above OR the user is an admin"
+```
+
+If you cannot read your condition out loud fluently, it is probably too complex. Break it into a named boolean:
+
+```javascript
+// Hard to read:
+if (node.health > 80 && node.network === "mainnet" && node.version === latestVersion) { }
+
+// Readable:
+const isEliteMainnetNode = node.health > 80
+  && node.network === "mainnet"
+  && node.version === latestVersion;
+
+if (isEliteMainnetNode) { }
+```
+
+The named boolean documents what the condition means. The raw condition documents how it is calculated. Both are valuable. The named version is almost always more readable.
+
+---
+
+## Common Mistakes
+
+**Mistake 1 — Assignment instead of comparison:**
+```javascript
+const health = 95;
+if (health = 80) { }   // ALWAYS true — you assigned 80 to health
+if (health === 80) { } // comparison — only true when health is exactly 80
+// The linter will catch this. TypeScript will catch this.
+// Both are reasons to use strict mode and TypeScript.
+```
+
+**Mistake 2 — Wrong order in chained conditions:**
+```javascript
+// Wrong — will never reach the Excellent branch for high scores:
+if (health >= 50) { console.log("Warning"); }
+else if (health >= 90) { console.log("Excellent"); }
+
+// Correct — most specific condition first:
+if (health >= 90) { console.log("Excellent"); }
+else if (health >= 50) { console.log("Warning"); }
+```
+
+**Mistake 3 — Missing curly braces:**
+```javascript
+if (isOnline)
+  console.log("online");
+  console.log("and this always runs"); // not inside the if!
+```
+
+**Mistake 4 — Using = instead of === in the condition:**
+```javascript
+// = is assignment. === is comparison.
+if (network = "mainnet") { }   // assigns "mainnet" to network, always truthy
+if (network === "mainnet") { } // compares, only true when network is "mainnet"
+```
+
+---
+
+## Micro-Drills
+
+**Drill 1:** Predict the output of each snippet:
+
+```javascript
+// Snippet A:
+const score = 75;
+if (score >= 90) {
+  console.log("A");
+} else if (score >= 70) {
+  console.log("B");
+} else {
+  console.log("C");
+}
+
+// Snippet B:
+const nodes = 0;
+if (nodes) {
+  console.log("nodes exist");
+} else {
+  console.log("no nodes");
+}
+
+// Snippet C:
+const version = "1.2.1";
+if (version !== "1.2.1") {
+  console.log("outdated");
+}
+```
+
+**Drill 2:** Write an `if/else` that checks if a network string is exactly `"mainnet"` and logs `"Production"` or `"Non-production"` accordingly.
+
+**Drill 3:** This chain has an ordering bug. Find it and fix it:
+```javascript
+const xp = 3500;
+if (xp >= 1000) {
+  console.log("Operator");
+} else if (xp >= 2500) {
+  console.log("Senior Operator");
+} else if (xp >= 5000) {
+  console.log("Elite Operator");
+} else {
+  console.log("Recruit");
+}
+```
+
+**Drill 4:** What is wrong with this code? What does it actually do?
+```javascript
+const health = 95;
+if (health > 80)
+  console.log("healthy");
+  console.log("this also prints");
+```
+
+---
+
+## Go Deeper
+
+- **javascript.info — Conditional branching:** https://javascript.info/ifelse — clean explanation with interactive examples
+- **MDN — if...else:** https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/if...else — official reference
+- **Fireship — JavaScript if/else in 100 Seconds:** https://www.youtube.com/watch?v=754-WlD7Ma8 — fast visual recap
+- **JavaScript Visualizer 9000:** https://www.jsv9000.app — paste any of your if/else chains and step through which branch executes for a given value
+
+---
+
+## The Crucible
+
+**Task 1 — Replication.** A standard two-path health check. The condition is straightforward. The output strings must match exactly — `"HEALTHY"` and `"AT RISK"` in all caps. Case matters.
+
+**Task 2 — Mutation.** The logic is backwards. The condition currently checks for equality when it should check for inequality — or the branches are swapped. Read both strings and both values, determine what the correct condition should be, and fix exactly that. One change.
+
+**Task 3 — Synthesis.** Four possible outcomes from a single value. The chain must be ordered correctly from highest threshold to lowest. If you put the `>= 1000` condition first, a value of `4200` will match it and log `"OPERATOR"` instead of `"SENIOR OPERATOR"`. Write the thresholds in the correct order.
+
+Go.
