@@ -1,0 +1,344 @@
+---
+tierId: 2
+moduleId: 5
+lessonId: 15
+title: "forEach — Iteration With a Function"
+mode: "terminal"
+xpReward: 70
+syntaxHint: "array.forEach(item => { console.log(item); });"
+
+task1Code: |
+  // TASK 1 — REPLICATION
+  // Use forEach to log a formatted summary of each node.
+  //
+  const nodes = [
+    { id: "7A5r", health: 95, network: "mainnet" },
+    { id: "8BJT", health: 47, network: "devnet"  },
+    { id: "Xk91", health: 91, network: "mainnet" }
+  ];
+  //
+  // Use forEach with all three callback parameters:
+  // the node itself, its index, and the full array.
+  //
+  // For each node, log this format:
+  // "[index] id — health% (of total)"
+  // where total is the length of the full array.
+  //
+  // Expected output (3 lines):
+  // [0] 7A5r — 95% (of 3)
+  // [1] 8BJT — 47% (of 3)
+  // [2] Xk91 — 91% (of 3)
+
+task1Logic: |
+  if (!logs.some(l => l === '[0] 7A5r — 95% (of 3)')) throw new Error('Task Failed: First line should be "[0] 7A5r — 95% (of 3)". Use all three forEach parameters: (node, index, array). Format: `[${index}] ${node.id} — ${node.health}% (of ${array.length})`.');
+  if (!logs.some(l => l === '[1] 8BJT — 47% (of 3)')) throw new Error('Task Failed: Second line should be "[1] 8BJT — 47% (of 3)".');
+  if (!logs.some(l => l === '[2] Xk91 — 91% (of 3)')) throw new Error('Task Failed: Third line should be "[2] Xk91 — 91% (of 3)".');
+
+task2Code: |
+  // TASK 2 — MUTATION
+  // This code tries to use forEach to build a summary string
+  // and total up health scores, but has three bugs.
+  //
+  const nodes = [
+    { id: "7A5r", health: 95 },
+    { id: "8BJT", health: 47 },
+    { id: "Xk91", health: 91 }
+  ];
+  //
+  let totalHealth = 0;
+  const ids = [];
+  //
+  nodes.forEach(node => {
+    return totalHealth + node.health;   // BUG 1: should mutate, not return
+    ids.push(node.id);                  // BUG 2: unreachable — return is above
+  });
+  //
+  // BUG 3: forEach does not return an array — this is wrong
+  const result = nodes.forEach(n => n.id);
+  //
+  console.log(totalHealth);            // should be: 233
+  console.log(ids);                    // should be: ["7A5r", "8BJT", "Xk91"]
+  console.log(ids.join(", "));         // should be: "7A5r, 8BJT, Xk91"
+
+task2Logic: |
+  if (!logs.some(l => l === 233)) throw new Error('Task Failed: totalHealth should be 233 (95 + 47 + 91). Remove the return keyword and use += to accumulate: totalHealth += node.health.');
+  const idsLog = logs.find(l => Array.isArray(l));
+  if (!idsLog || idsLog.length !== 3) throw new Error('Task Failed: ids array should have 3 elements. The ids.push(node.id) line is unreachable because of the return above it. Fix totalHealth accumulation to not use return, then ids.push will execute.');
+  if (!logs.some(l => l === '7A5r, 8BJT, Xk91')) throw new Error('Task Failed: ids.join(", ") should produce "7A5r, 8BJT, Xk91". Fix the array first.');
+
+task3Code: |
+  // TASK 3 — SYNTHESIS
+  // Process the full riot-trace node dataset.
+  //
+  const nodes = [
+    { id: "7A5r", health: 95, network: "mainnet", version: "1.2.1" },
+    { id: "8BJT", health: 47, network: "mainnet", version: "1.2.0" },
+    { id: "8PjP", health: 78, network: "devnet",  version: "1.2.1" },
+    { id: "Bfn2", health: 55, network: "mainnet", version: "1.2.0" },
+    { id: "Xk91", health: 91, network: "devnet",  version: "1.2.1" }
+  ];
+  //
+  const latestVersion = "1.2.1";
+  //
+  // Using a SINGLE forEach loop, do all of the following:
+  //
+  // 1. Count how many nodes need a version update
+  //    (version !== latestVersion)
+  //
+  // 2. Count how many nodes are on mainnet
+  //
+  // 3. Find the node with the highest health score and
+  //    store it in a variable called topNode
+  //
+  // After the loop, log three lines:
+  // "Updates needed: X"
+  // "Mainnet nodes: X"
+  // "Top node: [id] at [health]%"
+  //
+  // Expected output:
+  // Updates needed: 2
+  // Mainnet nodes: 3
+  // Top node: 7A5r at 95%
+
+task3Logic: |
+  if (!logs.some(l => l === 'Updates needed: 2')) throw new Error('Task Failed: 2 nodes have version "1.2.0" (not the latest "1.2.1"). Log "Updates needed: 2".');
+  if (!logs.some(l => l === 'Mainnet nodes: 3')) throw new Error('Task Failed: 3 nodes are on mainnet (7A5r, 8BJT, Bfn2). Log "Mainnet nodes: 3".');
+  if (!logs.some(l => l === 'Top node: 7A5r at 95%')) throw new Error('Task Failed: The highest health score is 95 (node 7A5r). Log "Top node: 7A5r at 95%". Track the top node by comparing each node\'s health to the current highest inside the forEach.');
+---
+
+## Iteration With a Function
+
+In Lesson 14 you used `for` and `for...of` to iterate manually. Both work. Both are explicit about their mechanics. But modern JavaScript codebases use a different approach for iteration: passing a function to the array that runs it for each element.
+
+`forEach` is the first and most direct of these. It does exactly what `for...of` does — visits every element — but instead of a loop body you write a callback function:
+
+```javascript
+// for...of version:
+for (const node of nodes) {
+  console.log(node.id);
+}
+
+// forEach version:
+nodes.forEach(node => {
+  console.log(node.id);
+});
+```
+
+Same result. The difference is style, expressiveness, and a set of specific capabilities that make `forEach` (and the methods that follow it) more powerful in certain contexts.
+
+---
+
+## The forEach Callback — Full Signature
+
+The function you pass to `forEach` receives three arguments. You can use as many or as few as you need:
+
+```javascript
+array.forEach((element, index, array) => {
+  // element — the current item
+  // index   — its position (0, 1, 2...)
+  // array   — the full original array
+});
+```
+
+Most of the time you only need `element`:
+```javascript
+nodes.forEach(node => {
+  console.log(node.health);
+});
+```
+
+When you need the position, use `index`:
+```javascript
+nodes.forEach((node, index) => {
+  console.log(`${index + 1}. ${node.id}`);
+});
+```
+
+When you need to know the total count inside the callback, use `array`:
+```javascript
+nodes.forEach((node, index, arr) => {
+  console.log(`Node ${index + 1} of ${arr.length}: ${node.id}`);
+});
+```
+
+---
+
+## What forEach Returns — And Why It Matters
+
+`forEach` **always returns `undefined`**. Always. No exceptions.
+
+```javascript
+const result = nodes.forEach(node => node.id);
+console.log(result);  // undefined — not an array of ids
+```
+
+This is the most important thing to understand about `forEach`: **it is for side effects only**. A side effect is anything that does something to the outside world — logging, modifying an external variable, pushing to an array defined outside the loop, making a network request.
+
+```javascript
+// forEach is the right tool when you want to DO something with each item:
+nodes.forEach(node => console.log(node.id));         // side effect: logging
+nodes.forEach(node => externalArray.push(node.id));  // side effect: array mutation
+nodes.forEach(node => sendToServer(node));            // side effect: network call
+
+// forEach is the WRONG tool when you want a new transformed array:
+const ids = nodes.forEach(node => node.id);  // undefined — use .map() instead
+```
+
+The next lesson covers `.map()`, which returns a new array. If you want a transformed result, use `.map()`. If you want to do something with each item without caring about a result, use `forEach`.
+
+---
+
+## return Inside forEach Does Nothing
+
+A common mistake: writing `return` inside a `forEach` callback expecting it to affect something:
+
+```javascript
+let total = 0;
+
+nodes.forEach(node => {
+  return total + node.health;  // return does nothing here
+  // total is never updated
+});
+
+console.log(total);  // 0 — unchanged
+```
+
+`return` inside a `forEach` callback just exits that specific callback invocation. It does not break the loop (you cannot break `forEach` — more on that shortly). It does not accumulate a value. It does nothing useful.
+
+The correct pattern for accumulating inside `forEach`:
+
+```javascript
+let total = 0;
+
+nodes.forEach(node => {
+  total += node.health;  // no return — mutate the outer variable directly
+});
+
+console.log(total);  // 233
+```
+
+---
+
+## forEach Cannot break or continue
+
+Unlike `for` and `for...of`, there is no way to stop a `forEach` loop early:
+
+```javascript
+// This does NOT stop the loop:
+nodes.forEach(node => {
+  if (node.health < 50) return;  // just skips this iteration
+  console.log(node.id);
+});
+// Using return inside forEach is like continue in a for loop — skips the current item
+
+// There is no equivalent of break in forEach
+// To stop early, you must use a standard for loop or for...of with break
+```
+
+This is a deliberate design constraint. `forEach` is for processing all elements. If you need to stop early, use a different loop.
+
+---
+
+## forEach vs for...of — Choosing Between Them
+
+Both iterate over every element. The choice comes down to two questions:
+
+**Do you need to stop early?**
+- Yes → use `for...of` with `break`
+- No → either works
+
+**Do you need the full array reference inside the callback?**
+- Yes → `forEach` (the third parameter gives you the array)
+- No → either works
+
+In practice, functional code tends to prefer the array methods (`forEach`, `map`, `filter`) over explicit loops because they communicate intent more directly. But readability is the priority — if a `for` loop is clearer for a specific situation, use it.
+
+---
+
+## Common Mistakes
+
+**Mistake 1 — Expecting forEach to return something:**
+```javascript
+const ids = nodes.forEach(node => node.id);
+// ids is undefined — forEach always returns undefined
+// Use .map() to get a new array
+```
+
+**Mistake 2 — Using return to accumulate:**
+```javascript
+let total = 0;
+nodes.forEach(node => {
+  return total + node.health;  // does nothing
+});
+// Fix: total += node.health;
+```
+
+**Mistake 3 — Trying to break forEach:**
+```javascript
+nodes.forEach(node => {
+  if (condition) break;  // SyntaxError — break is not valid inside forEach
+});
+// Fix: use for...of with break, or use .find() / .some()
+```
+
+**Mistake 4 — Using forEach when you need a transformed array:**
+```javascript
+const labels = nodes.forEach(node => `${node.id}: ${node.health}%`);
+// labels is undefined
+// Fix: use .map() which collects and returns the results
+```
+
+---
+
+## Micro-Drills
+
+**Drill 1:** What does this log and why?
+```javascript
+const result = [1, 2, 3].forEach(n => n * 2);
+console.log(result);
+```
+
+**Drill 2:** Fix this accumulator:
+```javascript
+let sum = 0;
+[10, 20, 30].forEach(n => {
+  return sum + n;
+});
+console.log(sum);
+```
+
+**Drill 3:** Using forEach and `continue`-like behavior (`return` inside forEach), log only the node IDs of online nodes:
+```javascript
+const nodes = [
+  { id: "7A5r", online: true },
+  { id: "8BJT", online: false },
+  { id: "Xk91", online: true }
+];
+```
+
+**Drill 4:** Rewrite this `for` loop as a `forEach`. Which version do you find more readable and why?
+```javascript
+for (let i = 0; i < nodes.length; i++) {
+  console.log(`${i}: ${nodes[i].id} — ${nodes[i].health}%`);
+}
+```
+
+---
+
+## Go Deeper
+
+- **javascript.info — Array methods — forEach:** https://javascript.info/array-methods#foreach — scroll to the forEach section
+- **MDN — Array.prototype.forEach():** https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach
+- **Web Dev Simplified — forEach vs map vs filter vs reduce:** https://www.youtube.com/watch?v=NcSosGLglQY — 10 minutes comparing all four methods with clear examples. Watch before Lessons 16-18.
+
+---
+
+## The Crucible
+
+**Task 1 — Replication.** Use all three callback parameters. The format string requires `index`, `node.id`, `node.health`, and `array.length`. None of these need external state — everything comes from the callback parameters.
+
+**Task 2 — Mutation.** Three bugs, all related to the fundamental misunderstandings about `forEach`. Bug 1 uses `return` to accumulate instead of `+=`. Bug 2 is unreachable code because of Bug 1's `return`. Bug 3 assigns the result of `forEach` expecting an array — `forEach` always returns `undefined`. Fix all three.
+
+**Task 3 — Synthesis.** One `forEach` loop. Three separate counters/trackers updated inside it. Three separate logs after it. The `topNode` tracker requires comparing each node's health to the current best — initialize it before the loop and update it conditionally inside. All three results from one pass through the array.
+
+Go.
