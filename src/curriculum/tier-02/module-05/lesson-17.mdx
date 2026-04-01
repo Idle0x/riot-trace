@@ -1,0 +1,345 @@
+---
+tierId: 2
+moduleId: 5
+lessonId: 17
+title: "filter — Selecting What Passes"
+mode: "terminal"
+xpReward: 70
+syntaxHint: "const result = array.filter(item => condition);"
+
+task1Code: |
+  // TASK 1 — REPLICATION
+  // Reproduce the xandeum-pulse network filter system.
+  //
+  const nodes = [
+    { id: "7A5r", health: 95, network: "mainnet" },
+    { id: "8BJT", health: 47, network: "mainnet" },
+    { id: "8PjP", health: 78, network: "devnet"  },
+    { id: "Bfn2", health: 55, network: "mainnet" },
+    { id: "Xk91", health: 91, network: "devnet"  }
+  ];
+  //
+  // 1. Filter to mainnet nodes only. Log the count.
+  // 2. From ALL nodes, filter to those with health above 70. Log the count.
+  // 3. Chain: filter to mainnet AND health above 70. Log the IDs array.
+  //
+  // Expected output (3 lines):
+  // 3
+  // 3
+  // [ '7A5r', 'Xk91' ]
+
+task1Logic: |
+  if (!logs.some(l => l === 3)) throw new Error('Task Failed: There are 3 mainnet nodes (7A5r, 8BJT, Bfn2) AND 3 nodes with health above 70 (7A5r, 8PjP, Xk91). Both counts are 3. Make sure you log both.');
+  const idsArr = logs.find(l => Array.isArray(l));
+  if (!idsArr) throw new Error('Task Failed: Log the array of IDs from the chained filter. Expected an array.');
+  if (idsArr.length !== 2) throw new Error('Task Failed: After filtering to mainnet nodes with health above 70, only 7A5r (95) and Xk91 qualifies — wait, Xk91 is devnet. Only 7A5r qualifies from mainnet with health > 70. Check your chain: filter mainnet first, then filter health > 70 from those.');
+
+task2Code: |
+  // TASK 2 — MUTATION
+  // This filter pipeline has three bugs.
+  //
+  const transactions = [
+    { id: "tx1", amount: 50000, type: "inflow",  category: "salary"    },
+    { id: "tx2", amount: 2000,  type: "outflow", category: "utilities" },
+    { id: "tx3", amount: 15000, type: "outflow", category: "rent"      },
+    { id: "tx4", amount: 8000,  type: "inflow",  category: "freelance" },
+    { id: "tx5", amount: 500,   type: "outflow", category: "utilities" }
+  ];
+  //
+  // Should keep only outflows above ₦1000:
+  const largeOutflows = transactions.filter(tx => {
+    tx.type === "outflow" && tx.amount > 1000;  // BUG 1: missing return
+  });
+  //
+  // Should keep transactions that are EITHER salary OR rent:
+  const important = transactions.filter(tx =>
+    tx.category === "salary" || tx.category === "rent"
+  );
+  //
+  // Should remove the first transaction (id: "tx1"):
+  const withoutFirst = transactions.filter((tx, index) => index = 0); // BUG 2: = not !==
+  //
+  console.log(largeOutflows.length);  // should be: 2
+  console.log(important.length);      // should be: 2
+  console.log(withoutFirst.length);   // should be: 4
+
+task2Logic: |
+  if (!logs.some(l => l === 2)) throw new Error('Task Failed: largeOutflows should have 2 items (tx2 is < 1000 so excluded, tx3 and tx5 — wait tx5 is 500 so excluded too. Only tx3 at 15000 passes. Actually: outflows are tx2(2000), tx3(15000), tx5(500). Above 1000: tx2 and tx3. So 2 is correct). Add return to the filter callback: return tx.type === "outflow" && tx.amount > 1000.');
+  if (!logs.some(l => l === 4)) throw new Error('Task Failed: withoutFirst should have 4 items (all except index 0). Bug 2: index = 0 assigns 0 to index (a number, which is falsy after assignment). Fix to index !== 0.');
+
+task3Code: |
+  // TASK 3 — SYNTHESIS
+  // The riot-sop transaction audit system.
+  //
+  const transactions = [
+    { id: "tx1", amount: 50000, type: "inflow",  category: "salary",    month: "March"    },
+    { id: "tx2", amount: 2000,  type: "outflow", category: "utilities", month: "March"    },
+    { id: "tx3", amount: 15000, type: "outflow", category: "rent",      month: "March"    },
+    { id: "tx4", amount: 8000,  type: "inflow",  category: "freelance", month: "February" },
+    { id: "tx5", amount: 500,   type: "outflow", category: "utilities", month: "February" },
+    { id: "tx6", amount: 25000, type: "inflow",  category: "salary",    month: "February" },
+    { id: "tx7", amount: 5000,  type: "outflow", category: "rent",      month: "March"    }
+  ];
+  //
+  // Build three separate filtered arrays and log their lengths:
+  //
+  // 1. March outflows above ₦3000
+  //    (filter by month "March" AND type "outflow" AND amount > 3000)
+  //    Log the count.
+  //
+  // 2. All inflows (any month)
+  //    Log the total inflow amount (chain .filter() then use forEach
+  //    or any method to sum — hint from Lesson 15 and 16)
+  //
+  // 3. Transactions where category is NOT "utilities"
+  //    (use !== to exclude utilities)
+  //    Then from those, use .map() to get just the IDs.
+  //    Log the IDs array.
+  //
+  // Expected output (3 lines):
+  // 2
+  // 83000
+  // [ 'tx1', 'tx3', 'tx4', 'tx6', 'tx7' ]
+
+task3Logic: |
+  if (!logs.some(l => l === 2)) throw new Error('Task Failed: March outflows above 3000 are tx3 (15000) and tx7 (5000) — that is 2 transactions. Filter: month === "March" AND type === "outflow" AND amount > 3000. Log the count.');
+  if (!logs.some(l => l === 83000)) throw new Error('Task Failed: Total inflows are tx1(50000) + tx4(8000) + tx6(25000) = 83000. Filter to inflows, then sum their amounts. Log 83000.');
+  const idsArr = logs.find(l => Array.isArray(l) && l.length === 5);
+  if (!idsArr) throw new Error('Task Failed: Non-utilities transactions are tx1, tx3, tx4, tx6, tx7 — 5 transactions. Their IDs array should have 5 items. Filter out utilities, then map to IDs.');
+  if (!idsArr.includes('tx1') || !idsArr.includes('tx7')) throw new Error('Task Failed: IDs array should include tx1 and tx7 among others. Check your filter excludes only "utilities" category.');
+---
+
+## Selective Inclusion
+
+`.map()` transforms every element. `.filter()` decides which elements survive.
+
+Where `.map()` always returns an array the same length as the input, `.filter()` returns an array that is equal in length or shorter — only the elements that pass the test are included:
+
+```javascript
+const scores = [95, 47, 88, 71, 55, 91];
+const passing = scores.filter(score => score > 70);
+// [95, 88, 71, 91]
+// 47 and 55 did not pass the test — they are gone
+```
+
+Every filter button in your xandeum-pulse dashboard is this operation. The "mainnet" button calls something equivalent to `nodes.filter(n => n.network === "mainnet")`. The health threshold slider calls `nodes.filter(n => n.health >= threshold)`. Understanding `.filter()` means understanding exactly how filtering works in any application.
+
+---
+
+## How filter Works
+
+The callback receives each element and must return a truthy or falsy value:
+
+- Return truthy → element is **included** in the result
+- Return falsy → element is **excluded** from the result
+
+```javascript
+const nodes = [
+  { id: "7A5r", health: 95, online: true  },
+  { id: "8BJT", health: 47, online: false },
+  { id: "Xk91", health: 91, online: true  }
+];
+
+const online = nodes.filter(node => node.online);
+// node.online is true → included
+// node.online is false → excluded
+// node.online is true → included
+// Result: [{ id: "7A5r"... }, { id: "Xk91"... }]
+```
+
+Any truthy value keeps the element. Any falsy value removes it. This means you can filter by property existence, non-zero values, non-empty strings — anything JavaScript treats as truthy:
+
+```javascript
+const mixed = [0, 1, "", "hello", null, "world", undefined];
+const truthy = mixed.filter(Boolean);
+// [1, "hello", "world"] — only the truthy values survive
+// Boolean is a function: Boolean(0) → false, Boolean(1) → true
+```
+
+---
+
+## Filtering With Multiple Conditions
+
+Use `&&` and `||` inside the callback to combine conditions:
+
+```javascript
+const nodes = [
+  { id: "7A5r", health: 95, network: "mainnet", version: "1.2.1" },
+  { id: "8BJT", health: 47, network: "mainnet", version: "1.2.0" },
+  { id: "8PjP", health: 78, network: "devnet",  version: "1.2.1" },
+  { id: "Xk91", health: 91, network: "devnet",  version: "1.2.1" }
+];
+
+// Both conditions must be true (&&):
+const healthyMainnet = nodes.filter(
+  node => node.network === "mainnet" && node.health > 70
+);
+// [{ id: "7A5r"... }] — only 7A5r is mainnet AND healthy
+
+// Either condition is true (||):
+const devnetOrOutdated = nodes.filter(
+  node => node.network === "devnet" || node.version !== "1.2.1"
+);
+// [{ id: "8BJT"... }, { id: "8PjP"... }, { id: "Xk91"... }]
+```
+
+---
+
+## filter Returns a New Array — Original Unchanged
+
+Like `.map()`, `.filter()` is non-destructive:
+
+```javascript
+const nodes = ["node-A", "node-B", "node-C"];
+const filtered = nodes.filter(n => n !== "node-B");
+
+console.log(filtered); // ["node-A", "node-C"]
+console.log(nodes);    // ["node-A", "node-B", "node-C"] — unchanged
+```
+
+The original array is never modified. `.filter()` reads it and creates a new one.
+
+---
+
+## Chaining filter With map
+
+The pattern appears constantly in real codebases: filter to the relevant subset, then map to transform:
+
+```javascript
+const nodes = [
+  { id: "7A5r", health: 95, network: "mainnet" },
+  { id: "8BJT", health: 47, network: "mainnet" },
+  { id: "8PjP", health: 78, network: "devnet"  },
+  { id: "Xk91", health: 91, network: "devnet"  }
+];
+
+// Get IDs of healthy mainnet nodes:
+const healthyMainnetIds = nodes
+  .filter(node => node.network === "mainnet")  // 2 nodes remain
+  .filter(node => node.health > 70)            // 1 node remains
+  .map(node => node.id);                       // extract IDs
+// ["7A5r"]
+```
+
+Each method in the chain receives the result of the previous method. Read it top-to-bottom as a pipeline: "from all nodes, keep only mainnet nodes, then from those keep only healthy ones, then extract their IDs."
+
+---
+
+## filter With Index
+
+The callback also receives `(element, index, array)`:
+
+```javascript
+const nodes = ["a", "b", "c", "d", "e"];
+
+// Keep every other item (even indices):
+const evens = nodes.filter((item, index) => index % 2 === 0);
+// ["a", "c", "e"]
+
+// Remove the first item:
+const withoutFirst = nodes.filter((item, index) => index !== 0);
+// ["b", "c", "d", "e"]
+
+// Keep only the first 3:
+const firstThree = nodes.filter((item, index) => index < 3);
+// ["a", "b", "c"] — but .slice(0, 3) is cleaner for this
+```
+
+---
+
+## Removing Duplicates With filter
+
+```javascript
+const networks = ["mainnet", "devnet", "mainnet", "testnet", "devnet"];
+
+const unique = networks.filter(
+  (network, index, array) => array.indexOf(network) === index
+);
+// ["mainnet", "devnet", "testnet"]
+// indexOf returns the FIRST occurrence index
+// If this is not the first occurrence, indexOf < index → filtered out
+
+// Modern alternative using Set:
+const unique2 = [...new Set(networks)];
+// Same result, cleaner code
+```
+
+---
+
+## Common Mistakes
+
+**Mistake 1 — Using map to filter (producing nulls):**
+```javascript
+const healthy = nodes.map(node => node.health > 80 ? node : null);
+// [node, null, node] — nulls pollute the array
+// Fix: use .filter()
+```
+
+**Mistake 2 — Missing return in full-body callback:**
+```javascript
+const filtered = nodes.filter(node => {
+  node.health > 80;  // no return — always returns undefined (falsy) — filters everything out
+});
+// filtered: [] — empty!
+```
+
+**Mistake 3 — Mutating inside filter:**
+```javascript
+nodes.filter(node => {
+  node.status = "processed";  // side effect — avoid this
+  return node.health > 80;
+});
+```
+
+**Mistake 4 — Expecting filter to transform:**
+```javascript
+const labels = nodes.filter(node => `${node.id}: ${node.health}%`);
+// labels contains the original node objects, not the strings
+// Non-empty strings are truthy — so this actually keeps everything
+// Use .map() to transform
+```
+
+---
+
+## Micro-Drills
+
+**Drill 1:** Given `const nums = [1,2,3,4,5,6,7,8,9,10]`, write filter expressions for:
+- Even numbers only
+- Numbers greater than 5
+- Numbers that are both even AND greater than 5
+
+**Drill 2:** What does this produce?
+```javascript
+const arr = [0, 1, false, 2, "", 3, null, 4, undefined, 5];
+const result = arr.filter(Boolean);
+```
+
+**Drill 3:** Given the transactions array from Task 3, write a single filter that keeps only the March inflows. What is the count?
+
+**Drill 4:** Fix this filter — it returns an empty array when it should return nodes with health above 60:
+```javascript
+const result = nodes.filter(node => {
+  node.health > 60;
+});
+```
+
+---
+
+## Go Deeper
+
+- **javascript.info — Array methods — filter:** https://javascript.info/array-methods#filter
+- **MDN — Array.prototype.filter():** https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter
+- **Web Dev Simplified — filter, map, reduce in 8 minutes:** https://www.youtube.com/watch?v=oQcAKQ2lmFI — focused practical examples
+- **Array methods cheatsheet:** https://array-methods-cheatsheet.netlify.app
+
+---
+
+## The Crucible
+
+**Task 1 — Replication.** Three filter operations: one simple, one simple, one chained with map. The tricky part is the third: mainnet nodes with health above 70. Mainnet nodes are 7A5r, 8BJT, Bfn2. Of those, only 7A5r has health above 70. The result is a single-item array.
+
+**Task 2 — Mutation.** Three bugs. Bug 1 is missing `return` — the braces require it. Bug 2 is `index = 0` (assignment, always falsy) instead of `index !== 0` (comparison). Fix both. The middle filter is already correct — do not touch it.
+
+**Task 3 — Synthesis.** Three independent filter operations on the same array, each producing a different result. The second requires summing amounts — chain a method after `.filter()` or use `forEach` to accumulate. The third requires chaining `.filter()` and `.map()`. Five non-utility IDs in the result array.
+
+Go.
