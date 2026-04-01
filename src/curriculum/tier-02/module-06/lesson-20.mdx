@@ -1,0 +1,417 @@
+---
+tierId: 2
+moduleId: 6
+lessonId: 20
+title: "Arrow Functions — Modern Syntax, Different Rules"
+mode: "terminal"
+xpReward: 70
+syntaxHint: "const fn = (param) => expression;"
+
+task1Code: |
+  // TASK 1 — REPLICATION
+  // Convert all three function forms to their arrow equivalents.
+  //
+  // Starting functions (do not delete — convert them):
+  //
+  // Form 1: multi-param, full body with return
+  function addScores(a, b) {
+    return a + b;
+  }
+  //
+  // Form 2: single-param, returns value directly
+  function doubleHealth(health) {
+    return health * 2;
+  }
+  //
+  // Form 3: no params, returns an object
+  function getDefaults() {
+    return { network: "mainnet", version: "1.2.1" };
+  }
+  //
+  // Write arrow versions of all three:
+  // const addScoresArrow = ...
+  // const doubleHealthArrow = ...
+  // const getDefaultsArrow = ...
+  //
+  // Then verify they produce the same results:
+  // Log addScoresArrow(95, 47)     → 142
+  // Log doubleHealthArrow(78)      → 156
+  // Log getDefaultsArrow().network → "mainnet"
+
+task1Logic: |
+  if (!logs.some(l => l === 142)) throw new Error('Task Failed: addScoresArrow(95, 47) should return 142. Arrow syntax: const addScoresArrow = (a, b) => a + b;');
+  if (!logs.some(l => l === 156)) throw new Error('Task Failed: doubleHealthArrow(78) should return 156. Arrow syntax: const doubleHealthArrow = health => health * 2; (single param — no parens needed)');
+  if (!logs.some(l => l === 'mainnet')) throw new Error('Task Failed: getDefaultsArrow().network should be "mainnet". Arrow returning object: const getDefaultsArrow = () => ({ network: "mainnet", version: "1.2.1" }); (parens around the object are required)');
+
+task2Code: |
+  // TASK 2 — MUTATION
+  // These arrow functions have common syntax mistakes.
+  // Fix all four.
+  //
+  // BUG 1: trying to return an object without wrapping in parens
+  const toSummary = node => { id: node.id, health: node.health };
+  //
+  // BUG 2: using return in concise body (no braces = implicit return)
+  const getNetwork = node => return node.network;
+  //
+  // BUG 3: missing parens for zero parameters
+  const getTimestamp = => Date.now();
+  //
+  // BUG 4: callback in array method missing the arrow
+  const healthScores = [95, 47, 88];
+  const doubled = healthScores.map(score = score * 2);
+  //
+  const node = { id: "7A5r", health: 95, network: "mainnet" };
+  //
+  console.log(toSummary(node).id);    // should be: "7A5r"
+  console.log(getNetwork(node));      // should be: "mainnet"
+  console.log(typeof getTimestamp()); // should be: "number"
+  console.log(doubled);               // should be: [190, 94, 176]
+
+task2Logic: |
+  if (!logs.some(l => l === '7A5r')) throw new Error('Task Failed: toSummary(node).id should be "7A5r". To return an object from an arrow function concise body, wrap it in parens: node => ({ id: node.id, health: node.health })');
+  if (!logs.some(l => l === 'mainnet')) throw new Error('Task Failed: getNetwork(node) should return "mainnet". In a concise body arrow function, do not use the return keyword: node => node.network (no braces, no return).');
+  if (!logs.some(l => l === 'number')) throw new Error('Task Failed: getTimestamp() should return a number (Date.now()). Arrow functions with no parameters require empty parens: const getTimestamp = () => Date.now();');
+  const doubledLog = logs.find(l => Array.isArray(l) && l[0] === 190);
+  if (!doubledLog) throw new Error('Task Failed: doubled should be [190, 94, 176]. In .map(), the arrow syntax is: score => score * 2 (not score = score * 2). The = is assignment, => is the arrow.');
+
+task3Code: |
+  // TASK 3 — SYNTHESIS
+  // Build the complete node processing pipeline using only
+  // arrow functions — no function keyword anywhere.
+  //
+  const nodes = [
+    { id: "7A5r", health: 95, network: "mainnet", storage: 250 },
+    { id: "8BJT", health: 47, network: "mainnet", storage: 23  },
+    { id: "8PjP", health: 78, network: "devnet",  storage: 180 },
+    { id: "Bfn2", health: 55, network: "mainnet", storage: 95  },
+    { id: "Xk91", health: 91, network: "devnet",  storage: 310 }
+  ];
+  //
+  // Step 1: Write an arrow function const getStatus that takes
+  //         a health number and returns:
+  //         >= 80 → "ONLINE" | >= 60 → "STABLE" | else → "OFFLINE"
+  //
+  // Step 2: Write an arrow function const enrichNode that takes
+  //         a node object and returns a new object (use spread)
+  //         adding a "status" property using getStatus(node.health)
+  //
+  // Step 3: Write an arrow function const isMainnet that takes
+  //         a node and returns true if network === "mainnet"
+  //
+  // Step 4: Build the pipeline:
+  //         - filter to mainnet nodes using isMainnet
+  //         - map to enriched nodes using enrichNode
+  //         - sort by health descending (copy first)
+  //
+  // Log the id and status of the first node in the result:
+  // Log result[0].id
+  // Log result[0].status
+  //
+  // Expected output:
+  // 7A5r
+  // ONLINE
+
+task3Logic: |
+  if (!logs.some(l => l === '7A5r')) throw new Error('Task Failed: After filtering to mainnet, enriching, and sorting by health descending, the first node should be "7A5r" (health 95, the highest mainnet node). Log result[0].id.');
+  if (!logs.some(l => l === 'ONLINE')) throw new Error('Task Failed: Node 7A5r has health 95 which is >= 80, so status should be "ONLINE". Make sure getStatus returns "ONLINE" for health >= 80, and that enrichNode adds the status property correctly.');
+---
+
+## The Same Thing, Written Differently — Mostly
+
+Arrow functions are not a completely different concept. They are a different syntax for writing function expressions. In most situations, they produce identical results:
+
+```javascript
+// These do the same thing:
+const double = function(n) { return n * 2; };
+const double = (n) => { return n * 2; };
+const double = n => n * 2;  // concise form — most common
+```
+
+But arrow functions have three meaningful differences from regular functions that affect behavior in specific situations. Understanding these differences is what makes callbacks, event handlers, and React hooks comprehensible at a deeper level.
+
+---
+
+## The Syntax — Four Forms
+
+### Full body with explicit return
+
+```javascript
+const classify = (health) => {
+  if (health >= 80) return "healthy";
+  return "at risk";
+};
+```
+
+Use when the body has multiple statements.
+
+### Concise body — implicit return
+
+```javascript
+const classify = health => health >= 80 ? "healthy" : "at risk";
+```
+
+Use when the body is a single expression. No `{}` braces, no `return` keyword — the expression result is returned automatically.
+
+### Returning an object from concise body
+
+```javascript
+// Wrong — {} looks like a function body:
+const toNode = id => { id: id, health: 0 };   // returns undefined!
+
+// Correct — () wraps the object:
+const toNode = id => ({ id: id, health: 0 });  // returns the object
+```
+
+The parentheses are required. Without them, JavaScript interprets `{` as the start of a function body, not an object literal.
+
+### No parameters — empty parens required
+
+```javascript
+const getTimestamp = () => Date.now();
+const getDefaults = () => ({ network: "mainnet" });
+```
+
+Unlike single-parameter functions where you can omit the parens around the parameter, zero-parameter arrows always need `()`.
+
+---
+
+## Parameter Parentheses Rules
+
+```javascript
+// Zero params — parens required:
+() => "hello"
+
+// One param — parens optional:
+x => x * 2
+(x) => x * 2  // also valid
+
+// Multiple params — parens required:
+(a, b) => a + b
+
+// With destructuring — parens required:
+({ id, health }) => `${id}: ${health}%`
+
+// With default value — parens required:
+(network = "mainnet") => network
+```
+
+Team convention usually picks one style (always parens or no parens for single params) and applies it consistently. TypeScript codebases tend to always use parens because the type annotation goes inside them: `(health: number) => health * 2`.
+
+---
+
+## Difference 1 — No `this` Binding
+
+This is the most important difference. Regular functions create their own `this` context. Arrow functions do not — they inherit `this` from the surrounding scope.
+
+```javascript
+const node = {
+  id: "7A5r",
+  health: 95,
+
+  // Regular method — 'this' is the object that called it:
+  getHealthRegular: function() {
+    return this.health;  // 'this' is node — works
+  },
+
+  // Arrow method — 'this' is from OUTSIDE the object:
+  getHealthArrow: () => {
+    return this.health;  // 'this' is window/undefined — does NOT work
+  }
+};
+
+node.getHealthRegular();  // 95
+node.getHealthArrow();    // undefined
+```
+
+This matters practically in one common situation: callbacks inside methods:
+
+```javascript
+const counter = {
+  count: 0,
+  nodes: [1, 2, 3],
+
+  // Regular function callback — 'this' is lost inside forEach:
+  incrementRegular: function() {
+    this.nodes.forEach(function(n) {
+      this.count++;  // 'this' is undefined here — forEach callback has its own 'this'
+    });
+  },
+
+  // Arrow function callback — 'this' is inherited from incrementArrow:
+  incrementArrow: function() {
+    this.nodes.forEach(n => {
+      this.count++;  // 'this' is counter — arrow inherits from enclosing method
+    });
+  }
+};
+```
+
+**In React, all your callbacks should be arrow functions** for exactly this reason. You never want `this` to be unexpectedly rebound.
+
+---
+
+## Difference 2 — No `arguments` Object
+
+Arrow functions do not have their own `arguments` object:
+
+```javascript
+function regularSum() {
+  return Array.from(arguments).reduce((a, b) => a + b, 0);
+}
+regularSum(1, 2, 3);  // 6 — arguments exists
+
+const arrowSum = () => {
+  return Array.from(arguments).reduce((a, b) => a + b, 0);
+};
+arrowSum(1, 2, 3);  // ReferenceError — arguments is not defined
+```
+
+Use rest parameters in arrow functions instead:
+
+```javascript
+const arrowSum = (...nums) => nums.reduce((a, b) => a + b, 0);
+arrowSum(1, 2, 3);  // 6
+```
+
+---
+
+## Difference 3 — Cannot Be Used as Constructors
+
+Arrow functions cannot be called with `new`:
+
+```javascript
+const Node = (id, health) => { this.id = id; };
+const node = new Node("7A5r", 95);  // TypeError: Node is not a constructor
+```
+
+This is rarely relevant in modern JavaScript with `class` syntax. But if you see code using `new SomeName()`, `SomeName` must be a regular function or class, not an arrow function.
+
+---
+
+## When to Use Arrow vs Regular
+
+**Use arrow functions for:**
+- Array method callbacks (`.map()`, `.filter()`, `.reduce()`, `.forEach()`)
+- Any callback that should inherit `this` from its surrounding context
+- Short utility functions and transformations
+- React component logic (event handlers, hooks)
+- Anywhere you are writing a function expression
+
+```javascript
+// Arrow is natural here:
+nodes.map(node => node.health)
+nodes.filter(node => node.online)
+const double = n => n * 2
+```
+
+**Use regular function declarations for:**
+- Top-level named functions that should be hoistable
+- Object methods where `this` should refer to the object
+- Functions that need the `arguments` object (legacy cases)
+- When you intentionally want the function to be callable with `new`
+
+```javascript
+// Regular declaration makes sense here:
+function initializeSystem() { ... }  // hoisted, called from anywhere
+```
+
+In practice, the vast majority of functions you write will be arrow functions. Regular function declarations are used for the top-level functions of a module or file.
+
+---
+
+## Common Mistakes
+
+**Mistake 1 — `return` keyword in concise body:**
+```javascript
+const double = n => return n * 2;  // SyntaxError
+const double = n => n * 2;         // correct — no return in concise body
+```
+
+**Mistake 2 — Object without wrapping parens:**
+```javascript
+const toObj = n => { value: n };   // returns undefined (value: n is a labeled statement)
+const toObj = n => ({ value: n }); // returns { value: n }
+```
+
+**Mistake 3 — Forgetting parens for zero params:**
+```javascript
+const getTime = => Date.now();   // SyntaxError
+const getTime = () => Date.now(); // correct
+```
+
+**Mistake 4 — `=` instead of `=>` in callbacks:**
+```javascript
+array.map(n = n * 2)   // SyntaxError — = is assignment, not arrow
+array.map(n => n * 2)  // correct
+```
+
+**Mistake 5 — Arrow method in object needing `this`:**
+```javascript
+const node = {
+  health: 95,
+  getHealth: () => this.health  // wrong — 'this' is not the object
+};
+// Fix: use regular function: getHealth() { return this.health; }
+```
+
+---
+
+## Micro-Drills
+
+**Drill 1:** Convert each to the most concise valid arrow syntax:
+```javascript
+function triple(n) { return n * 3; }
+function isHealthy(health) { return health >= 80; }
+function wrap(value) { return { value: value }; }
+function getVersion() { return "1.2.1"; }
+```
+
+**Drill 2:** Which of these are valid? Fix the invalid ones:
+```javascript
+const a = n => n * 2;
+const b = => 42;
+const c = (a, b) => a + b;
+const d = x => { x * 2 };
+const e = () => { name: "riot" };
+```
+
+**Drill 3:** Why does the arrow method version fail? Fix it:
+```javascript
+const counter = {
+  count: 0,
+  increment: () => { this.count++; }
+};
+counter.increment();
+console.log(counter.count);  // 0 — why?
+```
+
+**Drill 4:** Rewrite this pipeline using only concise arrow functions (no function keyword, no explicit return):
+```javascript
+const result = nodes
+  .filter(function(node) { return node.network === "mainnet"; })
+  .map(function(node) { return node.health; })
+  .reduce(function(acc, h) { return acc + h; }, 0);
+```
+
+---
+
+## Go Deeper
+
+- **javascript.info — Arrow functions, the basics:** https://javascript.info/arrow-functions-basics
+- **javascript.info — Arrow functions revisited:** https://javascript.info/arrow-functions — covers `this` difference in depth
+- **MDN — Arrow function expressions:** https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions
+- **Web Dev Simplified — Arrow Functions:** https://www.youtube.com/watch?v=h33Srr5J9nY — 8 minutes, practical examples
+- **Fireship — Arrow Functions in 100 Seconds:** https://www.youtube.com/watch?v=NAN7U3MrX6o
+
+---
+
+## The Crucible
+
+**Task 1 — Replication.** Three function-to-arrow conversions. Each tests a different syntax form: multi-param full body, single-param concise, zero-param returning object. The object-returning form requires the `()` wrapper — this is the most commonly forgotten syntax detail.
+
+**Task 2 — Mutation.** Four arrow syntax bugs in isolation. Bug 1 — returning object without parens. Bug 2 — `return` keyword in concise body. Bug 3 — missing `()` for zero params. Bug 4 — `=` instead of `=>` in a callback. All four are real bugs you will encounter in actual code.
+
+**Task 3 — Synthesis.** Build three helper arrow functions and compose them into a pipeline. No `function` keyword anywhere. The pipeline chains filter, map (enrichment with spread), and sort. The final result is sorted by health descending — highest first. Two logs confirming the correct node came first.
+
+Go.
