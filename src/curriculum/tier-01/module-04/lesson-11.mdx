@@ -1,0 +1,474 @@
+---
+tierId: 1
+moduleId: 4
+lessonId: 11
+title: "Arrays — Ordered Collections"
+mode: "terminal"
+xpReward: 70
+syntaxHint: "const items = ['a', 'b', 'c']; console.log(items[0]);"
+
+task1Code: |
+  // TASK 1 — REPLICATION
+  // Build the riot-trace tier registry.
+  //
+  // 1. Declare a const called tiers containing these 4 strings in order:
+  //    "Code Literacy", "JavaScript Deeply", "React Mental Model", "Web Platform"
+  //
+  // 2. Log the first tier (index 0)
+  // 3. Log the last tier using .length — do not hardcode index 3
+  // 4. Log the total number of tiers
+  //
+  // Expected output (3 lines):
+  // Code Literacy
+  // Web Platform
+  // 4
+
+task1Logic: |
+  if (!logs.some(l => l === 'Code Literacy')) throw new Error('Task Failed: Log tiers[0]. The first element is "Code Literacy".');
+  if (!logs.some(l => l === 'Web Platform')) throw new Error('Task Failed: Log the last element using tiers[tiers.length - 1]. Do not hardcode the index.');
+  if (!logs.some(l => l === 4)) throw new Error('Task Failed: Log tiers.length. The array has 4 elements.');
+
+task2Code: |
+  // TASK 2 — MUTATION
+  // This code tries to manage an active node list, but it has
+  // three bugs. Find and fix all of them.
+  //
+  // Bug 1: It uses the wrong method to add a node to the END
+  // Bug 2: It uses the wrong method to remove from the END
+  //        (should remove from the BEGINNING — the oldest node)
+  // Bug 3: It checks .size instead of .length for the count
+  //
+  let activeNodes = ["node-A", "node-B", "node-C"];
+  //
+  activeNodes.unshift("node-D");   // Bug 1: should add to END
+  activeNodes.pop();               // Bug 2: should remove from BEGINNING
+  //
+  console.log(activeNodes);        // should be: ["node-B", "node-C", "node-D"]
+  console.log(activeNodes.size);   // Bug 3: should log the count (3)
+
+task2Logic: |
+  const arr = logs[0];
+  if (!Array.isArray(arr)) throw new Error('Task Failed: First log should be the array itself. Make sure you log activeNodes directly.');
+  if (arr.length !== 3) throw new Error('Task Failed: Array should have 3 elements after the operations. Got ' + arr.length + '. Check that you fixed both the add and remove methods.');
+  if (arr[0] !== 'node-B' || arr[1] !== 'node-C' || arr[2] !== 'node-D') throw new Error('Task Failed: Array should be ["node-B", "node-C", "node-D"]. Got: ' + JSON.stringify(arr) + '. push() adds to end, shift() removes from beginning.');
+  if (logs[1] !== 3) throw new Error('Task Failed: Second log should be 3 (the array length). Use .length not .size — arrays do not have a .size property.');
+
+task3Code: |
+  // TASK 3 — SYNTHESIS
+  // The xandeum-pulse network has nodes with different health scores.
+  // Perform a complete analysis of this dataset.
+  //
+  const healthScores = [95, 47, 88, 71, 55, 91, 62, 78];
+  //
+  // 1. Log the total number of nodes (array length)
+  //
+  // 2. Log the health score of the 3rd node (index 2)
+  //
+  // 3. Add a new node score of 83 to the END of the array.
+  //    Then log the new length.
+  //
+  // 4. Check if the score 47 exists in the array using .includes().
+  //    Log the result (true or false).
+  //
+  // 5. Find the index of score 71 using .indexOf().
+  //    Log the result.
+  //
+  // Expected output (5 lines):
+  // 8
+  // 88
+  // 9
+  // true
+  // 3
+
+task3Logic: |
+  if (!logs.some(l => l === 8)) throw new Error('Task Failed: Log healthScores.length before adding the new score. There are 8 elements initially.');
+  if (!logs.some(l => l === 88)) throw new Error('Task Failed: Log healthScores[2]. The third element (index 2) is 88.');
+  if (!logs.some(l => l === 9)) throw new Error('Task Failed: After pushing 83, log the new length. It should be 9.');
+  if (!logs.some(l => l === true)) throw new Error('Task Failed: healthScores.includes(47) should return true — 47 is in the array.');
+  if (!logs.some(l => l === 3)) throw new Error('Task Failed: healthScores.indexOf(71) should return 3 — 71 is at index 3.');
+---
+
+## Why Arrays Are Everywhere
+
+Open your xandeum-pulse codebase. Find the API response from the stats endpoint. It returns something like this:
+
+```javascript
+{
+  pods: [
+    { id: "7A5r", health: 95, network: "mainnet" },
+    { id: "8BJT", health: 47, network: "devnet" },
+    { id: "8PjP", health: 78, network: "mainnet" },
+    // ... 198 more nodes
+  ],
+  totalCount: 201
+}
+```
+
+That `pods` property is an array. Every node card rendered on the dashboard comes from iterating over that array. Every filter button modifies which items from that array are shown. Every leaderboard is that array sorted differently.
+
+Arrays are the primary container for any list of data in JavaScript. Understanding them at this level — not just "how to use them" but "what they are, how they work, what every method does" — is the difference between reading data processing code fluently and squinting at it line by line.
+
+---
+
+## What an Array Actually Is
+
+An array is an **ordered, indexed collection of values**. Ordered means the sequence matters — item 0 is always item 0. Indexed means every item has a position number starting at 0.
+
+```javascript
+const nodes = ["node-A", "node-B", "node-C"];
+//              index 0    index 1    index 2
+```
+
+An array can hold any mix of data types:
+
+```javascript
+const mixed = [42, "mainnet", true, null, { health: 95 }];
+// Valid JavaScript — but in practice, arrays hold one type per array
+// Mixed-type arrays are harder to work with and a code smell
+```
+
+In real codebases, every array holds the same type of thing: all strings, all numbers, all node objects. TypeScript enforces this with type annotations, which you will use throughout Tiers 2 and 3.
+
+---
+
+## Creating Arrays
+
+```javascript
+// Array literal — the standard way
+const tiers = ["Code Literacy", "JavaScript Deeply", "React Mental Model"];
+
+// Empty array — common when you will add items later
+const activeNodes = [];
+
+// Array constructor — rarely used, prefer literal syntax
+const scores = new Array(3);  // creates [undefined, undefined, undefined]
+// This is confusing and almost never what you want
+```
+
+Always use the literal `[]` syntax. The constructor form has subtle edge cases that make it unreliable.
+
+---
+
+## Accessing Elements
+
+Arrays are zero-indexed. The first item is at index `0`, not index `1`:
+
+```javascript
+const tiers = ["Code Literacy", "JavaScript Deeply", "React Mental Model"];
+
+tiers[0]   // "Code Literacy" — first item
+tiers[1]   // "JavaScript Deeply" — second item
+tiers[2]   // "React Mental Model" — third and last item
+tiers[3]   // undefined — index 3 does not exist, no error, just undefined
+tiers[-1]  // undefined — negative indices don't work in JavaScript the way you might expect
+```
+
+**Accessing the last element dynamically** — never hardcode the last index:
+
+```javascript
+// Bad — hardcoded index breaks if the array grows:
+const last = tiers[2];
+
+// Good — always works regardless of array length:
+const last = tiers[tiers.length - 1];
+
+// Modern alternative (ES2022):
+const last = tiers.at(-1);  // .at() supports negative indices
+```
+
+---
+
+## The length Property
+
+`length` returns the number of elements in the array. It is a property, not a method — no parentheses:
+
+```javascript
+const nodes = ["node-A", "node-B", "node-C"];
+nodes.length   // 3
+
+const empty = [];
+empty.length   // 0
+```
+
+`length` is always one more than the last valid index:
+
+```javascript
+const arr = ["a", "b", "c"];
+// Last valid index: 2
+// arr.length: 3
+// arr[arr.length - 1]: "c"
+```
+
+---
+
+## Adding and Removing Elements
+
+Four methods. Two add, two remove. Learn all four:
+
+```javascript
+const nodes = ["node-A", "node-B", "node-C"];
+
+// push() — adds to the END, returns new length
+nodes.push("node-D");
+// nodes: ["node-A", "node-B", "node-C", "node-D"]
+// return value: 4 (new length)
+
+// unshift() — adds to the BEGINNING, returns new length
+nodes.unshift("node-Z");
+// nodes: ["node-Z", "node-A", "node-B", "node-C", "node-D"]
+
+// pop() — removes from the END, returns the removed item
+const removed = nodes.pop();
+// removed: "node-D"
+// nodes: ["node-Z", "node-A", "node-B", "node-C"]
+
+// shift() — removes from the BEGINNING, returns the removed item
+const first = nodes.shift();
+// first: "node-Z"
+// nodes: ["node-A", "node-B", "node-C"]
+```
+
+**Memory trick:**
+- `push` / `pop` — both reference the END (like a stack)
+- `shift` / `unshift` — both reference the BEGINNING (un-shift puts something back at front)
+
+All four **mutate the original array** — they change it in place. This matters for React state management, which you will learn in Tier 3.
+
+---
+
+## Finding Elements
+
+```javascript
+const nodes = ["node-A", "node-B", "node-C", "node-D"];
+
+// includes() — does the item exist? Returns boolean
+nodes.includes("node-B")    // true
+nodes.includes("node-Z")    // false
+
+// indexOf() — what position is the item at? Returns index or -1
+nodes.indexOf("node-B")     // 1
+nodes.indexOf("node-Z")     // -1 (not found)
+
+// Finding -1 is how you check for absence:
+if (nodes.indexOf("node-Z") === -1) {
+  console.log("node-Z is not in the array");
+}
+// Or more cleanly with includes():
+if (!nodes.includes("node-Z")) {
+  console.log("node-Z is not in the array");
+}
+```
+
+---
+
+## Slicing — Non-Destructive Extraction
+
+`slice()` returns a new array containing a portion of the original. The original is not modified:
+
+```javascript
+const scores = [95, 47, 88, 71, 55, 91];
+
+scores.slice(0, 3)    // [95, 47, 88] — items at index 0, 1, 2 (3 is exclusive)
+scores.slice(2)       // [88, 71, 55, 91] — from index 2 to end
+scores.slice(-2)      // [55, 91] — last 2 items
+scores.slice(1, 4)    // [47, 88, 71]
+
+console.log(scores);  // [95, 47, 88, 71, 55, 91] — unchanged
+```
+
+`slice()` is useful for getting the "top N" from a sorted list:
+
+```javascript
+const sortedNodes = [...nodes].sort((a, b) => b.health - a.health);
+const topFive = sortedNodes.slice(0, 5);  // top 5 healthiest
+```
+
+---
+
+## Splicing — Destructive Modification
+
+`splice()` modifies the array in place — it can remove items, insert items, or both:
+
+```javascript
+const nodes = ["node-A", "node-B", "node-C", "node-D"];
+
+// splice(startIndex, deleteCount, ...itemsToInsert)
+nodes.splice(1, 2);
+// Removes 2 items starting at index 1 (removes "node-B" and "node-C")
+// nodes: ["node-A", "node-D"]
+// Returns: ["node-B", "node-C"] (the removed items)
+
+// Insert without removing:
+nodes.splice(1, 0, "node-X");
+// At index 1, remove 0 items, insert "node-X"
+// nodes: ["node-A", "node-X", "node-D"]
+```
+
+`splice()` mutates. `slice()` does not. This is one of JavaScript's most confusing naming decisions. The difference is the `p` — `splice` with a `p` is destructive.
+
+---
+
+## Joining and Splitting
+
+```javascript
+const tiers = ["Code Literacy", "JavaScript Deeply", "React Mental Model"];
+
+// join() — array to string, items separated by delimiter
+tiers.join(", ")      // "Code Literacy, JavaScript Deeply, React Mental Model"
+tiers.join(" → ")     // "Code Literacy → JavaScript Deeply → React Mental Model"
+tiers.join("")        // "Code LiteracyJavaScript DeeplyReact Mental Model"
+
+// The reverse: splitting a string into an array
+const csv = "mainnet,devnet,testnet";
+csv.split(",")        // ["mainnet", "devnet", "testnet"]
+```
+
+---
+
+## Copying Arrays — Reference Trap Revisited
+
+From Lesson 5, you know that objects and arrays are reference types. This matters here:
+
+```javascript
+const original = [1, 2, 3];
+const reference = original;    // NOT a copy — same array in memory
+reference.push(4);
+console.log(original);         // [1, 2, 3, 4] — original changed!
+
+// Shallow copy — three equivalent ways:
+const copy1 = [...original];          // spread operator (most common)
+const copy2 = original.slice();       // slice with no arguments
+const copy3 = Array.from(original);   // Array.from
+
+copy1.push(99);
+console.log(original);         // [1, 2, 3, 4] — original unchanged
+console.log(copy1);            // [1, 2, 3, 4, 99] — independent
+```
+
+In React, you almost always want a copy when modifying array state. Mutating the original array directly often causes the UI not to update. This is why `[...array]` appears constantly in React codebases.
+
+---
+
+## Checking If Something Is an Array
+
+The `typeof` operator is useless for arrays — it returns `"object"` for everything:
+
+```javascript
+typeof [1, 2, 3]    // "object" — not helpful
+typeof {}           // "object" — same result
+
+// Use Array.isArray() instead:
+Array.isArray([1, 2, 3])   // true
+Array.isArray({})           // false
+Array.isArray("string")     // false
+Array.isArray(null)         // false
+```
+
+---
+
+## Common Mistakes
+
+**Mistake 1 — Off-by-one indexing:**
+```javascript
+const arr = ["a", "b", "c"];
+arr[3]    // undefined — last valid index is 2 (length - 1)
+arr[arr.length]  // undefined — same mistake
+arr[arr.length - 1]  // "c" — correct last item
+```
+
+**Mistake 2 — Confusing slice and splice:**
+```javascript
+const arr = [1, 2, 3, 4, 5];
+arr.slice(1, 3)    // [2, 3] — non-destructive, arr unchanged
+arr.splice(1, 2)   // removes and returns [2, 3], arr is now [1, 4, 5]
+```
+
+**Mistake 3 — Mutating instead of copying:**
+```javascript
+const nodes = ["node-A", "node-B"];
+const updated = nodes;         // same array
+updated.push("node-C");
+console.log(nodes.length);     // 3 — original mutated!
+
+// Fix:
+const updated = [...nodes];    // copy
+updated.push("node-C");
+console.log(nodes.length);     // 2 — original safe
+```
+
+**Mistake 4 — Using .size instead of .length:**
+```javascript
+const arr = [1, 2, 3];
+arr.size      // undefined — arrays don't have .size
+arr.length    // 3 — correct
+// Note: JavaScript Sets and Maps DO have .size. Easy to confuse.
+```
+
+**Mistake 5 — Expecting push() to return the array:**
+```javascript
+const result = [1, 2].push(3);
+console.log(result);  // 3 — push returns the NEW LENGTH, not the array
+// To get the modified array:
+const arr = [1, 2];
+arr.push(3);
+console.log(arr);  // [1, 2, 3]
+```
+
+---
+
+## Micro-Drills
+
+**Drill 1:** Given `const scores = [95, 47, 88, 71, 55]`, predict the output of each without running it:
+```javascript
+console.log(scores[0]);
+console.log(scores[scores.length - 1]);
+console.log(scores.length);
+console.log(scores.includes(71));
+console.log(scores.indexOf(88));
+```
+
+**Drill 2:** Write the code to:
+- Create an array of 3 network names
+- Add `"stagingnet"` to the end
+- Remove the first network
+- Log the resulting array
+
+**Drill 3:** What does each line log and why?
+```javascript
+const a = [1, 2, 3];
+const b = a;
+b.push(4);
+console.log(a.length);   // ?
+console.log(b.length);   // ?
+console.log(a === b);    // ?
+
+const c = [...a];
+c.push(5);
+console.log(a.length);   // ?
+console.log(c.length);   // ?
+console.log(a === c);    // ?
+```
+
+**Drill 4:** What is the difference between `slice(0, 3)` and `splice(0, 3)`? Which one would you use to get the top 3 items from a sorted leaderboard without changing the original array?
+
+---
+
+## Go Deeper
+
+- **javascript.info — Arrays:** https://javascript.info/array — complete coverage with interactive examples
+- **javascript.info — Array methods:** https://javascript.info/array-methods — detailed breakdown of every method
+- **MDN — Array:** https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array — the full reference with all 40+ array methods
+- **Fireship — JavaScript Arrays in 100 Seconds:** https://www.youtube.com/watch?v=oigfaZ5ApsM — fast visual overview
+- **Visualizing Array Methods:** https://array-methods-cheatsheet.netlify.app — interactive visual reference showing what each method does to the array
+
+---
+
+## The Crucible
+
+**Task 1 — Replication.** Build the array. Access first and last items correctly. Access last using `tiers.length - 1` — if you hardcode `tiers[3]`, it will work but the habit is wrong. Log the length. Three separate logs, three separate values.
+
+**Task 2 — Mutation.** Three bugs. Read the comments — each one tells you exactly which method is wrong and what it should do instead. `unshift` adds to the beginning; the bug says it should add to the end. `pop` removes from the end; the bug says it should remove from the beginning. `.size` does not exist on arrays; `.length` does. Fix all three.
+
+**Task 3 — Synthesis.** Five separate operations on one array. Each produces one log line. Work through them in order — the push in step 3 changes the length for step 4 onwards. `includes()` returns a boolean. `indexOf()` returns a number. Log them as-is, not wrapped in a string.
+
+Go.
