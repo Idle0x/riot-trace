@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   })
@@ -32,8 +32,6 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   // THE BOUNCER LOGIC:
-  // If NO user is found, and they are NOT on the /login page, and NOT attempting an /auth callback
-  // Kick them back to /login.
   if (
     !user &&
     !request.nextUrl.pathname.startsWith('/auth') && 
