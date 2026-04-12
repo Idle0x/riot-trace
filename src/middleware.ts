@@ -32,13 +32,20 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   // THE BOUNCER LOGIC:
-  // If there is NO user, and they are trying to access a protected route (like /tier, /lesson, etc.)
-  // Force them back to the root "/" landing page.
+  // If NO user is found, and they are NOT on the /login page, and NOT attempting an /auth callback
+  // Kick them back to /login.
   if (
     !user &&
     !request.nextUrl.pathname.startsWith('/auth') && 
-    request.nextUrl.pathname !== '/'
+    request.nextUrl.pathname !== '/login'
   ) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    return NextResponse.redirect(url)
+  }
+
+  // If user IS logged in, but tries to hit the login page, push them to the Hub (/)
+  if (user && request.nextUrl.pathname === '/login') {
     const url = request.nextUrl.clone()
     url.pathname = '/'
     return NextResponse.redirect(url)
@@ -47,7 +54,6 @@ export async function middleware(request: NextRequest) {
   return supabaseResponse
 }
 
-// Ensure the middleware runs on these paths
 export const config = {
   matcher: [
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
