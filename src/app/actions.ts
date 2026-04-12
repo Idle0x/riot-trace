@@ -15,9 +15,9 @@ const REWARDS = {
 
 export async function saveTaskProgress(taskId: string, type: keyof typeof REWARDS) {
   try {
-    // FIX: Await the cookies() Promise required by Next.js 15+
+    // Await the cookies() Promise required by Next.js 15+
     const cookieStore = await cookies(); 
-    
+
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -67,11 +67,14 @@ export async function saveTaskProgress(taskId: string, type: keyof typeof REWARD
       .upsert({ 
         user_id: user.id, 
         lesson_id: taskId,
-        last_reviewed_at: new Date().toISOString() 
+        last_reviewed_at: new Date().toISOString(),
+        // Capture specific challenge types for the database
+        is_boss_fight: type === 'boss',
+        is_capstone: type === 'capstone'
       }, { onConflict: 'user_id, lesson_id' });
 
     if (completionError) throw completionError;
-    
+
     return { success: true, xp: xpToAward };
   } catch (error) {
     console.error("CRITICAL_LEDGER_FAILURE:", error);
