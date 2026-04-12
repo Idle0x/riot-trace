@@ -20,12 +20,17 @@ export default async function TierPage({ params }: { params: Promise<{ tierId: s
 
   return (
     <main className="min-h-screen bg-base p-4 md:p-8 flex justify-center pt-20">
-      <div className="w-full max-w-6xl">
+      {/* Widened Container: Allows the layout to naturally expand on larger monitors 
+        rather than bunching tightly in the center.
+      */}
+      <div className="w-full max-w-[1600px] xl:w-[95%]">
+        
         <header className="mb-10 border-b border-border-strong pb-8">
           <Link href="/" className="font-mono text-[9px] text-text-muted hover:text-white mb-6 inline-block uppercase tracking-widest transition-colors">
             [ ← RETURN TO GLOBAL MATRIX ]
           </Link>
-          <div className={`font-mono text-[10px] tracking-[0.3em] mb-3 ${accentClass} uppercase`}>
+          <div className={`font-mono text-[10px] tracking-[0.3em] mb-3 ${accentClass} uppercase flex items-center gap-2`}>
+            <div className={`w-1.5 h-1.5 ${accentClass.replace('text-', 'bg-')} rounded-sm animate-pulse`}></div>
             TIER 0{tierId} ARCHIVE
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-text-primary">Architecture Segment {tierId}</h1>
@@ -37,12 +42,14 @@ export default async function TierPage({ params }: { params: Promise<{ tierId: s
           {moduleIds.map((mId, index) => (
             <div 
               key={mId} 
-              className="border border-border-base bg-surface shadow-plate rounded-sm overflow-hidden animate-fade-up"
+              className="border border-border-base bg-surface shadow-plate rounded-sm overflow-hidden animate-fade-up hover:border-border-strong transition-colors duration-300"
               style={{ animationDelay: `${index * 0.1}s` }} // Staggered boot-up effect
             >
-              <div className="bg-surface-sunken border-b border-border-strong p-4 font-mono text-[11px] uppercase font-bold text-text-secondary flex justify-between">
+              <div className="bg-surface-sunken border-b border-border-strong p-4 font-mono text-[11px] uppercase font-bold text-text-secondary flex justify-between items-center">
                 <span>MODULE {String(mId).padStart(2, '0')}</span>
-                <span className="text-text-dim text-[9px] font-normal tracking-widest">STATUS: ONLINE</span>
+                <span className="text-text-dim text-[9px] font-normal tracking-widest flex items-center gap-1.5">
+                  <span className="w-1 h-1 bg-phosphor rounded-full"></span> ONLINE
+                </span>
               </div>
 
               {/* Standard Lessons */}
@@ -87,7 +94,11 @@ export default async function TierPage({ params }: { params: Promise<{ tierId: s
 
           {/* --- FULL WIDTH CAPSTONE ROW --- */}
           {hasTierCapstone(tierId) && (
-            <div className="col-span-1 lg:col-span-2 mt-4 border border-border-strong bg-surface shadow-plate rounded-sm overflow-hidden relative group transition-all duration-500 hover:border-accent-purple hover:shadow-[0_0_30px_rgba(168,85,247,0.15)] animate-fade-up" style={{ animationDelay: `${moduleIds.length * 0.1}s` }}>
+            <div 
+              className="col-span-1 lg:col-span-2 mt-4 border border-border-strong bg-surface shadow-plate rounded-sm overflow-hidden relative group transition-all duration-500 hover:border-accent-purple hover:shadow-[0_0_30px_rgba(168,85,247,0.15)] animate-fade-up" 
+              style={{ animationDelay: `${moduleIds.length * 0.1}s` }}
+            >
+               {/* Elegant, subtle hover gradient */}
                <div className="absolute inset-0 bg-gradient-to-r from-accent-purple/0 via-accent-purple/[0.05] to-accent-purple/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
 
                <Link
@@ -113,6 +124,7 @@ export default async function TierPage({ params }: { params: Promise<{ tierId: s
                 </Link>
             </div>
           )}
+
         </div>
       </div>
     </main>
